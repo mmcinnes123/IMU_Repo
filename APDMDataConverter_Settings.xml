@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<OpenSimDocument Version="40000">
+	<APDMDataReaderSettings>
+		<!--List of Experimental sensors and desired associated column labels in resulting tables-->
+		<ExperimentalSensors>
+			<ExperimentalSensor name="Upper">
+				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data_out, it will be used as a table column label.-->
+				<name_in_model>radius_r_imu</name_in_model>
+			</ExperimentalSensor>
+			<ExperimentalSensor name="Middle">
+				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data_out, it will be used as a table column label.-->
+				<name_in_model>humerus_r_imu</name_in_model>
+			</ExperimentalSensor>
+			<ExperimentalSensor name="Lower">
+				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data_out, it will be used as a table column label.-->
+				<name_in_model>thorax_imu</name_in_model>
+			</ExperimentalSensor>				
+		</ExperimentalSensors>
+	</APDMDataReaderSettings>
+</OpenSimDocument>
