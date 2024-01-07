@@ -88,7 +88,7 @@ def intial_IMU_transform_alt(IMU_df):
     return transformed_quats_df
 
 # Write new data_out to APDM file template
-def write_to_APDM(df_1, df_2, df_3, df_4, template_file, tag):
+def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
     # Make columns of zeros
     N = len(df_1)
     zeros_25_df = pd.DataFrame(np.zeros((N, 25)))
@@ -109,7 +109,7 @@ def write_to_APDM(df_1, df_2, df_3, df_4, template_file, tag):
     new_df = pd.DataFrame(new_array)
 
     # Add the new dataframe into the template
-    new_df.to_csv("APDM_" + tag + ".csv", mode='w', index=False, header=False, encoding='utf-8', na_rep='nan')
+    new_df.to_csv(output_dir + r"\APDM_" + tag + ".csv", mode='w', index=False, header=False, encoding='utf-8', na_rep='nan')
 
 # Apply offset to calculate body segment orientations based on IMU_offset
 def find_segment_quats(segment_imu_offset, IMU_quats):

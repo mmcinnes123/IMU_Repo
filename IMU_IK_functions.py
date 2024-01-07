@@ -3,10 +3,7 @@ import opensim as osim
 
 def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
 
-    output_file_name = input_file_name.replace('.csv', '.sto')
-
     # Build an APDM Settings Object
-
     # Instantiate the Reader Settings Class
     APDMSettings = osim.APDMDataReaderSettings(APDM_settings_file)
     # Instantiate an APDMDataReader
@@ -19,7 +16,6 @@ def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
 
     # Write to file
     osim.STOFileAdapterQuaternion.write(quatTable, output_file_name)
-
 
 
 def adjust_calibration_settings(calibration_settings_file, modelFileName, sensor_to_opensim_rotations,
