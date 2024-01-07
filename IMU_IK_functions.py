@@ -18,39 +18,35 @@ def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
     osim.STOFileAdapterQuaternion.write(quatTable, output_file_name)
 
 
-def adjust_calibration_settings(calibration_settings_file, modelFileName, sensor_to_opensim_rotations,
-                                orientationsFileName, baseIMUName, baseIMUHeading):
+def run_calibrate_model(calibration_settings_file, modelFileName, sensor_to_opensim_rotations,
+                        calibration_orientations_file, baseIMUName, baseIMUHeading,
+                        visulize_calibration, output_dir):
 
     # Instantiate an IMUPlacer object
     imuPlacer = osim.IMUPlacer(calibration_settings_file)
 
     # Set properties for the IMUPlacer
     imuPlacer.set_model_file(modelFileName)
-    imuPlacer.set_orientation_file_for_calibration(orientationsFileName)
+    imuPlacer.set_orientation_file_for_calibration(calibration_orientations_file)
     imuPlacer.set_sensor_to_opensim_rotations(sensor_to_opensim_rotations)
     imuPlacer.set_base_imu_label(baseIMUName)
     imuPlacer.set_base_heading_axis(baseIMUHeading)
+
     # Update settings file
-    imuPlacer.printToXML(calibration_settings_file)
-
-
-def calibrate_model(calibration_settings_file, visulize_calibration, model_file):
-
-    # Instantiate an IMUPlacer object
-    imuPlacer = osim.IMUPlacer(calibration_settings_file)
+    imuPlacer.printToXML(output_dir + "\\" + calibration_settings_file)
 
     # Run the IMUPlacer
-    imuPlacer.run(visulize_calibration);
+    imuPlacer.run(visulize_calibration)
 
     # Get the model with the calibrated IMU
-    model = imuPlacer.getCalibratedModel();
+    model = imuPlacer.getCalibratedModel()
 
     # Print the calibrated model to file.
-    model.printToXML('Calibrated_' + model_file)
+    model.printToXML(output_dir + r'\Calibrated_' + modelFileName)
 
 
-def adjust_IMU_IK_settings(IMU_IK_settings_file, calibrated_model_file, orientations_file,
-                           sensor_to_opensim_rotations, results_directory, start_time, end_time, IK_output_file_name):
+def run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
+                           sensor_to_opensim_rotations, results_directory, start_time, end_time, IK_output_file_name, visualize_tracking):
 
     # Instantiate an InverseKinematicsTool
     imuIK = osim.IMUInverseKinematicsTool(IMU_IK_settings_file)
@@ -64,16 +60,9 @@ def adjust_IMU_IK_settings(IMU_IK_settings_file, calibrated_model_file, orientat
     imuIK.set_time_range(1, end_time)
     imuIK.setOutputMotionFileName(IK_output_file_name)
 
-    # Update the settings .xml file
-    imuIK.printToXML(IMU_IK_settings_file)
-
-
-
-def run_IMU_IK(IMU_IK_settings_file, visualize_tracking):
-
-    # Instantiate an InverseKinematicsTool
-    imuIK = osim.IMUInverseKinematicsTool(IMU_IK_settings_file)
-
     # Run IK
-    imuIK.run(visualize_tracking);
+    imuIK.run(visualize_tracking)
+
+    # Update the settings .xml file
+    imuIK.printToXML(results_directory + "\\" + IMU_IK_settings_file)
 
