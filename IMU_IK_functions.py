@@ -1,7 +1,7 @@
 import opensim as osim
 
 
-def APDM_2_sto_Converter(APDM_settings_file, input_file_name):
+def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
 
     output_file_name = input_file_name.replace('.csv', '.sto')
 
@@ -16,6 +16,7 @@ def APDM_2_sto_Converter(APDM_settings_file, input_file_name):
     table = APDM.read(input_file_name)
     # Get Orientation Data as quaternions
     quatTable = APDM.getOrientationsTable(table)
+
     # Write to file
     osim.STOFileAdapterQuaternion.write(quatTable, output_file_name)
 
