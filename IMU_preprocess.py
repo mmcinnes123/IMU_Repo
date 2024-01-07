@@ -8,7 +8,8 @@ from IMU_IK_functions import APDM_2_sto_Converter
 """ SETTINGS """
 
 # Quick Settings
-input_file = "20thDec_Movements - Report2 - IMU_Quats.txt"
+input_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\RawData\20thDec_Movements - Report2 - IMU_Quats.txt"
+out_put_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"
 trim_data = False
 transform_data = True
 start_time = 0
@@ -45,7 +46,7 @@ if transform_data == True:
 
 # Write transformed IMU quaternions to .sto file (write to APDM .csv first, then convert)
 write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, tag="Movements")
-APDM_2_sto_Converter(APDM_settings_file, "APDM_Movements.csv")
+APDM_2_sto_Converter(APDM_settings_file, out_put_dir + r"\APDM_Movements.csv")
 
 print("\nPreview orientations")
 
@@ -60,4 +61,4 @@ IMU3_cal_df = extract_cal_row(IMU3_df, new_cal_pose_time, sample_rate)
 
 # Write calibration quaternions to .sto file (write to APDM .csv first, then convert)
 write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, tag="Calibration")
-APDM_2_sto_Converter(APDM_settings_file, "APDM_Calibration.csv")
+APDM_2_sto_Converter(APDM_settings_file, out_put_dir + r"\APDM_Calibration.csv")
