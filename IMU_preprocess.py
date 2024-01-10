@@ -9,10 +9,10 @@ from IMU_IK_functions import APDM_2_sto_Converter
 
 # Quick Settings
 raw_data_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\RawData"
-input_file = raw_data_dir + "\\" + "20thDec_Movements - Report2 - IMU_Quats.txt"
+input_file = raw_data_dir + "\\" + "20thDec_Movements - Report5 - Cluster_Quats.txt"
 out_put_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU"
 trim_data = False
-transform_data = True
+transform_data = False  # If using marker cluster questions, make False
 start_time = 0
 end_time = 24
 sample_rate = 100

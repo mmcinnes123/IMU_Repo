@@ -24,8 +24,8 @@ model_file = 'das3.osim'
 # Calibration Settings
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
 baseIMUName = 'thorax_imu'
-# Which axes of the thorax IMU points in same direction as the model's thorax x-axis? (cluster quats - 'x', IMU quats = '-x')
-baseIMUHeading = '-x'
+# Which axes of the thorax IMU points in same direction as the model's thorax x-axis? (cluster quats = 'x', IMU quats = '-x')
+baseIMUHeading = 'x'
 visualize_calibration = False
 
 # IMU IK Settings
@@ -38,6 +38,7 @@ visualize_tracking = False
 orientations_file = parent_dir + r"\APDM_Movements.sto"
 calibration_orientations_file = parent_dir + r"\APDM_Calibration.sto"
 osim.Logger.addFileSink(parent_dir + "\\" + results_directory + r'\opensim.log')
+
 # Create a new results directory
 if os.path.exists(results_directory) == False:
     os.mkdir(results_directory)
