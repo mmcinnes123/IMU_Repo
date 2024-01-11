@@ -1,0 +1,50 @@
+[2024-01-11 15:47:13.537] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-11 15:47:13.862] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-11 15:47:22.695] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 15:47:23.002] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 15:55:06.671] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-11 15:55:06.971] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-11 15:55:15.816] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 15:55:16.116] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate TH_x_trans is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate TH_y_trans is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate TH_z_trans is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate SC_y is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate SC_z is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate SC_x is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate AC_y is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate AC_z is locked. Unable to change its value.
+[2024-01-11 15:55:17.563] [warning] Coordinate.setValue:  coordinate AC_x is locked. Unable to change its value.
+[2024-01-11 16:53:06.553] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-11 16:53:06.874] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-11 16:53:15.548] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 16:53:15.855] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate TH_x_trans is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate TH_y_trans is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate TH_z_trans is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate SC_y is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate SC_z is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate SC_x is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate AC_y is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate AC_z is locked. Unable to change its value.
+[2024-01-11 16:53:17.275] [warning] Coordinate.setValue:  coordinate AC_x is locked. Unable to change its value.
+[2024-01-11 17:04:03.900] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-11 17:04:04.205] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-11 17:04:13.596] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:04:13.911] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 17:09:05.834] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:09:06.146] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 17:25:53.675] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:25:53.971] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 17:27:03.839] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:27:04.136] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 17:44:11.566] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:44:11.876] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 17:49:05.706] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-11 17:49:06.009] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-11 17:49:20.754] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:49:21.078] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-11 17:54:56.031] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-11 17:54:56.332] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-11 17:55:08.746] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-11 17:55:09.054] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim

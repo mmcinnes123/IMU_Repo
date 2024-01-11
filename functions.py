@@ -147,11 +147,19 @@ def get_joint_angles_from_states(states_file, model_file):
     model = osim.Model(model_file)
     thorax = model.getBodySet().get('thorax')
     humerus_r = model.getBodySet().get('humerus_r')
+
+    # Unlock any locked coordinates in model
+    for coord in ['TH_x','TH_y','TH_z','TH_x_trans','TH_y_trans','TH_z_trans',
+                  'SC_x','SC_y','SC_z','AC_x','AC_y','AC_z','GH_y','GH_z','GH_yy','EL_x','PS_y']:
+        model.getCoordinateSet().get(coord).set_locked(False)
+
+    # Get the states info from the states file
     stateTrajectory = osim.StatesTrajectory.createFromStatesStorage(model, states_sto)
     n_rows = stateTrajectory.getSize()
 
     model.initSystem()
 
+    # Get the relative orientation of the two bodies from the states info
     HT1_arr = np.zeros((n_rows))
     HT2_arr = np.zeros((n_rows))
     HT3_arr = np.zeros((n_rows))

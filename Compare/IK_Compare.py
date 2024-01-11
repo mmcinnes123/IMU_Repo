@@ -9,10 +9,11 @@ import scipy
 """ SETTINGS """
 
 results_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1"
-IMU_input_file = results_dir + r'\Right-scaled_StatesReporter_states.sto'
+IMU_input_file = results_dir + r'\Right-scaled_StatesReporter_states_IMU.sto'
 OMC_input_file = results_dir + r'\Right-scaled_StatesReporter_states.sto'
-path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
+path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU" + "\\" + "Calibrated_das3.osim"
 path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
+delete_last_row_of_OMC = True   # Set to True if length of OMC data doesn't match IMU data
 
 
 """ MAIN """
@@ -23,9 +24,8 @@ def plot_compare_JAs(joint_of_interest):
     # Read in joint angles for .mot file
     OMC_table = osim.TimeSeriesTable(OMC_input_file)
     IMU_table = osim.TimeSeriesTable(IMU_input_file)
-
-    # Remove last row of OMC to match length of IMU (if comparing IMU vs OMC data, you need this line - if comparing similar data, comment out)
-    # OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
+    if delete_last_row_of_OMC == True:
+        OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
 
     if joint_of_interest == "Thorax":
         ref1 = "/jointset/base/TH_x/value"
@@ -59,6 +59,10 @@ def plot_compare_JAs(joint_of_interest):
         # Get HT joint angles with different function
         OMC_angle1, OMC_angle2, OMC_angle3 = get_joint_angles_from_states(OMC_input_file, path_to_OMC_model_file)
         IMU_angle1, IMU_angle2, IMU_angle3 = get_joint_angles_from_states(IMU_input_file, path_to_IMU_model_file)
+        if delete_last_row_of_OMC == True:
+            OMC_angle1 = OMC_angle1[:-1]
+            OMC_angle2 = OMC_angle2[:-1]
+            OMC_angle3 = OMC_angle3[:-1]
         label1 = "Plane of Elevation"
         label2 = "Elevation"
         label3 = "Int/Ext Rotation"
@@ -66,7 +70,6 @@ def plot_compare_JAs(joint_of_interest):
     else:
         print("Joint_of_interest isn't typed correctly")
         quit()
-
 
     time = OMC_table.getIndependentColumn()
 
