@@ -6,13 +6,12 @@
         # LCF alginment - transform cluster data_out based on relative orientation to IMU at t=0, or average
 
 from scipy.spatial.transform import Rotation as R
-# import numpy as np
 import pandas as pd
-# import matplotlib.pyplot as plt
-# import statsmodels.api as sm
 from quat_functions import *
+import opensim as osim
 
 
+""" FUNCTIONS FOR READING IN DATA"""
 
 
 # Read all data_out in from specified input file
@@ -111,6 +110,10 @@ def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
     # Add the new dataframe into the template
     new_df.to_csv(output_dir + r"\APDM_" + tag + ".csv", mode='w', index=False, header=False, encoding='utf-8', na_rep='nan')
 
+
+
+""" FUNCTIONS FOR ANALYSIS"""
+
 # Apply offset to calculate body segment orientations based on IMU_offset
 def find_segment_quats(segment_imu_offset, IMU_quats):
 
@@ -126,3 +129,35 @@ def find_segment_quats(segment_imu_offset, IMU_quats):
     segment_quats_df = pd.DataFrame(segment_quats)
 
     return segment_quats_df
+
+
+def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
+    Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
+    quat = Rot.convertRotationToQuaternion()
+    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    eul = scipyR.as_euler(eul_seq, degrees=True)
+
+    return eul[0], eul[1], eul[2]
+
+
+
+def get_joint_angles_from_states(states_file, model_file):
+
+    states_sto = osim.Storage(states_file)
+    model = osim.Model(model_file)
+    thorax = model.getBodySet().get('thorax')
+    humerus_r = model.getBodySet().get('humerus_r')
+    stateTrajectory = osim.StatesTrajectory.createFromStatesStorage(model, states_sto)
+    n_rows = stateTrajectory.getSize()
+
+    model.initSystem()
+
+    HT1_arr = np.zeros((n_rows))
+    HT2_arr = np.zeros((n_rows))
+    HT3_arr = np.zeros((n_rows))
+    for row in range(n_rows):
+        state = stateTrajectory.get(row)
+        model.realizePosition(state)
+        HT1_arr[row], HT2_arr[row], HT3_arr[row] = get_eulers_between_two_bodies(state, thorax, humerus_r, 'YZY')
+
+    return HT1_arr, HT2_arr, HT3_arr

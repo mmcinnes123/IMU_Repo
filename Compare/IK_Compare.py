@@ -2,64 +2,73 @@
 # Inputs are: two .mot files
 # Outputs are: .png plots of each joint of interest
 
-import opensim as osim
 import matplotlib.pyplot as plt
-import numpy as np
+from functions import *
 import scipy
 
 """ SETTINGS """
-IMU_input_file = 'IMU_IK_results.mot'
-OMC_input_file = 'OMC_IK_results.mot'
+
+results_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1"
+IMU_input_file = results_dir + r'\Right-scaled_StatesReporter_states.sto'
+OMC_input_file = results_dir + r'\Right-scaled_StatesReporter_states.sto'
+path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
+path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
+
 
 """ MAIN """
 
-# Read in joint angles for .mot file
-OMC_table = osim.TimeSeriesTable(OMC_input_file)
-IMU_table = osim.TimeSeriesTable(IMU_input_file)
-
-# Remove last row of OMC to match length of IMU (if comparing IMU vs OMC data, you need this line - if comparing similar data, comment out)
-OMC_table.removeRow((OMC_table.getNumRows()-1)/100)
-
 # Define a function to plot IMU vs OMC joint angles, with extra plot of errors to see distribution
-def plot_compare_JAs(OMC_table, IMU_table, joint_of_interest):
+def plot_compare_JAs(joint_of_interest):
 
-    if joint_of_interest == "Shoulder":
-        ref1 = "GH_y"
-        ref2 = "GH_z"
-        ref3 = "GH_yy"
-        label1 = "Plane of Elevation (GH_y)"
-        label2 = "Elevation (GH_z)"
-        label3 = "Internal/External Rotation (GH_yy)"
+    # Read in joint angles for .mot file
+    OMC_table = osim.TimeSeriesTable(OMC_input_file)
+    IMU_table = osim.TimeSeriesTable(IMU_input_file)
 
-    elif joint_of_interest == "Thorax":
-        ref1 = "TH_x"
-        ref2 = "TH_z"
-        ref3 = "TH_y"
+    # Remove last row of OMC to match length of IMU (if comparing IMU vs OMC data, you need this line - if comparing similar data, comment out)
+    # OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
+
+    if joint_of_interest == "Thorax":
+        ref1 = "/jointset/base/TH_x/value"
+        ref2 = "/jointset/base/TH_z/value"
+        ref3 = "/jointset/base/TH_y/value"
         label1 = "Forward Tilt"
         label2 = "Lateral Tilt"
         label3 = "Trunk Rotation"
+        OMC_angle1 = OMC_table.getDependentColumn(ref1).to_numpy()*180/np.pi
+        OMC_angle2 = OMC_table.getDependentColumn(ref2).to_numpy()*180/np.pi
+        OMC_angle3 = OMC_table.getDependentColumn(ref3).to_numpy()*180/np.pi
+        IMU_angle1 = IMU_table.getDependentColumn(ref1).to_numpy()*180/np.pi
+        IMU_angle2 = IMU_table.getDependentColumn(ref2).to_numpy()*180/np.pi
+        IMU_angle3 = IMU_table.getDependentColumn(ref3).to_numpy()*180/np.pi
 
     elif joint_of_interest == "Elbow":
-        ref1 = "EL_x"
-        ref2 = "PS_y"
-        ref3 = "PS_y"
+        ref1 = "/jointset/hu/EL_x/value"
+        ref2 = "/jointset/ur/PS_y/value"
+        ref3 = "/jointset/ur/PS_y/value"
         label1 = "Elbow Flexion"
         label2 = "Pro/Supination"
         label3 = "Pro/Supination"
+        OMC_angle1 = OMC_table.getDependentColumn(ref1).to_numpy()*180/np.pi
+        OMC_angle2 = OMC_table.getDependentColumn(ref2).to_numpy()*180/np.pi
+        OMC_angle3 = OMC_table.getDependentColumn(ref3).to_numpy()*180/np.pi
+        IMU_angle1 = IMU_table.getDependentColumn(ref1).to_numpy()*180/np.pi
+        IMU_angle2 = IMU_table.getDependentColumn(ref2).to_numpy()*180/np.pi
+        IMU_angle3 = IMU_table.getDependentColumn(ref3).to_numpy()*180/np.pi
+
+    elif joint_of_interest == "Shoulder":
+        # Get HT joint angles with different function
+        OMC_angle1, OMC_angle2, OMC_angle3 = get_joint_angles_from_states(OMC_input_file, path_to_OMC_model_file)
+        IMU_angle1, IMU_angle2, IMU_angle3 = get_joint_angles_from_states(IMU_input_file, path_to_IMU_model_file)
+        label1 = "Plane of Elevation"
+        label2 = "Elevation"
+        label3 = "Int/Ext Rotation"
 
     else:
         print("Joint_of_interest isn't typed correctly")
         quit()
 
-    # Extract data from OpenSim time series tables
 
     time = OMC_table.getIndependentColumn()
-    OMC_angle1 = OMC_table.getDependentColumn(ref1).to_numpy()
-    OMC_angle2 = OMC_table.getDependentColumn(ref2).to_numpy()
-    OMC_angle3 = OMC_table.getDependentColumn(ref3).to_numpy()
-    IMU_angle1 = IMU_table.getDependentColumn(ref1).to_numpy()
-    IMU_angle2 = IMU_table.getDependentColumn(ref2).to_numpy()
-    IMU_angle3 = IMU_table.getDependentColumn(ref3).to_numpy()
 
     # Smooth data
     OMC_angle1 = scipy.signal.savgol_filter(OMC_angle1, 50, 3)
@@ -159,13 +168,16 @@ def plot_compare_JAs(OMC_table, IMU_table, joint_of_interest):
 
     fig.tight_layout(pad=2.0)
 
-    fig.savefig(joint_of_interest + "_angles.png")
+    fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
 
     # plt.show()
 
+
 # Plot IMU vs OMC joint angles
-plot_compare_JAs(OMC_table, IMU_table, joint_of_interest="Thorax")
-plot_compare_JAs(OMC_table, IMU_table, joint_of_interest="Shoulder")
-plot_compare_JAs(OMC_table, IMU_table, joint_of_interest="Elbow")
+plot_compare_JAs(joint_of_interest="Thorax")
+plot_compare_JAs(joint_of_interest="Shoulder")
+plot_compare_JAs(joint_of_interest="Elbow")
+
+
 
 
