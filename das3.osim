@@ -1203,9 +1203,9 @@
 						<!--3 Axes for rotations are listed first.-->
 						<TransformAxis name="rotation1">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates>TH_x</coordinates>
+							<coordinates>TH_y</coordinates>
 							<!--Rotation or translation axis for the transform.-->
-							<axis>1 0 0</axis>
+							<axis>0 1 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<LinearFunction name="function">
 								<coefficients> 1 0</coefficients>
@@ -1213,9 +1213,9 @@
 						</TransformAxis>
 						<TransformAxis name="rotation2">
 							<!--Names of the coordinates that serve as the independent variables         of the transform function.-->
-							<coordinates>TH_y</coordinates>
+							<coordinates>TH_x</coordinates>
 							<!--Rotation or translation axis for the transform.-->
-							<axis>0 1 0</axis>
+							<axis>1 0 0</axis>
 							<!--Transform function of the generalized coordinates used to        represent the amount of displacement along a specified axis.-->
 							<LinearFunction name="function">
 								<coefficients> 1 0</coefficients>
