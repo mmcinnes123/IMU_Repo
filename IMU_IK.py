@@ -3,7 +3,7 @@
 # Calibrates an .osim model by assigning IMUs to segments
 # Outputs .mot IK results
 
-# Test Change 1
+# Test Change 2 - gave up on other branch
 
 from IMU_IK_functions import *
 import os
