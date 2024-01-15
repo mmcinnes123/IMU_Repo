@@ -52,23 +52,23 @@ osim.Logger.addFileSink(results_directory + r'\opensim.log')
 
 """ MAIN """
 
-# # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
-# run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
-#                     calibration_orientations_file, baseIMUName, baseIMUHeading,
-#                     visualize_calibration, parent_dir)
-#
-# # Calibrate the model - assign IMUs to segments based on calibration pose
-# print("\nCalibrated .osim model")
-#
-# # Check we're happy to go ahead with IK
-# IK_confirmation = input("\nHappy to go ahead with IK?: ")
-# if IK_confirmation == "No":
-#     quit()
-#
-# # Run the IMU IK  based on settings inputs above
-# run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,
-#                        results_directory, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
-#
+# Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
+run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
+                    calibration_orientations_file, baseIMUName, baseIMUHeading,
+                    visualize_calibration, parent_dir)
+
+# Calibrate the model - assign IMUs to segments based on calibration pose
+print("\nCalibrated .osim model")
+
+# Check we're happy to go ahead with IK
+IK_confirmation = input("\nHappy to go ahead with IK?: ")
+if IK_confirmation == "No":
+    quit()
+
+# Run the IMU IK  based on settings inputs above
+run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,
+                       results_directory, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
+
 
 # Create states file from the output .mot file
 create_states_file_from_coordinates_file(analyze_settings_template_file, model_file_for_analysis, coord_file_for_analysis,
