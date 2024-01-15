@@ -135,10 +135,23 @@ def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
     Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
     quat = Rot.convertRotationToQuaternion()
     scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    # Get euler angles
     eul = scipyR.as_euler(eul_seq, degrees=True)
 
     return eul[0], eul[1], eul[2]
 
+def get_vec_between_bodies(state, body1, body2):
+
+    Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
+    quat = Rot.convertRotationToQuaternion()
+    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    mat = scipyR.as_matrix()
+    mat_x_X = mat[0,0]
+    mat_x_Z = mat[2,0]
+    # Get angle of local x-axis projected on the thorax XZ plane (relative to thorax X)
+    angle = np.arctan(mat_x_Z/mat_x_X)*180/np.pi
+
+    return angle
 
 
 def get_joint_angles_from_states(states_file, model_file):
@@ -163,9 +176,16 @@ def get_joint_angles_from_states(states_file, model_file):
     HT1_arr = np.zeros((n_rows))
     HT2_arr = np.zeros((n_rows))
     HT3_arr = np.zeros((n_rows))
+    HT_IER_arr = np.zeros((n_rows))
     for row in range(n_rows):
         state = stateTrajectory.get(row)
         model.realizePosition(state)
         HT1_arr[row], HT2_arr[row], HT3_arr[row] = get_eulers_between_two_bodies(state, thorax, humerus_r, 'YZY')
+        # Get vector projection based int/ext rot
+        HT_IER_arr[row] = get_vec_between_bodies(state, thorax, humerus_r)
 
-    return HT1_arr, HT2_arr, HT3_arr
+    return HT1_arr, HT2_arr, HT3_arr, HT_IER_arr
+
+
+
+

@@ -96,3 +96,27 @@
 [2024-01-15 12:33:30.279] [warning] Couldn't find file 'rulna.vtp'.
 [2024-01-15 12:33:30.279] [warning] Couldn't find file 'rradius.vtp'.
 [2024-01-15 12:33:30.279] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:11:59.192] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:11:59.541] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:11:59.542] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:11:59.542] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:11:59.542] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:11:59.542] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:11:59.543] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:11:59.543] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:11:59.543] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:11:59.543] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:11:59.543] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:11:59.543] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:12:12.373] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 14:12:12.725] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 14:12:12.725] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:12:12.726] [warning] Couldn't find file 'r_hand.vtp'.

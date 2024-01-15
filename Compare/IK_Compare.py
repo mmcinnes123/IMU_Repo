@@ -220,8 +220,13 @@ def plot_compare_JAs_shoulder(joint_of_interest):
 
     elif joint_of_interest == "Shoulder":
         # Get HT joint angles with different function
-        OMC_angle1, OMC_angle2, OMC_angle3 = get_joint_angles_from_states(OMC_input_file, path_to_OMC_model_file)
-        IMU_angle1, IMU_angle2, IMU_angle3 = get_joint_angles_from_states(IMU_input_file, path_to_IMU_model_file)
+        OMC_angle1, OMC_angle2, OMC_angle3, OMC_IER = get_joint_angles_from_states(OMC_input_file, path_to_OMC_model_file)
+        IMU_angle1, IMU_angle2, IMU_angle3, IMU_IER = get_joint_angles_from_states(IMU_input_file, path_to_IMU_model_file)
+
+        #Lets plot EIR for now:
+        OMC_angle3 = OMC_IER
+        IMU_angle3 = IMU_IER
+
         if delete_last_row_of_OMC == True:
             OMC_angle1 = OMC_angle1[:-1]
             OMC_angle2 = OMC_angle2[:-1]
