@@ -120,3 +120,459 @@
 [2024-01-15 14:12:12.726] [warning] Couldn't find file 'rulna.vtp'.
 [2024-01-15 14:12:12.726] [warning] Couldn't find file 'rradius.vtp'.
 [2024-01-15 14:12:12.726] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:37:53.951] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:37:54.268] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:37:54.269] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:37:54.270] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:37:54.270] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:37:54.270] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:38:08.082] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 14:38:08.973] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 14:38:08.974] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:38:08.974] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:38:08.974] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:38:08.975] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:40:26.017] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:40:26.329] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:40:26.330] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:40:26.330] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:40:26.330] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:40:26.330] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:40:26.331] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:40:26.331] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:40:26.331] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:40:26.331] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:40:26.331] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:40:26.331] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:40:36.479] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 14:40:36.792] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 14:40:36.793] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:40:36.793] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:40:36.793] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:40:36.793] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:40:36.793] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:40:36.793] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:40:36.794] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:40:36.794] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:40:36.794] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:40:36.794] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:42:39.466] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:42:39.781] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:42:39.782] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:42:39.783] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:42:39.783] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:42:39.783] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:42:50.206] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:42:50.522] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:42:50.522] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:42:50.522] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:42:50.522] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:42:50.522] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:42:50.523] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:42:50.523] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:42:50.523] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:42:50.523] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:42:50.523] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:42:50.523] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:43:47.391] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:43:47.705] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:43:47.706] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:43:57.228] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:43:57.546] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:43:57.547] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:50:00.262] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 14:50:00.575] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:50:00.576] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 14:50:10.212] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 14:50:10.548] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 14:50:10.549] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 14:50:10.549] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 14:50:10.549] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 14:50:10.549] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 14:50:10.549] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 14:50:10.550] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 14:50:10.550] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 14:50:10.550] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 14:50:10.550] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 14:50:10.550] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:49:58.918] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 15:49:59.223] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:49:59.224] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:49:59.225] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:49:59.225] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:49:59.225] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:50:08.958] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 15:50:09.282] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:50:09.283] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:50:09.284] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:57:57.235] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 15:57:57.553] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:57:57.554] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:57:57.555] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:58:07.693] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 15:58:08.041] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 15:58:08.042] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:58:08.042] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:58:08.042] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:58:08.042] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:58:08.042] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:58:08.043] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:58:08.043] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:58:08.043] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:58:08.043] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:58:08.043] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:58:51.187] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 15:58:51.494] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:58:51.495] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:59:00.904] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 15:59:01.229] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 15:59:01.230] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:59:01.230] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:59:01.230] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:59:01.231] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 15:59:58.549] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 15:59:58.862] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 15:59:58.862] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 15:59:58.862] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 15:59:58.863] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:00:08.344] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:00:08.652] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:00:08.652] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:00:08.653] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:01:30.336] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:01:30.683] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:01:30.684] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:01:30.684] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:01:30.684] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:01:30.684] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:01:30.685] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:01:30.685] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:01:30.685] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:01:30.685] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:01:30.685] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:01:30.685] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:01:41.086] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:01:41.419] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:01:41.419] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:01:41.419] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:01:41.420] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:03:10.545] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:03:10.863] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:03:10.864] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:03:10.864] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:03:10.864] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:03:10.864] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:03:10.865] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:03:10.865] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:03:10.865] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:03:10.865] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:03:10.865] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:03:10.865] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:03:20.231] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:03:20.558] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:03:20.559] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:03:20.559] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:03:20.559] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:03:20.559] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:03:20.559] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:03:20.559] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:03:20.560] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:03:20.560] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:03:20.560] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:03:20.560] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:04:38.550] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:04:38.876] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:04:38.876] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:04:38.877] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:04:48.858] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:04:49.194] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:04:49.195] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:06:02.853] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:06:03.167] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:06:03.168] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:06:03.168] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:06:03.169] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:06:12.601] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:06:12.911] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:06:12.911] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:06:12.911] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:06:12.912] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:06:47.283] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:06:47.593] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:06:47.593] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:06:47.594] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:06:57.176] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:06:57.513] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:06:57.514] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:06:57.515] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:06:57.515] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:07:29.436] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:07:29.751] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:07:29.752] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:07:29.752] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:07:29.752] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:07:29.752] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:07:29.753] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:07:29.753] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:07:29.753] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:07:29.753] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:07:29.753] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:07:29.753] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:07:39.191] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:07:39.518] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:07:39.519] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:07:39.520] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:07:39.520] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:07:39.520] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:08:47.746] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:08:48.090] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:08:48.091] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:08:48.091] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:08:48.091] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:08:48.091] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:08:48.091] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:08:48.092] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:08:48.092] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:08:48.092] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:08:48.092] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:08:48.092] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:08:57.582] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:08:57.906] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:08:57.907] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:08:57.908] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:09:47.438] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:09:47.749] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:09:47.750] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:09:47.751] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:09:57.111] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:09:57.443] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:09:57.444] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:09:57.444] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:09:57.444] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:09:57.444] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:09:57.444] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:09:57.444] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:09:57.445] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:09:57.445] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:09:57.445] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:09:57.445] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:19:40.183] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:19:40.504] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:19:40.505] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:19:50.822] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:19:51.156] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:19:51.157] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:19:51.158] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:19:51.158] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:24:45.087] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states.sto (nr=2201 nc=309)
+[2024-01-15 16:24:45.439] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC\das3_scaled_and_placed.osim
+[2024-01-15 16:24:45.439] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:24:45.439] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:24:45.440] [warning] Couldn't find file 'r_hand.vtp'.
+[2024-01-15 16:24:55.534] [info] Storage: read data file = C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison1\Right-scaled_StatesReporter_states_IMU.sto (nr=2200 nc=309)
+[2024-01-15 16:24:55.883] [info] Loaded model DAS3 from file C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU\Calibrated_das3.osim
+[2024-01-15 16:24:55.884] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-01-15 16:24:55.884] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-01-15 16:24:55.884] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-01-15 16:24:55.884] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-01-15 16:24:55.884] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-01-15 16:24:55.885] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-01-15 16:24:55.885] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-01-15 16:24:55.885] [warning] Couldn't find file 'rulna.vtp'.
+[2024-01-15 16:24:55.885] [warning] Couldn't find file 'rradius.vtp'.
+[2024-01-15 16:24:55.885] [warning] Couldn't find file 'r_hand.vtp'.
