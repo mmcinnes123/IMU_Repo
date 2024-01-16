@@ -4,6 +4,7 @@
     # Transformations:
         # IMU data_out into Y-Up convention
         # LCF alginment - transform cluster data_out based on relative orientation to IMU at t=0, or average
+from opensim import ArrayDouble
 
 from scipy.spatial.transform import Rotation as R
 import pandas as pd
@@ -154,9 +155,14 @@ def get_vec_between_bodies(state, body1, body2):
     return angle
 
 
-def get_joint_angles_from_states(states_file, model_file):
+def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
 
-    states_sto = osim.Storage(states_file)
+    # Create a time series table from the states file
+    state_table = osim.TimeSeriesTable(states_file)
+    # Trim the table based on time period of interest
+    state_table.trim(start_time, end_time)
+
+    # Create the model and the bodies
     model = osim.Model(model_file)
     thorax = model.getBodySet().get('thorax')
     humerus_r = model.getBodySet().get('humerus_r')
@@ -167,9 +173,10 @@ def get_joint_angles_from_states(states_file, model_file):
         model.getCoordinateSet().get(coord).set_locked(False)
 
     # Get the states info from the states file
-    stateTrajectory = osim.StatesTrajectory.createFromStatesStorage(model, states_sto)
+    stateTrajectory = osim.StatesTrajectory.createFromStatesTable(model, state_table)
     n_rows = stateTrajectory.getSize()
 
+    # Initiate the system so that the model can actively realise positions based on states
     model.initSystem()
 
     # Get the relative orientation of the two bodies from the states info
