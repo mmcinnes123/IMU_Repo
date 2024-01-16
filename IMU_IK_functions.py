@@ -77,4 +77,5 @@ def create_states_file_from_coordinates_file(analyze_settings_template_file, mod
     analyze_tool.setCoordinatesFileName(coord_file)
     analyze_tool.setInitialTime(start_time)
     analyze_tool.setFinalTime(end_time)
+    analyze_tool.setStatesFileName("StatesReporter_states_IMU.sto")
     analyze_tool.run()
