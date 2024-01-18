@@ -4,15 +4,17 @@
 
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
+import os
 
 """ SETTINGS """
 
 # Quick Settings
-raw_data_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\RawData"
-input_file = raw_data_dir + "\\" + "20thDec_Movements - Report5 - Cluster_Quats.txt"
-out_put_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU"
-trim_data = False
+trial_name = 'IMU_cal_pose6'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"  # Name of the working folder
+input_file_name = "20thDec_Movements - Report5 - Cluster_Quats.txt"     # Name of the file with quaternion data
 transform_data = False  # If using marker cluster questions, make False
+cal_pose_time = 19  # Enter time (s) when subject was in calibration pose
+trim_data = False
 start_time = 0
 end_time = 24
 sample_rate = 100
@@ -21,11 +23,18 @@ sample_rate = 100
 template_file = "APDM_template_4S.csv"
 APDM_settings_file = "APDMDataConverter_Settings.xml"
 
+raw_data_dir = parent_dir + "\RawData"
+input_file_path = raw_data_dir + "\\" + "20thDec_Movements - Report5 - Cluster_Quats.txt"
+
+# Create a new results directory
+results_dir = parent_dir + "\\" + trial_name
+if os.path.exists(results_dir) == False:
+    os.mkdir(results_dir)
 
 """ MAIN """
 
 # Read data in from file
-IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(input_file)
+IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(input_file_path)
 
 # Trim the data based on start and end time
 if trim_data == True:
@@ -46,13 +55,10 @@ if transform_data == True:
     IMU3_df = intial_IMU_transform_alt(IMU3_df)
 
 # Write transformed IMU quaternions to .sto file (write to APDM .csv first, then convert)
-write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, out_put_dir, tag="Movements")
-APDM_2_sto_Converter(APDM_settings_file, input_file_name=out_put_dir + r"\APDM_Movements.csv", output_file_name=out_put_dir + r"\APDM_Movements.sto")
+write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, tag="Movements")
+APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_Movements.csv", output_file_name=results_dir + r"\APDM_Movements.sto")
 
-print("\nPreview orientations")
 
-# Enter calibration pose time after previewing orientations
-cal_pose_time = int(input("\nEnter time of calibration pose (s): "))
 
 # Extract row based on moment of calibration pose
 new_cal_pose_time = cal_pose_time - start_time
@@ -61,5 +67,5 @@ IMU2_cal_df = extract_cal_row(IMU2_df, new_cal_pose_time, sample_rate)
 IMU3_cal_df = extract_cal_row(IMU3_df, new_cal_pose_time, sample_rate)
 
 # Write calibration quaternions to .sto file (write to APDM .csv first, then convert)
-write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, out_put_dir, tag="Calibration")
-APDM_2_sto_Converter(APDM_settings_file, input_file_name=out_put_dir + r"\APDM_Calibration.csv", output_file_name=out_put_dir + r"\APDM_Calibration.sto")
+write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, tag="Calibration")
+APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_Calibration.csv", output_file_name=results_dir + r"\APDM_Calibration.sto")

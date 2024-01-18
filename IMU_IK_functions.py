@@ -68,7 +68,7 @@ def run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
 
 
 def create_states_file_from_coordinates_file(analyze_settings_template_file, model_file, coord_file,
-                                             results_path, start_time, end_time):
+                                             results_path, start_time, end_time, trial_name):
 
     # Instantiate a Analyze Tool
     analyze_tool = osim.AnalyzeTool(analyze_settings_template_file)
@@ -77,5 +77,5 @@ def create_states_file_from_coordinates_file(analyze_settings_template_file, mod
     analyze_tool.setCoordinatesFileName(coord_file)
     analyze_tool.setInitialTime(start_time)
     analyze_tool.setFinalTime(end_time)
-    analyze_tool.setName("IMU")
+    analyze_tool.setName(trial_name)
     analyze_tool.run()

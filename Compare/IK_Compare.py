@@ -7,14 +7,19 @@ from functions import *
 
 """ SETTINGS """
 
-results_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\Comparison2"
-IMU_states_file = results_dir + r'\Right-scaled_StatesReporter_states_IMU.sto'
-OMC_states_file = results_dir + r'\Right-scaled_StatesReporter_states.sto'
-path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU" + "\\" + "Calibrated_das3.osim"
-path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
-delete_last_row_of_OMC = True   # Set to True if length of OMC data doesn't match IMU data
+# Quick Settings
+trial_name = 'IMU_cal_pose6'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"  # Name of the working folder
 start_time = 0
 end_time = 39   # If you enter same end_time as you used in IK here, OMC angles will be one too long
+results_dir = parent_dir + r"\Comparison7_cal_pose_6"
+
+# Define some file names
+IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
+OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
+path_to_IMU_model_file = parent_dir + "\\" + trial_name + "\\" + "Calibrated_das3.osim"
+path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
+delete_last_row_of_OMC = True   # Set to True if length of OMC data doesn't match IMU data
 
 
 """ MAIN """
