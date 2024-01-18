@@ -13,7 +13,7 @@ import os
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\IMU"  # Define the working folder
 trial_name = '20thDec'
-IK_start_time = 18
+IK_start_time = 0
 IK_end_time = 40
 
 # Files required in folder:
