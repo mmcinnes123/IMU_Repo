@@ -8,11 +8,11 @@ from functions import *
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_cal_pose6'    # Tag to describe this trial
+trial_name = 'IMU_cal_pose1'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"  # Name of the working folder
-start_time = 0
-end_time = 39   # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison7_cal_pose_6"
+start_time = 25
+end_time = 40   # If you enter same end_time as you used in IK here, OMC angles will be one too long
+results_dir = parent_dir + r"\Comparison2_cal_pose_1"
 
 # Define some file names
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
@@ -186,21 +186,37 @@ def plot_compare_JAs_shoulder(joint_of_interest):
 
     # Get the time data from the input data file
     OMC_table = osim.TimeSeriesTable(OMC_states_file)
-    if delete_last_row_of_OMC == True:
-        OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
+    # if delete_last_row_of_OMC == True:
+        # OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
     OMC_table.trim(start_time, end_time)    # Trim based on time of interest
     time = OMC_table.getIndependentColumn() # Get the time data
 
     if joint_of_interest == "Shoulder":
         # Get HT joint angles with different function
-        OMC_angle1, OMC_angle2, OMC_angle3, OMC_IER = \
+        OMC_angle1, OMC_angle2, OMC_angle3, OMC_IER_x, IMU_angle1, IMU_angle2, IMU_angle3, IMU_IER, OMC_IER_z, OMC_IER_y = \
             get_joint_angles_from_states(OMC_states_file, path_to_OMC_model_file, start_time, end_time)
-        IMU_angle1, IMU_angle2, IMU_angle3, IMU_IER = \
-            get_joint_angles_from_states(IMU_states_file, path_to_IMU_model_file, start_time, end_time)
+        # IMU_angle1, IMU_angle2, IMU_angle3, IMU_IER = \
+        #     get_joint_angles_from_states(IMU_states_file, path_to_IMU_model_file, start_time, end_time)
+
+
+        # Algorthm to determine IER
+        n_rows = len(OMC_angle1)
+        OMC_IER = np.zeros((n_rows))
+        for row in range(n_rows):
+            if OMC_angle2[row] < 45 or OMC_angle2[row] > 135:    # If elevation is less than 45 deg, or above 135 deg, use x axis angle
+                OMC_IER[row] = OMC_IER_x[row]
+            else:   # Else, (if elevation is between 45 and 135 deg)
+                if 45 < OMC_angle1[row] < 135:   # And if arm is in flexion, keep using x axis angle
+                    OMC_IER[row] = OMC_IER_x[row]
+                else:    # But if arm is in abduction, use z axis angle instead
+                    OMC_IER[row] = OMC_IER_z[row]
+
+
+
 
         # Discount vector angle when elevation is above cutoff
-        OMC_IER = np.where(OMC_angle2 < 45, OMC_IER, np.nan)
-        IMU_IER = np.where(OMC_angle2 < 45, IMU_IER, np.nan)
+        # OMC_IER_x = np.where(OMC_angle2 < 45, OMC_IER_x, np.nan)
+        # IMU_IER = np.where(OMC_angle2 < 45, IMU_IER, np.nan)
 
         label1 = "Euler Y - Plane of Elevation"
         label2 = "Euler Z - Elevation"
@@ -218,14 +234,14 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     # IMU_angle1 = scipy.signal.savgol_filter(IMU_angle1, 50, 3)
     # IMU_angle2 = scipy.signal.savgol_filter(IMU_angle2, 50, 3)
     # IMU_angle3 = scipy.signal.savgol_filter(IMU_angle3, 50, 3)
-    # OMC_IER = scipy.signal.savgol_filter(OMC_IER, 50, 3)
+    # OMC_IER_x = scipy.signal.savgol_filter(OMC_IER_x, 50, 3)
     # IMU_IER = scipy.signal.savgol_filter(IMU_IER, 50, 3)
 
     # Calculate error arrays
     error_angle1 = abs(OMC_angle1 - IMU_angle1)
     error_angle2 = abs(OMC_angle2 - IMU_angle2)
     error_angle3 = abs(OMC_angle3 - IMU_angle3)
-    error_IER = abs(OMC_IER - IMU_IER)
+    error_IER = abs(OMC_IER_x - IMU_IER)
 
     # Remove nan values from error arrays
     error_angle1_no_nans = error_angle1[np.logical_not(np.isnan(error_angle1))]
@@ -249,7 +265,7 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     # Plot joint angles
 
     axs[0,0].plot(time, OMC_angle1)
-    axs[0,0].plot(time, IMU_angle1)
+    axs[0,0].plot(time, OMC_IER_y)
 
     axs[1,0].plot(time, OMC_angle2)
     axs[1,0].plot(time, IMU_angle2)
@@ -257,8 +273,10 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     axs[2,0].plot(time, OMC_angle3)
     axs[2,0].plot(time, IMU_angle3)
 
+    axs[3,0].plot(time, OMC_IER_x)
+    axs[3,0].plot(time, OMC_IER_z)
+    axs[3,0].plot(time, OMC_IER_y)
     axs[3,0].plot(time, OMC_IER)
-    axs[3,0].plot(time, IMU_IER)
 
     axs[0,0].set_title(label1)
     axs[1,0].set_title(label2)
@@ -267,8 +285,11 @@ def plot_compare_JAs_shoulder(joint_of_interest):
 
     for i in range(0, 4):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]", xlim=(time[0], time[-1]))
+
+    for i in range(0, 3):
         axs[i,0].legend(["OMC", "IMU"])
 
+    axs[3,0].legend(["IER_x", "IER_z", "IER_y", "IER"])
 
     # Plot error graphs
 
@@ -339,8 +360,8 @@ def plot_compare_JAs_shoulder(joint_of_interest):
 
 
 # Plot IMU vs OMC joint angles
-plot_compare_JAs(joint_of_interest="Thorax")
-plot_compare_JAs(joint_of_interest="Elbow")
+# plot_compare_JAs(joint_of_interest="Thorax")
+# plot_compare_JAs(joint_of_interest="Elbow")
 plot_compare_JAs_shoulder(joint_of_interest="Shoulder")
 
 

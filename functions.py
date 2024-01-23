@@ -147,12 +147,21 @@ def get_vec_between_bodies(state, body1, body2):
     quat = Rot.convertRotationToQuaternion()
     scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
     mat = scipyR.as_matrix()
-    mat_x_X = mat[0,0]
-    mat_x_Z = mat[2,0]
+    mat_x_X = mat[0,0]  # This is the component of the humerus x-axis which points in the thorax X direction
+    mat_x_Z = mat[2,0]  # This is the component of the humerus x-axis which points in the thorax Z direction
+    mat_z_X = mat[0,2]  # This is the component of the humerus z-axis which points in the thorax X direction
+    mat_z_Z = mat[2,2]  # This is the component of the humerus z-axis which points in the thorax Z direction
+    mat_y_X = mat[0,1]  # This is the component of the humerus y-axis which points in the thorax X direction
+    mat_y_Z = mat[2,1]  # This is the component of the humerus y-axis which points in the thorax Z direction
     # Get angle of local x-axis projected on the thorax XZ plane (relative to thorax X)
-    angle = np.arctan(mat_x_Z/mat_x_X)*180/np.pi
+    angle_x = np.arctan(mat_x_Z/mat_x_X)*180/np.pi
+    # Get angle of local z-axis projected on the thorax XZ plane (relative to thorax Z)
+    angle_z = -np.arctan(mat_z_X/mat_z_Z)*180/np.pi
+    # Get angle of local y-axis projected on the thorax XZ plane (relative to thorax X)
+    angle_y = -np.arctan(mat_y_Z/mat_y_X)*180/np.pi
 
-    return angle
+
+    return angle_x, angle_z, angle_y
 
 
 def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
@@ -183,15 +192,17 @@ def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
     HT1_arr = np.zeros((n_rows))
     HT2_arr = np.zeros((n_rows))
     HT3_arr = np.zeros((n_rows))
-    HT_IER_arr = np.zeros((n_rows))
+    HT_IER_arr_x = np.zeros((n_rows))
+    HT_IER_arr_z = np.zeros((n_rows))
+    HT_IER_arr_y = np.zeros((n_rows))
     for row in range(n_rows):
         state = stateTrajectory.get(row)
         model.realizePosition(state)
         HT1_arr[row], HT2_arr[row], HT3_arr[row] = get_eulers_between_two_bodies(state, thorax, humerus_r, 'YZY')
         # Get vector projection based int/ext rot
-        HT_IER_arr[row] = get_vec_between_bodies(state, thorax, humerus_r)
+        HT_IER_arr_x[row], HT_IER_arr_z[row], HT_IER_arr_y[row] = get_vec_between_bodies(state, thorax, humerus_r)
 
-    return HT1_arr, HT2_arr, HT3_arr, HT_IER_arr
+    return HT1_arr, HT2_arr, HT3_arr, HT_IER_arr_x, HT1_arr, HT2_arr, HT3_arr, HT_IER_arr_x, HT_IER_arr_z, HT_IER_arr_y
 
 
 
