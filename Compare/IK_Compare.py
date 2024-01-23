@@ -21,6 +21,8 @@ path_to_IMU_model_file = parent_dir + "\\" + trial_name + "\\" + "Calibrated_das
 path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
 delete_last_row_of_OMC = True   # Set to True if length of OMC data doesn't match IMU data
 
+osim.Logger.addFileSink(results_dir + r'\opensim.log')
+
 
 """ MAIN """
 
