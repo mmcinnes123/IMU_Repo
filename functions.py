@@ -141,6 +141,12 @@ def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
 
     return eul[0], eul[1], eul[2]
 
+def get_body_quat(state, body):
+    Rot = body.getTransformInGround(state).R()
+    quat = Rot.convertRotationToQuaternion()
+    output_quat = np.array([quat.get(0), quat.get(1), quat.get(2), quat.get(3)])
+    return output_quat
+
 def get_vec_between_bodies(state, body1, body2):
 
     Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
