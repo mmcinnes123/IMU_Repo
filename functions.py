@@ -132,14 +132,7 @@ def find_segment_quats(segment_imu_offset, IMU_quats):
     return segment_quats_df
 
 
-def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
-    Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
-    quat = Rot.convertRotationToQuaternion()
-    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
-    # Get euler angles
-    eul = scipyR.as_euler(eul_seq, degrees=True)
 
-    return eul[0], eul[1], eul[2]
 
 def get_body_quat(state, body):
     Rot = body.getTransformInGround(state).R()
@@ -170,6 +163,28 @@ def get_vec_between_bodies(state, body1, body2):
     return angle_x, angle_z, angle_y
 
 
+def get_JA_euls_from_quats(body1_quats, body2_quats, eul_seq):
+
+    n_rows = len(body1_quats)
+    eul_1_arr = np.zeros((n_rows))
+    eul_2_arr = np.zeros((n_rows))
+    eul_3_arr = np.zeros((n_rows))
+    for row in range(n_rows):
+        joint_Rot = quat_mul(quat_conj(body1_quats[row]), body2_quats[row])  # Calculate joint Rot quat
+        joint_scipyR = R.from_quat([joint_Rot[1], joint_Rot[2], joint_Rot[3], joint_Rot[0]])    # In scalar last format
+        joint_eul = joint_scipyR.as_euler(eul_seq, degrees=True)    # Get euler angles
+        eul_1_arr[row], eul_2_arr[row], eul_3_arr[row] = joint_eul[0], joint_eul[1], joint_eul[2]
+
+    return eul_1_arr, eul_2_arr, eul_3_arr
+
+def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
+    Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
+    quat = Rot.convertRotationToQuaternion()
+    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    # Get euler angles
+    eul = scipyR.as_euler(eul_seq, degrees=True)
+
+    return eul[0], eul[1], eul[2]
 def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
 
     # Create a time series table from the states file
@@ -212,4 +227,60 @@ def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
 
 
 
+# Define a function for extracting body orientations from the states table
+def extract_body_quats(states_table, model_file, results_dir, tag):
+
+    # Create the model and the bodies
+    model = osim.Model(model_file)
+    thorax = model.getBodySet().get('thorax')
+    humerus = model.getBodySet().get('humerus_r')
+    radius = model.getBodySet().get('radius_r')
+
+    # Unlock any locked coordinates in model
+    for coord in ['TH_x','TH_y','TH_z','TH_x_trans','TH_y_trans','TH_z_trans',
+                  'SC_x','SC_y','SC_z','AC_x','AC_y','AC_z','GH_y','GH_z','GH_yy','EL_x','PS_y']:
+        model.getCoordinateSet().get(coord).set_locked(False)
+
+    # Get the states info from the states file
+    stateTrajectory = osim.StatesTrajectory.createFromStatesTable(model, states_table)
+    n_rows = stateTrajectory.getSize()
+
+    # Initiate the system so that the model can actively realise positions based on states
+    model.initSystem()
+
+    # Get the orientation of each body of interest
+    thorax_quats = np.zeros((n_rows, 4))
+    humerus_quats = np.zeros((n_rows, 4))
+    radius_quats = np.zeros((n_rows, 4))
+    for row in range(n_rows):
+        state = stateTrajectory.get(row)
+        model.realizePosition(state)
+        thorax_quats[row] = get_body_quat(state, thorax)
+        humerus_quats[row] = get_body_quat(state, humerus)
+        radius_quats[row] = get_body_quat(state, radius)
+
+    # Write all body quats to a csv file
+    thorax_quats_df = pd.DataFrame({"Thorax_Q0": thorax_quats[:,0],"Thorax_Q1": thorax_quats[:,1], "Thorax_Q2": thorax_quats[:,2], "Thorax_Q3": thorax_quats[:,3]})
+    humerus_quats_df = pd.DataFrame({"Humerus_Q0": humerus_quats[:,0],"Humerus_Q1": humerus_quats[:,1], "Humerus_Q2": humerus_quats[:,2],"Humerus_Q3": humerus_quats[:,3]})
+    radius_quats_df = pd.DataFrame({"Radius_Q0": radius_quats[:,0],"Radius_Q1": radius_quats[:,1], "Radius_Q2": radius_quats[:,2],"Radius_Q3": radius_quats[:,3]})
+    time_df = pd.DataFrame({"Time": np.asarray(states_table.getIndependentColumn())[:]})
+
+    all_quats_df = pd.concat([time_df, thorax_quats_df, humerus_quats_df, radius_quats_df], axis=1)
+
+    all_quats_df.to_csv(results_dir + "\\" + tag + "_quats.csv", mode='w', encoding='utf-8', na_rep='nan')
+
+def read_in_quats(start_time, end_time, file_name):
+    with open(file_name, 'r') as file:
+        df = pd.read_csv(file, header=0)
+    # Trim dataframe
+    df = df.loc[(df['Time'] >= start_time) & (df['Time'] <= end_time)]
+    # Extract separate dfs for each body
+    thorax_quats = df.filter(["Thorax_Q0", "Thorax_Q1", "Thorax_Q2", "Thorax_Q3"], axis=1)
+    humerus_quats = df.filter(["Humerus_Q0", "Humerus_Q1", "Humerus_Q2", "Humerus_Q3"], axis=1)
+    radius_quats = df.filter(["Radius_Q0", "Radius_Q1", "Radius_Q2", "Radius_Q3"], axis=1)
+    thorax_quats_np = thorax_quats.to_numpy()
+    humerus_quats_np = humerus_quats.to_numpy()
+    radius_quats_np = radius_quats.to_numpy()
+
+    return thorax_quats_np, humerus_quats_np, radius_quats_np
 
