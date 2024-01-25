@@ -3,6 +3,8 @@
 # Outputs are: .png plots of each joint of interest
 
 import matplotlib.pyplot as plt
+import numpy as np
+
 from functions import *
 import scipy
 
@@ -11,17 +13,16 @@ import scipy
 # Quick Settings
 trial_name = 'IMU_cal_pose1'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"  # Name of the working folder
-start_time = 10
-end_time = 40   # If you enter same end_time as you used in IK here, OMC angles will be one too long
+start_time = 0
+end_time = 40  # If you enter same end_time as you used in IK here, OMC angles will be one too long
 results_dir = parent_dir + r"\Comparison2_cal_pose_1"
-create_new_ori_csvs = False
+create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 
 # Define some file names
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
 OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
 path_to_IMU_model_file = parent_dir + "\\" + trial_name + "\\" + "Calibrated_das3.osim"
 path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
-delete_last_row_of_OMC = True   # Set to True if length of OMC data doesn't match IMU data
 
 osim.Logger.addFileSink(results_dir + r'\opensim.log')
 
@@ -41,9 +42,15 @@ if create_new_ori_csvs == True:
     extract_body_quats(OMC_table, path_to_OMC_model_file, results_dir, tag="OMC")
     extract_body_quats(IMU_table, path_to_IMU_model_file, results_dir, tag="IMU")
 
+
+# Find the heading offset between IMU model thorax and OMC model thorax (as a descriptor of global frame offset) (read in untrimmed data)
+thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=results_dir + r"\OMC_quats.csv", trim_bool=False)
+thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv", trim_bool=False)
+heading_offset = find_heading_offset(thorax_OMC_all, thorax_IMU_all)
+
 # Read in body orientations from newly created csv files (as trimmed np arrays)
-thorax_OMC, humerus_OMC, radius_OMC = read_in_quats(start_time, end_time, file_name=results_dir + r"\OMC_quats.csv")
-thorax_IMU, humerus_IMU, radius_IMU = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv")
+thorax_OMC, humerus_OMC, radius_OMC = read_in_quats(start_time, end_time, file_name=results_dir + r"\OMC_quats.csv", trim_bool=True)
+thorax_IMU, humerus_IMU, radius_IMU = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv", trim_bool=True)
 
 # Trim tables based on time of interest
 OMC_table.trim(start_time, end_time)
@@ -188,8 +195,6 @@ def plot_compare_JAs(joint_of_interest):
 
     fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
 
-    # plt.show()
-
 
 
 # Define a function to plot IMU vs OMC for the shoulder joint euler anlges
@@ -306,6 +311,106 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     fig.tight_layout(pad=2.0)
 
     fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
+
+
+# Define a function to plot IMU vs OMC model body orientation errors (single angle quaternion difference)
+def plot_compare_body_oris(joint_of_interest):
+
+    label1 = "Thorax Orientation Error" + " (heading offset applied: " + str(round(heading_offset*180/np.pi,1)) + "deg)"
+    label2 = "Humerus Orientation Error"
+    label3 = "Radius Orientation Error"
+
+    # Apply heading offset to all IMU bodies
+    heading_offset_quat = np.array([np.cos(heading_offset/2), 0, np.sin(heading_offset/2), 0])
+    for row in range(len(thorax_IMU)):
+        thorax_IMU[row] = quat_mul(thorax_IMU[row], heading_offset_quat)
+        humerus_IMU[row] = quat_mul(humerus_IMU[row], heading_offset_quat)
+        radius_IMU[row] = quat_mul(radius_IMU[row], heading_offset_quat)
+
+    def find_single_angle_diff_between_two_CFs(body1, body2):
+        n_rows = len(body1)
+        angle_arr = np.zeros((n_rows))
+        for row in range(n_rows):
+            quat_diff = quat_mul(quat_conj(body1[row]), body2[row])
+            angle_arr[row] = 2 * np.arccos(abs(quat_diff[0])) * 180 / np.pi
+        return angle_arr
+
+    thorax_ori_error = find_single_angle_diff_between_two_CFs(thorax_OMC, thorax_IMU)
+    humerus_ori_error = find_single_angle_diff_between_two_CFs(humerus_OMC, humerus_IMU)
+    radius_ori_error = find_single_angle_diff_between_two_CFs(radius_OMC, radius_IMU)
+
+    # Calculate RMSE
+    RMSE_angle1 = (sum(np.square(thorax_ori_error)) / len(thorax_ori_error)) ** 0.5
+    RMSE_angle2 = (sum(np.square(humerus_ori_error)) / len(humerus_ori_error)) ** 0.5
+    RMSE_angle3 = (sum(np.square(radius_ori_error)) / len(radius_ori_error)) ** 0.5
+    max_error_angle1 = np.amax(thorax_ori_error)
+    max_error_angle2 = np.amax(humerus_ori_error)
+    max_error_angle3 = np.amax(radius_ori_error)
+
+    # Create figure with three subplots
+    fig, axs = plt.subplots(3, 1, figsize=(14,9))
+
+    # Plot error graphs
+
+    axs[0].scatter(time, thorax_ori_error, s=0.4)
+    axs[1].scatter(time, humerus_ori_error, s=0.4)
+    axs[2].scatter(time, radius_ori_error, s=0.4)
+
+    axs[0].set_title(label1)
+    axs[1].set_title(label2)
+    axs[2].set_title(label3)
+
+    # Plot RMSE error lines and text
+    axs[0].axhline(y=RMSE_angle1, linewidth=2, c="red")
+    axs[0].text(end_time+(end_time-start_time)*0.07, RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[1].axhline(y=RMSE_angle2, linewidth=2, c="red")
+    axs[1].text(end_time+(end_time-start_time)*0.07, RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[2].axhline(y=RMSE_angle3, linewidth=2, c="red")
+    axs[2].text(end_time+(end_time-start_time)*0.07, RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+
+    # Functions to define placement of max error annotation
+    def y_max_line_placement(max_error):
+        if max_error > 40:
+            line_placement = 40
+        else:
+            line_placement = max_error
+        return line_placement
+
+    def y_max_text_placement(max_error, RMSE):
+        if max_error > 40:
+            text_placement = 40
+        elif max_error < (RMSE + 3):
+            text_placement = RMSE + 2
+        else:
+            text_placement = max_error
+        return text_placement
+
+    # Plot max error lines
+    y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
+    y_max_line_placement_2 = y_max_line_placement(max_error_angle2)
+    y_max_line_placement_3 = y_max_line_placement(max_error_angle3)
+    axs[0].axhline(y=y_max_line_placement_1, linewidth=1, c="red")
+    axs[1].axhline(y=y_max_line_placement_2, linewidth=1, c="red")
+    axs[2].axhline(y=y_max_line_placement_3, linewidth=1, c="red")
+
+    # Plot max error text
+    y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
+    y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
+    y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
+    axs[0].text(end_time+(end_time-start_time)*0.07, y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1].text(end_time+(end_time-start_time)*0.07, y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2].text(end_time+(end_time-start_time)*0.07, y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+
+    # Set a shared x axis
+    y_lim_list = np.array([max_error_angle1, max_error_angle2, max_error_angle3])
+    for i in range(0, 3):
+        axs[i].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0, 1.1*y_lim_list.max()))
+
+    fig.tight_layout(pad=2.0)
+
+    fig.savefig(results_dir + "\\" + joint_of_interest + ".png")
+
+
 
 
 def plot_compare_JAs_shoulder(joint_of_interest):
@@ -479,9 +584,9 @@ def plot_compare_JAs_shoulder(joint_of_interest):
 # Plot IMU vs OMC joint angles based on OpenSim coordinates
 # plot_compare_JAs(joint_of_interest="Thorax")
 # plot_compare_JAs(joint_of_interest="Elbow")
-plot_compare_JAs_shoulder_eulers(joint_of_interest="GH_Eulers")
+# plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
 
 
-# plot_compare_JAs_shoulder(joint_of_interest="Shoulder")
 
 
+plot_compare_body_oris("Body_orientation_diff")

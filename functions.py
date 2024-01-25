@@ -269,11 +269,12 @@ def extract_body_quats(states_table, model_file, results_dir, tag):
 
     all_quats_df.to_csv(results_dir + "\\" + tag + "_quats.csv", mode='w', encoding='utf-8', na_rep='nan')
 
-def read_in_quats(start_time, end_time, file_name):
+def read_in_quats(start_time, end_time, file_name, trim_bool):
     with open(file_name, 'r') as file:
         df = pd.read_csv(file, header=0)
     # Trim dataframe
-    df = df.loc[(df['Time'] >= start_time) & (df['Time'] <= end_time)]
+    if trim_bool == True:
+        df = df.loc[(df['Time'] >= start_time) & (df['Time'] <= end_time)]
     # Extract separate dfs for each body
     thorax_quats = df.filter(["Thorax_Q0", "Thorax_Q1", "Thorax_Q2", "Thorax_Q3"], axis=1)
     humerus_quats = df.filter(["Humerus_Q0", "Humerus_Q1", "Humerus_Q2", "Humerus_Q3"], axis=1)
@@ -284,3 +285,23 @@ def read_in_quats(start_time, end_time, file_name):
 
     return thorax_quats_np, humerus_quats_np, radius_quats_np
 
+# A function for calculating the average heading offset between an array of two bodies or IMUs, relative to a global frame
+def find_heading_offset(OMC_thorax_quats, IMU_thorax_quats):
+    def find_heading_of_thorax(thorax_quats, row):
+        thorax_scipy_R = R.from_quat([thorax_quats[row,1], thorax_quats[row,2], thorax_quats[row,3], thorax_quats[row,0]])
+        thorax_rot_mat = thorax_scipy_R.as_matrix()
+        # Calculating angle of thorax z-axis on the glboal XZ plane
+        mat_z_Z = thorax_rot_mat[2,2]
+        mat_z_X = thorax_rot_mat[0,2]
+        angle_z = np.arctan(mat_z_X / mat_z_Z)
+        return angle_z
+
+    heading_offset_arr = np.zeros((len(OMC_thorax_quats)))
+    for row in range(len(OMC_thorax_quats)):
+        OMC_thorax_offset_i = find_heading_of_thorax(OMC_thorax_quats, row)
+        IMU_thorax_offset_i = find_heading_of_thorax(IMU_thorax_quats, row)
+        heading_offset_arr[row] = OMC_thorax_offset_i - IMU_thorax_offset_i
+
+    angle_z = np.mean(heading_offset_arr)
+
+    return angle_z
