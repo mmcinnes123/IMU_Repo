@@ -2,6 +2,8 @@
 # Inputs are: two .mot files
 # Outputs are: .png plots of each joint of interest
 
+# Test change made in Master
+
 import matplotlib.pyplot as plt
 from functions import *
 
