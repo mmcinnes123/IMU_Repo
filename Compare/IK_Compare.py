@@ -48,7 +48,7 @@ thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_
 thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv", trim_bool=False)
 heading_offset = find_heading_offset(thorax_OMC_all, thorax_IMU_all)
 
-# Read in body orientations from newly created csv files (as trimmed np arrays)
+# Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
 thorax_OMC, humerus_OMC, radius_OMC = read_in_quats(start_time, end_time, file_name=results_dir + r"\OMC_quats.csv", trim_bool=True)
 thorax_IMU, humerus_IMU, radius_IMU = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv", trim_bool=True)
 
@@ -313,6 +313,7 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
 
 
+
 # Define a function to plot IMU vs OMC model body orientation errors (single angle quaternion difference)
 def plot_compare_body_oris(joint_of_interest):
 
@@ -412,93 +413,72 @@ def plot_compare_body_oris(joint_of_interest):
 
 
 
+# Define a function to plot IMU vs OMC HT angles, based on projected vector directions
+def plot_vector_HT_angles(joint_of_interest):
 
-def plot_compare_JAs_shoulder(joint_of_interest):
+    label1 = "Abduction (x_rel2_X_on_XY)"
+    label2 = "Flexion (z_rel2_Z_on_ZY)"
+    label3 = "Rotation - Elbow Down (x_rel2_X_on_XZ)"
+    label4 = "Rotation - Elbow Up (z_rel2_Z_on_ZY)"
 
+    # Calculate the projected vector angles based on the body orientations of thorax and humerus
+    abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC = \
+        get_vec_angles_from_two_CFs(thorax_OMC, humerus_OMC)
+    abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU = \
+        get_vec_angles_from_two_CFs(thorax_IMU, humerus_IMU)
 
-    # Get HT joint angles with different function
-    OMC_angle1, OMC_angle2, OMC_angle3, OMC_IER_x, IMU_angle1, IMU_angle2, IMU_angle3, IMU_IER, OMC_IER_z, OMC_IER_y = \
-        get_joint_angles_from_states(OMC_states_file, path_to_OMC_model_file, start_time, end_time)
-    # IMU_angle1, IMU_angle2, IMU_angle3, IMU_IER = \
-    #     get_joint_angles_from_states(IMU_states_file, path_to_IMU_model_file, start_time, end_time)
-        # TODO: Tidy lines above - create new function specifically for calculating vector angles
-
-    # Algorthm to determine IER
-    n_rows = len(OMC_angle1)
-    OMC_IER = np.zeros((n_rows))
-    for row in range(n_rows):
-        if OMC_angle2[row] < 45 or OMC_angle2[row] > 135:    # If elevation is less than 45 deg, or above 135 deg, use x axis angle
-            OMC_IER[row] = OMC_IER_x[row]
-        else:   # Else, (if elevation is between 45 and 135 deg)
-            if 45 < OMC_angle1[row] < 135:   # And if arm is in flexion, keep using x axis angle
-                OMC_IER[row] = OMC_IER_x[row]
-            else:    # But if arm is in abduction, use z axis angle instead
-                OMC_IER[row] = OMC_IER_z[row]
-        # TODO: Add functionality to algorithm so it will work when int/ext happens during flex or abduction
-        #   Try using x on x-y plane
-
-
-
-    # Discount vector angle when elevation is above cutoff
-    # OMC_IER_x = np.where(OMC_angle2 < 45, OMC_IER_x, np.nan)
-    # IMU_IER = np.where(OMC_angle2 < 45, IMU_IER, np.nan)
-        # TODO: Decide when and how I want to discount data
-
-    label1 = "Euler Y - Plane of Elevation"
-    label2 = "Euler Z - Elevation"
-    label3 = "Euler YY - Int/Ext Rotation"
-    label4 = "Vector Angle - Int/Ext Rotation"
-
-
-    # Smooth data
-    # OMC_angle1 = scipy.signal.savgol_filter(OMC_angle1, 50, 3)
-    # OMC_angle2 = scipy.signal.savgol_filter(OMC_angle2, 50, 3)
-    # OMC_angle3 = scipy.signal.savgol_filter(OMC_angle3, 50, 3)
-    # IMU_angle1 = scipy.signal.savgol_filter(IMU_angle1, 50, 3)
-    # IMU_angle2 = scipy.signal.savgol_filter(IMU_angle2, 50, 3)
-    # IMU_angle3 = scipy.signal.savgol_filter(IMU_angle3, 50, 3)
-    # OMC_IER_x = scipy.signal.savgol_filter(OMC_IER_x, 50, 3)
-    # IMU_IER = scipy.signal.savgol_filter(IMU_IER, 50, 3)
+    # Trim the arrays above based on criteria to avoid singularities and only focus on angles on interest
+    abduction_OMC, flexion_OMC, rotation_elbow_down_OMC, rotation_elbow_up_OMC = \
+        trim_vec_prof_angles(abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC)
+    abduction_IMU, flexion_IMU, rotation_elbow_down_IMU, rotation_elbow_up_IMU = \
+        trim_vec_prof_angles(abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU)
 
     # Calculate error arrays
-    error_angle1 = abs(OMC_angle1 - IMU_angle1)
-    error_angle2 = abs(OMC_angle2 - IMU_angle2)
-    error_angle3 = abs(OMC_angle3 - IMU_angle3)
-    error_IER = abs(OMC_IER_x - IMU_IER)
+    error_angle1_with_nans = abs(abduction_OMC - abduction_IMU)
+    error_angle2_with_nans = abs(flexion_OMC - flexion_IMU)
+    error_angle3_with_nans = abs(rotation_elbow_down_OMC - rotation_elbow_down_IMU)
+    error_angle4_with_nans = abs(rotation_elbow_up_OMC - rotation_elbow_up_IMU)
 
-    # Remove nan values from error arrays
-    error_angle1_no_nans = error_angle1[np.logical_not(np.isnan(error_angle1))]
-    error_angle2_no_nans = error_angle2[np.logical_not(np.isnan(error_angle2))]
-    error_angle3_no_nans = error_angle3[np.logical_not(np.isnan(error_angle3))]
-    error_IER_no_nans = error_IER[np.logical_not(np.isnan(error_IER))]
+    # Remove any rows where there's nan values
+    error_angle1 = error_angle1_with_nans[~np.isnan(error_angle1_with_nans)]
+    error_angle2 = error_angle2_with_nans[~np.isnan(error_angle2_with_nans)]
+    error_angle3 = error_angle3_with_nans[~np.isnan(error_angle3_with_nans)]
+    error_angle4 = error_angle4_with_nans[~np.isnan(error_angle4_with_nans)]
 
     # Calculate RMSE
-    RMSE_angle1 = (sum(np.square(error_angle1_no_nans)) / len(error_angle1_no_nans)) ** 0.5
-    RMSE_angle2 = (sum(np.square(error_angle2_no_nans)) / len(error_angle2_no_nans)) ** 0.5
-    RMSE_angle3 = (sum(np.square(error_angle3_no_nans)) / len(error_angle3_no_nans)) ** 0.5
-    RMSE_IER = (sum(np.square(error_IER_no_nans)) / len(error_IER_no_nans)) ** 0.5
-    max_error_angle1 = np.amax(error_angle1_no_nans)
-    max_error_angle2 = np.amax(error_angle2_no_nans)
-    max_error_angle3 = np.amax(error_angle3_no_nans)
-    max_error_IER = np.amax(error_IER_no_nans)
+    RMSE_angle1 = (sum(np.square(error_angle1)) / len(error_angle1)) ** 0.5
+    RMSE_angle2 = (sum(np.square(error_angle2)) / len(error_angle2)) ** 0.5
+    RMSE_angle3 = (sum(np.square(error_angle3)) / len(error_angle3)) ** 0.5
+    RMSE_angle4 = (sum(np.square(error_angle4)) / len(error_angle4)) ** 0.5
+    max_error_angle1 = np.amax(error_angle1)
+    max_error_angle2 = np.amax(error_angle2)
+    max_error_angle3 = np.amax(error_angle3)
+    max_error_angle4 = np.amax(error_angle4)
 
-    # Create figure with four subplots
+    # Create figure with three subplots
     fig, axs = plt.subplots(4, 2, figsize=(14,9), width_ratios=[9,1])
 
     # Plot joint angles
 
-    axs[0,0].plot(time, OMC_angle1)
-    axs[0,0].plot(time, IMU_angle1)
+    line1, = axs[0,0].plot(time, abduction_all_OMC, linestyle='dotted', c='lightgrey')
+    line2, = axs[0,0].plot(time, abduction_all_IMU, linestyle='dotted', c='lightgrey')
+    line3, = axs[0,0].plot(time, abduction_OMC)
+    line4, = axs[0,0].plot(time, abduction_IMU)
 
-    axs[1,0].plot(time, OMC_angle2)
-    axs[1,0].plot(time, IMU_angle2)
+    line1, = axs[1,0].plot(time, flexion_all_OMC, linestyle='dotted', c='lightgrey')
+    line2, = axs[1,0].plot(time, flexion_all_IMU, linestyle='dotted', c='lightgrey')
+    line3, = axs[1,0].plot(time, flexion_OMC)
+    line4, = axs[1,0].plot(time, flexion_IMU)
 
-    axs[2,0].plot(time, OMC_angle3)
-    axs[2,0].plot(time, IMU_angle3)
+    line1, = axs[2,0].plot(time, rotation_elbow_down_all_OMC, linestyle='dotted', c='lightgrey')
+    line2, = axs[2,0].plot(time, rotation_elbow_down_all_IMU, linestyle='dotted', c='lightgrey')
+    line3, = axs[2,0].plot(time, rotation_elbow_down_OMC)
+    line4, = axs[2,0].plot(time, rotation_elbow_down_IMU)
 
-    axs[3,0].plot(time, OMC_IER_x)
-    axs[3,0].plot(time, OMC_IER_z)
-    axs[3,0].plot(time, -OMC_angle3)
+    line1, = axs[3,0].plot(time, rotation_elbow_up_all_OMC, linestyle='dotted', c='lightgrey')
+    line2, = axs[3,0].plot(time, rotation_elbow_up_all_IMU, linestyle='dotted', c='lightgrey')
+    line3, = axs[3,0].plot(time, rotation_elbow_up_OMC)
+    line4, = axs[3,0].plot(time, rotation_elbow_up_IMU)
 
     axs[0,0].set_title(label1)
     axs[1,0].set_title(label2)
@@ -506,19 +486,15 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     axs[3,0].set_title(label4)
 
     for i in range(0, 4):
-        axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]", xlim=(time[0], time[-1]))
-
-    for i in range(0, 3):
-        axs[i,0].legend(["OMC", "IMU"])
-
-    axs[3,0].legend(["IER_x", "IER_z", "Eul3"])
+        axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
+        axs[i,0].legend([line3, line4], ["OMC", "IMU"])
 
     # Plot error graphs
 
-    axs[0,1].scatter(time, error_angle1, s=0.4)
-    axs[1,1].scatter(time, error_angle2, s=0.4)
-    axs[2,1].scatter(time, error_angle3, s=0.4)
-    axs[3,1].scatter(time, error_IER, s=0.4)
+    axs[0,1].scatter(time, error_angle1_with_nans, s=0.4)
+    axs[1,1].scatter(time, error_angle2_with_nans, s=0.4)
+    axs[2,1].scatter(time, error_angle3_with_nans, s=0.4)
+    axs[3,1].scatter(time, error_angle4_with_nans, s=0.4)
 
     # Plot RMSE error lines and text
     axs[0,1].axhline(y=RMSE_angle1, linewidth=2, c="red")
@@ -527,11 +503,10 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     axs[1,1].text(time[-1]+3, RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
     axs[2,1].axhline(y=RMSE_angle3, linewidth=2, c="red")
     axs[2,1].text(time[-1]+3, RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
-    axs[3,1].axhline(y=RMSE_IER, linewidth=2, c="red")
-    axs[3,1].text(time[-1]+3, RMSE_IER, "RMSE = " + str(round(RMSE_IER,1)) + " deg")
+    axs[3,1].axhline(y=RMSE_angle4, linewidth=2, c="red")
+    axs[3,1].text(time[-1]+3, RMSE_angle4, "RMSE = " + str(round(RMSE_angle4,1)) + " deg")
 
     # Functions to define placement of max error annotation
-
     def y_max_line_placement(max_error):
         if max_error > 40:
             line_placement = 40
@@ -552,7 +527,7 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
     y_max_line_placement_2 = y_max_line_placement(max_error_angle2)
     y_max_line_placement_3 = y_max_line_placement(max_error_angle3)
-    y_max_line_placement_4 = y_max_line_placement(max_error_IER)
+    y_max_line_placement_4 = y_max_line_placement(max_error_angle4)
     axs[0,1].axhline(y=y_max_line_placement_1, linewidth=1, c="red")
     axs[1,1].axhline(y=y_max_line_placement_2, linewidth=1, c="red")
     axs[2,1].axhline(y=y_max_line_placement_3, linewidth=1, c="red")
@@ -562,31 +537,26 @@ def plot_compare_JAs_shoulder(joint_of_interest):
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
     y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
     y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
-    y_max_text_placement_4 = y_max_text_placement(max_error_IER, RMSE_IER)
+    y_max_text_placement_4 = y_max_text_placement(max_error_angle4, RMSE_angle4)
     axs[0,1].text(time[-1]+3, y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
     axs[1,1].text(time[-1]+3, y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
     axs[2,1].text(time[-1]+3, y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
-    axs[3,1].text(time[-1]+3, y_max_text_placement_4, "Max = " + str(round(max_error_IER,1)) + " deg")
+    axs[3,1].text(time[-1]+3, y_max_text_placement_4, "Max = " + str(round(max_error_angle4,1)) + " deg")
 
     # Set a shared x axis
     for i in range(0, 4):
-        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40), xlim=(time[0], time[-1]))
+        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40), xlim=(start_time, end_time))
 
     fig.tight_layout(pad=2.0)
 
-    fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
-
-    # plt.show()
+    fig.savefig(results_dir + "\\" + joint_of_interest + ".png")
 
 
 
 
 # Plot IMU vs OMC joint angles based on OpenSim coordinates
-# plot_compare_JAs(joint_of_interest="Thorax")
-# plot_compare_JAs(joint_of_interest="Elbow")
-# plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
-
-
-
-
-plot_compare_body_oris("Body_orientation_diff")
+plot_compare_JAs(joint_of_interest="Thorax")
+plot_compare_JAs(joint_of_interest="Elbow")
+plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
+plot_compare_body_oris(joint_of_interest="Body_Orientation_Diff")
+plot_vector_HT_angles(joint_of_interest="HT_Vectors")

@@ -305,3 +305,78 @@ def find_heading_offset(OMC_thorax_quats, IMU_thorax_quats):
     angle_z = np.mean(heading_offset_arr)
 
     return angle_z
+
+
+# Define functions for finding vector projected joint angles for the HT joint
+def get_vec_angles_from_two_CFs(CF1, CF2):
+
+    n_rows = len(CF1)
+    x_rel2_X_on_XY = np.zeros((n_rows))
+    x_rel2_X_on_XZ = np.zeros((n_rows))
+    z_rel2_Z_on_ZY = np.zeros((n_rows))
+    for row in range(n_rows):
+        joint_rot = quat_mul(quat_conj(CF1[row]), CF2[row])  # Calculate joint rotation quaternion
+        joint_scipyR = R.from_quat([joint_rot[1], joint_rot[2], joint_rot[3], joint_rot[0]])  # In scalar last format
+        joint_mat = joint_scipyR.as_matrix()    # Calculate the joint rotation matrix
+        # Extract the vector components of CF2 axes relative to CF1 axes
+        mat_x_X = joint_mat[0,0]    # This is the component of the CF2 x axis in the CF1 X direction
+        mat_x_Y = joint_mat[1,0]    # This is the component of the CF2 x axis in the CF1 Y direction
+        mat_x_Z = joint_mat[2,0]    # This is the component of the CF2 x axis in the CF1 Z direction
+        mat_y_X = joint_mat[0,1]    # This is the component of the CF2 y axis in the CF1 X direction
+        mat_y_Y = joint_mat[1,1]    # This is the component of the CF2 y axis in the CF1 Y direction
+        mat_y_Z = joint_mat[2,1]    # This is the component of the CF2 y axis in the CF1 Z direction
+        mat_z_X = joint_mat[0,2]    # This is the component of the CF2 z axis in the CF1 X direction
+        mat_z_Y = joint_mat[1,2]    # This is the component of the CF2 z axis in the CF1 Y direction
+        mat_z_Z = joint_mat[2,2]    # This is the component of the CF2 z axis in the CF1 Z direction
+        # Make these values up into vectors projected on certain planes
+        vec_x_on_XY = [mat_x_X, mat_x_Y]
+        X_on_XY = [1, 0]
+        vec_x_on_XZ = [mat_x_X, mat_x_Z]
+        X_on_XZ = [1,0]
+        vec_z_on_ZY = [mat_z_Z, mat_z_Y]
+        Z_on_ZY = [1,0]
+        # Calculate the angle of certain CF2 vectors on certain CF1 planes
+        x_rel2_X_on_XY[row] = np.arccos(np.dot(vec_x_on_XY,X_on_XY)/(np.linalg.norm(vec_x_on_XY)*np.linalg.norm(X_on_XY))) * 180 / np.pi
+        x_rel2_X_on_XZ[row] = np.arccos(np.dot(vec_x_on_XZ,X_on_XZ)/(np.linalg.norm(vec_x_on_XZ)*np.linalg.norm(X_on_XZ))) * 180 / np.pi
+        z_rel2_Z_on_ZY[row] = np.arccos(np.dot(vec_z_on_ZY,Z_on_ZY)/(np.linalg.norm(vec_z_on_ZY)*np.linalg.norm(Z_on_ZY))) * 180 / np.pi
+        # x_rel2_X_on_XY[row] = np.arctan(mat_x_Y / mat_x_X) * 180 / np.pi
+        # x_rel2_X_on_XZ[row] = np.arctan(mat_x_Z / mat_x_X) * 180 / np.pi
+        # z_rel2_Z_on_ZY[row] = np.arctan(mat_z_Y / mat_z_Z) * 180 / np.pi
+
+    # Assign to clinically relevant joint angles
+    abduction_all = x_rel2_X_on_XY
+    flexion_all = z_rel2_Z_on_ZY
+    rotation_elbow_down_all = x_rel2_X_on_XZ
+    rotation_elbow_up_all = z_rel2_Z_on_ZY
+
+    return abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all
+
+
+
+
+def trim_vec_prof_angles(abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all):
+
+    # Discount values of the projected vector to avoid singularities and only focus on angles on interest
+
+    # Remove flexion values whenever abduction is above 45deg or where rotation_elbow_down is outwith -45 to 45
+    flexion_keep_conditions = (rotation_elbow_down_all < 45) & (rotation_elbow_down_all > -45) & (abduction_all < 45)
+    flexion = np.where(flexion_keep_conditions, flexion_all, np.nan)
+
+
+    # Remove abduction values whenever we're in flexion, or if int/ext is outwith -45 to 45
+    abduction_keep_conditions = (flexion_all < 45)
+    abduction = np.where(abduction_keep_conditions, abduction_all, np.nan)
+
+    # Remove rotation values if abduction or flexion is above 45 degrees
+    rotation_elbow_down_keep_conditions = (abduction_all < 45) & (flexion_all < 45)
+    rotation_elbow_down = np.where(rotation_elbow_down_keep_conditions, rotation_elbow_down_all, np.nan)
+
+    # Remove these rotation values when abduction in below 45degrees, and when rotation_elbow_down is outwith -45 to 45
+    condition_1 = (abduction_all > 45)
+    rotation_elbow_up = np.where(condition_1, rotation_elbow_up_all, np.nan)
+    # Make condition based on array where nans are replaced with zeros so that any "is value < 45" checks return "True"
+    # condition_2 = np.where((~np.isnan(rotation_elbow_down)), rotation_elbow_down, 0) < 45
+    # rotation_elbow_up = np.where(condition, rotation_elbow_up, np.nan)
+
+
+    return abduction, flexion, rotation_elbow_down, rotation_elbow_up
