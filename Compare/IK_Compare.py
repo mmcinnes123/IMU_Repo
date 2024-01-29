@@ -13,18 +13,18 @@ import scipy
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_cal_pose1'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"  # Name of the working folder
+trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 start_time = 0
 end_time = 40  # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison2_cal_pose_1"
+results_dir = parent_dir + r"\Comparison1_cal_pose_1_IMUCLUS"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 
 # Define some file names
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
 OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
 path_to_IMU_model_file = parent_dir + "\\" + trial_name + "\\" + "Calibrated_das3.osim"
-path_to_OMC_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20\OMC" + "\\" + "das3_scaled_and_placed.osim"
+path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
 
 osim.Logger.addFileSink(results_dir + r'\opensim.log')
 
@@ -141,6 +141,7 @@ def plot_compare_JAs(joint_of_interest):
     for i in range(0, 3):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
         axs[i,0].legend(["OMC", "IMU"])
+        axs[i,0].grid(color="lightgrey")
 
     # Plot error graphs
 
@@ -192,6 +193,7 @@ def plot_compare_JAs(joint_of_interest):
     # Set a shared x axis
     for i in range(0, 3):
         axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40))
+        axs[i,1].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
 
@@ -258,6 +260,7 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     for i in range(0, 3):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
         axs[i,0].legend(["OMC", "IMU"])
+        axs[i,0].grid(color="lightgrey")
 
     # Plot error graphs
 
@@ -309,6 +312,7 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     # Set a shared x axis
     for i in range(0, 3):
         axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40), xlim=(start_time, end_time))
+        axs[i,1].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
 
@@ -383,7 +387,7 @@ def plot_compare_body_oris(joint_of_interest):
         if max_error > 40:
             text_placement = 40
         elif max_error < (RMSE + 3):
-            text_placement = RMSE + 2
+            text_placement = RMSE + 4
         else:
             text_placement = max_error
         return text_placement
@@ -407,7 +411,8 @@ def plot_compare_body_oris(joint_of_interest):
     # Set a shared x axis
     y_lim_list = np.array([max_error_angle1, max_error_angle2, max_error_angle3])
     for i in range(0, 3):
-        axs[i].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0, 1.1*y_lim_list.max()))
+        axs[i].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0, 1.1*y_lim_list[i]))
+        axs[i].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
 
@@ -490,6 +495,7 @@ def plot_vector_HT_angles(joint_of_interest):
     for i in range(0, 4):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
         axs[i,0].legend([line3, line4], ["OMC", "IMU"])
+        axs[i,0].grid(color="lightgrey")
 
     # Plot error graphs
 
@@ -548,6 +554,7 @@ def plot_vector_HT_angles(joint_of_interest):
     # Set a shared x axis
     for i in range(0, 4):
         axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40), xlim=(start_time, end_time))
+        axs[i,1].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
 

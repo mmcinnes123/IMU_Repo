@@ -9,14 +9,14 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_cal_pose6'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\23_12_20"  # Name of the working folder
-input_file_name = "20thDec_Movements - Report5 - Cluster_Quats.txt"     # Name of the file with quaternion data
+trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
+input_file_name = "22ndJan_Movements - Report3 - Cluster_Quats.txt"     # Name of the file with quaternion data
 transform_data = False  # If using marker cluster questions, make False
-cal_pose_time = 19  # Enter time (s) when subject was in calibration pose
+cal_pose_time = 5  # Enter time (s) when subject was in calibration pose
 trim_data = False
-start_time = 0
-end_time = 24
+start_time = 0  # Only relevant if trim_data = True
+end_time = 24   # Only relevant if trim_data = True
 sample_rate = 100
 
 # Required Files in Folder
@@ -24,7 +24,7 @@ template_file = "APDM_template_4S.csv"
 APDM_settings_file = "APDMDataConverter_Settings.xml"
 
 raw_data_dir = parent_dir + "\RawData"
-input_file_path = raw_data_dir + "\\" + "20thDec_Movements - Report5 - Cluster_Quats.txt"
+input_file_path = raw_data_dir + "\\" + input_file_name
 
 # Create a new results directory
 results_dir = parent_dir + "\\" + trial_name
@@ -33,6 +33,11 @@ if os.path.exists(results_dir) == False:
 osim.Logger.addFileSink(results_dir + r'\opensim.log')
 
 """ MAIN """
+
+# Check we've set the default pose of the model correctly
+pose_confirmation = input("\nIs the default pose of the model set to match the expected subject pose?: ")
+if pose_confirmation == "No":
+    quit()
 
 # Read data in from file
 IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(input_file_path)
@@ -58,7 +63,6 @@ if transform_data == True:
 # Write transformed IMU quaternions to .sto file (write to APDM .csv first, then convert)
 write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, tag="Movements")
 APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_Movements.csv", output_file_name=results_dir + r"\APDM_Movements.sto")
-
 
 
 # Extract row based on moment of calibration pose
