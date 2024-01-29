@@ -48,11 +48,11 @@ if trim_data == True:
     IMU2_df = trim_df(IMU2_df, start_time, end_time, sample_rate)
     IMU3_df = trim_df(IMU3_df, start_time, end_time, sample_rate)
 
-# Interpolate for missing data_out
-IMU1_df, IMU1_nan_count = interpolate_df(IMU1_df)
-IMU2_df, IMU2_nan_count = interpolate_df(IMU2_df)
-IMU3_df, IMU3_nan_count = interpolate_df(IMU3_df)
-print("Total missing data_out: " + str(IMU1_nan_count + IMU2_nan_count + IMU3_nan_count))
+# # Interpolate for missing data_out
+# IMU1_df, IMU1_nan_count = interpolate_df(IMU1_df)
+# IMU2_df, IMU2_nan_count = interpolate_df(IMU2_df)
+# IMU3_df, IMU3_nan_count = interpolate_df(IMU3_df)
+# print("Total missing data_out: " + str(IMU1_nan_count + IMU2_nan_count + IMU3_nan_count))
 
 # Do initial transform of IMU data_out to match OptiTrack Y-up convention, and take transpose
 if transform_data == True:

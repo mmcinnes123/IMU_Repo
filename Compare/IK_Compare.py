@@ -16,14 +16,16 @@ import scipy
 trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 start_time = 0
-end_time = 40  # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison1_cal_pose_1_IMUCLUS"
+end_time = 37  # If you enter same end_time as you used in IK here, OMC angles will be one too long
+results_dir = parent_dir + r"\Comparison3_IMUwithnans_iIMUwithout"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
+labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
+labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
 # Define some file names
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
 OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
-path_to_IMU_model_file = parent_dir + "\\" + trial_name + "\\" + "Calibrated_das3.osim"
+path_to_IMU_model_file = "das3.osim"
 path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
 
 osim.Logger.addFileSink(results_dir + r'\opensim.log')
@@ -34,6 +36,7 @@ osim.Logger.addFileSink(results_dir + r'\opensim.log')
 # Read in states for states files
 OMC_table = osim.TimeSeriesTable(OMC_states_file)
 IMU_table = osim.TimeSeriesTable(IMU_states_file)
+
 
 # Check if they're the same length and remove last row from OMC table if not.
 if OMC_table.getNumRows() != IMU_table.getNumRows():
@@ -140,7 +143,7 @@ def plot_compare_JAs(joint_of_interest):
 
     for i in range(0, 3):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
-        axs[i,0].legend(["OMC", "IMU"])
+        axs[i,0].legend([labelA, labelB])
         axs[i,0].grid(color="lightgrey")
 
     # Plot error graphs
@@ -259,7 +262,7 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
 
     for i in range(0, 3):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
-        axs[i,0].legend(["OMC", "IMU"])
+        axs[i,0].legend([labelA, labelB])
         axs[i,0].grid(color="lightgrey")
 
     # Plot error graphs
@@ -494,7 +497,7 @@ def plot_vector_HT_angles(joint_of_interest):
 
     for i in range(0, 4):
         axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
-        axs[i,0].legend([line3, line4], ["OMC", "IMU"])
+        axs[i,0].legend([line3, line4], [labelA, labelB])
         axs[i,0].grid(color="lightgrey")
 
     # Plot error graphs
