@@ -354,29 +354,36 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
 
 
 
-def trim_vec_prof_angles(abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all):
+def trim_vec_prof_angles(abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all,
+                         Eul_angle1_all, Eul_angle2_all):
+
+    # Name the three euler angles to be used as references
+    plane_of_elevation = Eul_angle1_all
+    elevation = Eul_angle2_all
 
     # Discount values of the projected vector to avoid singularities and only focus on angles on interest
 
-    # Remove flexion values whenever abduction is above 45deg or where rotation_elbow_down is outwith -45 to 45
-    flexion_keep_conditions = (rotation_elbow_down_all < 45) & (rotation_elbow_down_all > -45) & (abduction_all < 45)
-    flexion = np.where(flexion_keep_conditions, flexion_all, np.nan)
-
-
-    # Remove abduction values whenever we're in flexion, or if int/ext is outwith -45 to 45
-    abduction_keep_conditions = (flexion_all < 45)
-    abduction = np.where(abduction_keep_conditions, abduction_all, np.nan)
-
     # Remove rotation values if abduction or flexion is above 45 degrees
-    rotation_elbow_down_keep_conditions = (abduction_all < 45) & (flexion_all < 45)
+    rotation_elbow_down_keep_conditions = (elevation < 45)
     rotation_elbow_down = np.where(rotation_elbow_down_keep_conditions, rotation_elbow_down_all, np.nan)
 
-    # Remove these rotation values when abduction in below 45degrees, and when rotation_elbow_down is outwith -45 to 45
-    condition_1 = (abduction_all > 45)
-    rotation_elbow_up = np.where(condition_1, rotation_elbow_up_all, np.nan)
-    # Make condition based on array where nans are replaced with zeros so that any "is value < 45" checks return "True"
-    # condition_2 = np.where((~np.isnan(rotation_elbow_down)), rotation_elbow_down, 0) < 45
-    # rotation_elbow_up = np.where(condition, rotation_elbow_up, np.nan)
+    # Remove abduction values whenever elevation is above 45 AND plane of elevation is outwith -45 to 45
+    abduction_discard_conditions1 = (elevation > 45) & (plane_of_elevation > 45)
+    abduction_discard_conditions2 = (elevation > 45) & (plane_of_elevation < -45)
+    abduction_int = np.where(abduction_discard_conditions1, np.nan, abduction_all)
+    abduction = np.where(abduction_discard_conditions2, np.nan, abduction_int)
 
+    # Remove flexion values whenever elevation is above 45deg AND plane of elevation is within -45 to 45
+    flexion_discard_conditions1 = (elevation > 45) & (plane_of_elevation < 45) & (plane_of_elevation > -45)
+    flexion_int_1 = np.where(flexion_discard_conditions1, np.nan, flexion_all)
+    # Also Remove flexion values whenever int/ext rotation is outwith -45 to 45
+    flexion_discard_conditions2 = (rotation_elbow_down > 45) & (elevation < 45)
+    flexion_discard_conditions3 = (rotation_elbow_down < -45) & (elevation < 45)
+    flexion_int_2 = np.where(flexion_discard_conditions2, np.nan, flexion_int_1)
+    flexion = np.where(flexion_discard_conditions3, np.nan, flexion_int_2)
+
+    # Remove these rotation values if we're not in abduction - i.e. only keep if elevation is over 45 and plane of elevation is within -45 to 45
+    rotation_elbow_up_keep_condition1 = (elevation > 45) & (plane_of_elevation < 45) & (plane_of_elevation > -45)
+    rotation_elbow_up = np.where(rotation_elbow_up_keep_condition1, rotation_elbow_up_all, np.nan)
 
     return abduction, flexion, rotation_elbow_down, rotation_elbow_up

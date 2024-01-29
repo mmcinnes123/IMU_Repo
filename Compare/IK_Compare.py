@@ -17,7 +17,7 @@ trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 start_time = 0
 end_time = 37  # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison3_IMUwithnans_iIMUwithout"
+results_dir = parent_dir + r"\Comparison2_cal_pose_1_IMUCLUS"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
@@ -431,6 +431,10 @@ def plot_vector_HT_angles(joint_of_interest):
     label3 = "Rotation - Elbow Down (x_rel2_X_on_XZ)"
     label4 = "Rotation - Elbow Up (z_rel2_Z_on_ZY)"
 
+    # Calculate HT Euler angles (to be used as a reference)
+    OMC_angle1_all, OMC_angle2_all, OMC_angle3_all = get_JA_euls_from_quats(thorax_OMC, humerus_OMC, eul_seq="YZY")
+    IMU_angle1_all, IMU_angle2_all, IMU_angle3_all = get_JA_euls_from_quats(thorax_IMU, humerus_IMU, eul_seq="YZY")
+
     # Calculate the projected vector angles based on the body orientations of thorax and humerus
     abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC = \
         get_vec_angles_from_two_CFs(thorax_OMC, humerus_OMC)
@@ -439,9 +443,11 @@ def plot_vector_HT_angles(joint_of_interest):
 
     # Trim the arrays above based on criteria to avoid singularities and only focus on angles on interest
     abduction_OMC, flexion_OMC, rotation_elbow_down_OMC, rotation_elbow_up_OMC = \
-        trim_vec_prof_angles(abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC)
+        trim_vec_prof_angles(abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC,
+                             OMC_angle1_all, OMC_angle2_all)
     abduction_IMU, flexion_IMU, rotation_elbow_down_IMU, rotation_elbow_up_IMU = \
-        trim_vec_prof_angles(abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU)
+        trim_vec_prof_angles(abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU,
+                             IMU_angle1_all, IMU_angle2_all)
 
     # Calculate error arrays
     error_angle1_with_nans = abs(abduction_OMC - abduction_IMU)
@@ -567,8 +573,8 @@ def plot_vector_HT_angles(joint_of_interest):
 
 
 # Plot IMU vs OMC joint angles based on OpenSim coordinates
-plot_compare_JAs(joint_of_interest="Thorax")
-plot_compare_JAs(joint_of_interest="Elbow")
-plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
-plot_compare_body_oris(joint_of_interest="Body_Orientation_Diff")
+# plot_compare_JAs(joint_of_interest="Thorax")
+# plot_compare_JAs(joint_of_interest="Elbow")
+# plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
+# plot_compare_body_oris(joint_of_interest="Body_Orientation_Diff")
 plot_vector_HT_angles(joint_of_interest="HT_Vectors")
