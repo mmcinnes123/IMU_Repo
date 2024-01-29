@@ -132,6 +132,51 @@ def find_segment_quats(segment_imu_offset, IMU_quats):
     return segment_quats_df
 
 
+
+
+def get_body_quat(state, body):
+    Rot = body.getTransformInGround(state).R()
+    quat = Rot.convertRotationToQuaternion()
+    output_quat = np.array([quat.get(0), quat.get(1), quat.get(2), quat.get(3)])
+    return output_quat
+
+def get_vec_between_bodies(state, body1, body2):
+
+    Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
+    quat = Rot.convertRotationToQuaternion()
+    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    mat = scipyR.as_matrix()
+    mat_x_X = mat[0,0]  # This is the component of the humerus x-axis which points in the thorax X direction
+    mat_x_Z = mat[2,0]  # This is the component of the humerus x-axis which points in the thorax Z direction
+    mat_z_X = mat[0,2]  # This is the component of the humerus z-axis which points in the thorax X direction
+    mat_z_Z = mat[2,2]  # This is the component of the humerus z-axis which points in the thorax Z direction
+    mat_y_X = mat[0,1]  # This is the component of the humerus y-axis which points in the thorax X direction
+    mat_y_Z = mat[2,1]  # This is the component of the humerus y-axis which points in the thorax Z direction
+    # Get angle of local x-axis projected on the thorax XZ plane (relative to thorax X)
+    angle_x = np.arctan(mat_x_Z/mat_x_X)*180/np.pi
+    # Get angle of local z-axis projected on the thorax XZ plane (relative to thorax Z)
+    angle_z = -np.arctan(mat_z_X/mat_z_Z)*180/np.pi
+    # Get angle of local y-axis projected on the thorax XZ plane (relative to thorax X)
+    angle_y = -np.arctan(mat_y_Z/mat_y_X)*180/np.pi
+
+
+    return angle_x, angle_z, angle_y
+
+
+def get_JA_euls_from_quats(body1_quats, body2_quats, eul_seq):
+
+    n_rows = len(body1_quats)
+    eul_1_arr = np.zeros((n_rows))
+    eul_2_arr = np.zeros((n_rows))
+    eul_3_arr = np.zeros((n_rows))
+    for row in range(n_rows):
+        joint_Rot = quat_mul(quat_conj(body1_quats[row]), body2_quats[row])  # Calculate joint Rot quat
+        joint_scipyR = R.from_quat([joint_Rot[1], joint_Rot[2], joint_Rot[3], joint_Rot[0]])    # In scalar last format
+        joint_eul = joint_scipyR.as_euler(eul_seq, degrees=True)    # Get euler angles
+        eul_1_arr[row], eul_2_arr[row], eul_3_arr[row] = joint_eul[0], joint_eul[1], joint_eul[2]
+
+    return eul_1_arr, eul_2_arr, eul_3_arr
+
 def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
     Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
     quat = Rot.convertRotationToQuaternion()
@@ -140,21 +185,6 @@ def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
     eul = scipyR.as_euler(eul_seq, degrees=True)
 
     return eul[0], eul[1], eul[2]
-
-def get_vec_between_bodies(state, body1, body2):
-
-    Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
-    quat = Rot.convertRotationToQuaternion()
-    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
-    mat = scipyR.as_matrix()
-    mat_x_X = mat[0,0]
-    mat_x_Z = mat[2,0]
-    # Get angle of local x-axis projected on the thorax XZ plane (relative to thorax X)
-    angle = np.arctan(mat_x_Z/mat_x_X)*180/np.pi
-
-    return angle
-
-
 def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
 
     # Create a time series table from the states file
@@ -183,16 +213,170 @@ def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
     HT1_arr = np.zeros((n_rows))
     HT2_arr = np.zeros((n_rows))
     HT3_arr = np.zeros((n_rows))
-    HT_IER_arr = np.zeros((n_rows))
+    HT_IER_arr_x = np.zeros((n_rows))
+    HT_IER_arr_z = np.zeros((n_rows))
+    HT_IER_arr_y = np.zeros((n_rows))
     for row in range(n_rows):
         state = stateTrajectory.get(row)
         model.realizePosition(state)
         HT1_arr[row], HT2_arr[row], HT3_arr[row] = get_eulers_between_two_bodies(state, thorax, humerus_r, 'YZY')
         # Get vector projection based int/ext rot
-        HT_IER_arr[row] = get_vec_between_bodies(state, thorax, humerus_r)
+        HT_IER_arr_x[row], HT_IER_arr_z[row], HT_IER_arr_y[row] = get_vec_between_bodies(state, thorax, humerus_r)
 
-    return HT1_arr, HT2_arr, HT3_arr, HT_IER_arr
-
-
+    return HT1_arr, HT2_arr, HT3_arr, HT_IER_arr_x, HT1_arr, HT2_arr, HT3_arr, HT_IER_arr_x, HT_IER_arr_z, HT_IER_arr_y
 
 
+
+# Define a function for extracting body orientations from the states table
+def extract_body_quats(states_table, model_file, results_dir, tag):
+
+    # Create the model and the bodies
+    model = osim.Model(model_file)
+    thorax = model.getBodySet().get('thorax')
+    humerus = model.getBodySet().get('humerus_r')
+    radius = model.getBodySet().get('radius_r')
+
+    # Unlock any locked coordinates in model
+    for coord in ['TH_x','TH_y','TH_z','TH_x_trans','TH_y_trans','TH_z_trans',
+                  'SC_x','SC_y','SC_z','AC_x','AC_y','AC_z','GH_y','GH_z','GH_yy','EL_x','PS_y']:
+        model.getCoordinateSet().get(coord).set_locked(False)
+
+    # Get the states info from the states file
+    stateTrajectory = osim.StatesTrajectory.createFromStatesTable(model, states_table)
+    n_rows = stateTrajectory.getSize()
+
+    # Initiate the system so that the model can actively realise positions based on states
+    model.initSystem()
+
+    # Get the orientation of each body of interest
+    thorax_quats = np.zeros((n_rows, 4))
+    humerus_quats = np.zeros((n_rows, 4))
+    radius_quats = np.zeros((n_rows, 4))
+    for row in range(n_rows):
+        state = stateTrajectory.get(row)
+        model.realizePosition(state)
+        thorax_quats[row] = get_body_quat(state, thorax)
+        humerus_quats[row] = get_body_quat(state, humerus)
+        radius_quats[row] = get_body_quat(state, radius)
+
+    # Write all body quats to a csv file
+    thorax_quats_df = pd.DataFrame({"Thorax_Q0": thorax_quats[:,0],"Thorax_Q1": thorax_quats[:,1], "Thorax_Q2": thorax_quats[:,2], "Thorax_Q3": thorax_quats[:,3]})
+    humerus_quats_df = pd.DataFrame({"Humerus_Q0": humerus_quats[:,0],"Humerus_Q1": humerus_quats[:,1], "Humerus_Q2": humerus_quats[:,2],"Humerus_Q3": humerus_quats[:,3]})
+    radius_quats_df = pd.DataFrame({"Radius_Q0": radius_quats[:,0],"Radius_Q1": radius_quats[:,1], "Radius_Q2": radius_quats[:,2],"Radius_Q3": radius_quats[:,3]})
+    time_df = pd.DataFrame({"Time": np.asarray(states_table.getIndependentColumn())[:]})
+
+    all_quats_df = pd.concat([time_df, thorax_quats_df, humerus_quats_df, radius_quats_df], axis=1)
+
+    all_quats_df.to_csv(results_dir + "\\" + tag + "_quats.csv", mode='w', encoding='utf-8', na_rep='nan')
+
+def read_in_quats(start_time, end_time, file_name, trim_bool):
+    with open(file_name, 'r') as file:
+        df = pd.read_csv(file, header=0)
+    # Trim dataframe
+    if trim_bool == True:
+        df = df.loc[(df['Time'] >= start_time) & (df['Time'] <= end_time)]
+    # Extract separate dfs for each body
+    thorax_quats = df.filter(["Thorax_Q0", "Thorax_Q1", "Thorax_Q2", "Thorax_Q3"], axis=1)
+    humerus_quats = df.filter(["Humerus_Q0", "Humerus_Q1", "Humerus_Q2", "Humerus_Q3"], axis=1)
+    radius_quats = df.filter(["Radius_Q0", "Radius_Q1", "Radius_Q2", "Radius_Q3"], axis=1)
+    thorax_quats_np = thorax_quats.to_numpy()
+    humerus_quats_np = humerus_quats.to_numpy()
+    radius_quats_np = radius_quats.to_numpy()
+
+    return thorax_quats_np, humerus_quats_np, radius_quats_np
+
+# A function for calculating the average heading offset between an array of two bodies or IMUs, relative to a global frame
+def find_heading_offset(OMC_thorax_quats, IMU_thorax_quats):
+    def find_heading_of_thorax(thorax_quats, row):
+        thorax_scipy_R = R.from_quat([thorax_quats[row,1], thorax_quats[row,2], thorax_quats[row,3], thorax_quats[row,0]])
+        thorax_rot_mat = thorax_scipy_R.as_matrix()
+        # Calculating angle of thorax z-axis on the glboal XZ plane
+        mat_z_Z = thorax_rot_mat[2,2]
+        mat_z_X = thorax_rot_mat[0,2]
+        angle_z = np.arctan(mat_z_X / mat_z_Z)
+        return angle_z
+
+    heading_offset_arr = np.zeros((len(OMC_thorax_quats)))
+    for row in range(len(OMC_thorax_quats)):
+        OMC_thorax_offset_i = find_heading_of_thorax(OMC_thorax_quats, row)
+        IMU_thorax_offset_i = find_heading_of_thorax(IMU_thorax_quats, row)
+        heading_offset_arr[row] = OMC_thorax_offset_i - IMU_thorax_offset_i
+
+    angle_z = np.mean(heading_offset_arr)
+
+    return angle_z
+
+
+# Define functions for finding vector projected joint angles for the HT joint
+def get_vec_angles_from_two_CFs(CF1, CF2):
+
+    n_rows = len(CF1)
+    x_rel2_X_on_XY = np.zeros((n_rows))
+    x_rel2_X_on_XZ = np.zeros((n_rows))
+    z_rel2_Z_on_ZY = np.zeros((n_rows))
+    for row in range(n_rows):
+        joint_rot = quat_mul(quat_conj(CF1[row]), CF2[row])  # Calculate joint rotation quaternion
+        joint_scipyR = R.from_quat([joint_rot[1], joint_rot[2], joint_rot[3], joint_rot[0]])  # In scalar last format
+        joint_mat = joint_scipyR.as_matrix()    # Calculate the joint rotation matrix
+        # Extract the vector components of CF2 axes relative to CF1 axes
+        mat_x_X = joint_mat[0,0]    # This is the component of the CF2 x axis in the CF1 X direction
+        mat_x_Y = joint_mat[1,0]    # This is the component of the CF2 x axis in the CF1 Y direction
+        mat_x_Z = joint_mat[2,0]    # This is the component of the CF2 x axis in the CF1 Z direction
+        mat_y_X = joint_mat[0,1]    # This is the component of the CF2 y axis in the CF1 X direction
+        mat_y_Y = joint_mat[1,1]    # This is the component of the CF2 y axis in the CF1 Y direction
+        mat_y_Z = joint_mat[2,1]    # This is the component of the CF2 y axis in the CF1 Z direction
+        mat_z_X = joint_mat[0,2]    # This is the component of the CF2 z axis in the CF1 X direction
+        mat_z_Y = joint_mat[1,2]    # This is the component of the CF2 z axis in the CF1 Y direction
+        mat_z_Z = joint_mat[2,2]    # This is the component of the CF2 z axis in the CF1 Z direction
+        # Make these values up into vectors projected on certain planes
+        vec_x_on_XY = [mat_x_X, mat_x_Y]
+        X_on_XY = [1, 0]
+        vec_x_on_XZ = [mat_x_X, mat_x_Z]
+        X_on_XZ = [1,0]
+        vec_z_on_ZY = [mat_z_Z, mat_z_Y]
+        Z_on_ZY = [1,0]
+        # Calculate the angle of certain CF2 vectors on certain CF1 planes
+        x_rel2_X_on_XY[row] = np.arccos(np.dot(vec_x_on_XY,X_on_XY)/(np.linalg.norm(vec_x_on_XY)*np.linalg.norm(X_on_XY))) * 180 / np.pi
+        x_rel2_X_on_XZ[row] = np.arccos(np.dot(vec_x_on_XZ,X_on_XZ)/(np.linalg.norm(vec_x_on_XZ)*np.linalg.norm(X_on_XZ))) * 180 / np.pi
+        z_rel2_Z_on_ZY[row] = np.arccos(np.dot(vec_z_on_ZY,Z_on_ZY)/(np.linalg.norm(vec_z_on_ZY)*np.linalg.norm(Z_on_ZY))) * 180 / np.pi
+        # x_rel2_X_on_XY[row] = np.arctan(mat_x_Y / mat_x_X) * 180 / np.pi
+        # x_rel2_X_on_XZ[row] = np.arctan(mat_x_Z / mat_x_X) * 180 / np.pi
+        # z_rel2_Z_on_ZY[row] = np.arctan(mat_z_Y / mat_z_Z) * 180 / np.pi
+
+    # Assign to clinically relevant joint angles
+    abduction_all = x_rel2_X_on_XY
+    flexion_all = z_rel2_Z_on_ZY
+    rotation_elbow_down_all = x_rel2_X_on_XZ
+    rotation_elbow_up_all = z_rel2_Z_on_ZY
+
+    return abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all
+
+
+
+
+def trim_vec_prof_angles(abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all):
+
+    # Discount values of the projected vector to avoid singularities and only focus on angles on interest
+
+    # Remove flexion values whenever abduction is above 45deg or where rotation_elbow_down is outwith -45 to 45
+    flexion_keep_conditions = (rotation_elbow_down_all < 45) & (rotation_elbow_down_all > -45) & (abduction_all < 45)
+    flexion = np.where(flexion_keep_conditions, flexion_all, np.nan)
+
+
+    # Remove abduction values whenever we're in flexion, or if int/ext is outwith -45 to 45
+    abduction_keep_conditions = (flexion_all < 45)
+    abduction = np.where(abduction_keep_conditions, abduction_all, np.nan)
+
+    # Remove rotation values if abduction or flexion is above 45 degrees
+    rotation_elbow_down_keep_conditions = (abduction_all < 45) & (flexion_all < 45)
+    rotation_elbow_down = np.where(rotation_elbow_down_keep_conditions, rotation_elbow_down_all, np.nan)
+
+    # Remove these rotation values when abduction in below 45degrees, and when rotation_elbow_down is outwith -45 to 45
+    condition_1 = (abduction_all > 45)
+    rotation_elbow_up = np.where(condition_1, rotation_elbow_up_all, np.nan)
+    # Make condition based on array where nans are replaced with zeros so that any "is value < 45" checks return "True"
+    # condition_2 = np.where((~np.isnan(rotation_elbow_down)), rotation_elbow_down, 0) < 45
+    # rotation_elbow_up = np.where(condition, rotation_elbow_up, np.nan)
+
+
+    return abduction, flexion, rotation_elbow_down, rotation_elbow_up
