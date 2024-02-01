@@ -12,7 +12,7 @@ import os
 
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-trial_name = 'IMU_CLUS_cal_pose6'    # Tag to describe this trial
+trial_name = 'IMU_IMU_cal_pose4'    # Tag to describe this trial
 IK_start_time = 0
 IK_end_time = 40
 
@@ -29,7 +29,7 @@ results_dir = parent_dir + "\\" + trial_name  # Define the working folder
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
 baseIMUName = 'thorax_imu'
 # Which axes of the thorax IMU points in same direction as the model's thorax x-axis? (cluster quats = 'x', IMU quats = '-x')
-baseIMUHeading = 'x'
+baseIMUHeading = '-x'
 visualize_calibration = False
 
 # IMU IK Settings

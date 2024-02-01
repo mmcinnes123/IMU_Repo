@@ -13,11 +13,11 @@ import scipy
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_CLUS_cal_pose3'    # Tag to describe this trial
+trial_name = 'IMU_IMU_cal_pose4'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-start_time = 0
-end_time = 37 # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison5_cal_pose_3_IMUCLUS"
+start_time = 14
+end_time = 14.1 # If you enter same end_time as you used in IK here, OMC angles will be one too long
+results_dir = parent_dir + r"\Comparison9_cal_pose_4_IMUIMU"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title

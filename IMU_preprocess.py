@@ -9,11 +9,11 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_CLUS_cal_pose6'    # Tag to describe this trial
+trial_name = 'IMU_IMU_cal_pose4'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-input_file_name = "22ndJan_Movements - Report3 - Cluster_Quats.txt"     # Name of the file with quaternion data
-transform_data = False  # If using marker cluster questions, make False
-cal_pose_time = 16  # Enter time (s) when subject was in calibration pose
+input_file_name = "22ndJan_Movements - Report2 - IMU_Quats.txt"     # Name of the file with quaternion data
+transform_data = True  # If using marker cluster questions, make False
+cal_pose_time = 14  # Enter time (s) when subject was in calibration pose
 trim_data = False
 start_time = 0  # Only relevant if trim_data = True
 end_time = 24   # Only relevant if trim_data = True
