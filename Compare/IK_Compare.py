@@ -16,7 +16,7 @@ import scipy
 trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 start_time = 0
-end_time = 37  # If you enter same end_time as you used in IK here, OMC angles will be one too long
+end_time = 40  # If you enter same end_time as you used in IK here, OMC angles will be one too long
 results_dir = parent_dir + r"\Comparison2_cal_pose_1_IMUCLUS"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
@@ -103,12 +103,12 @@ def plot_compare_JAs(joint_of_interest):
     # Smooth data
     window_length = 20
     polynomial = 3
-    OMC_angle1 = scipy.signal.savgol_filter(OMC_angle1, window_length, polynomial)
-    OMC_angle2 = scipy.signal.savgol_filter(OMC_angle2, window_length, polynomial)
-    OMC_angle3 = scipy.signal.savgol_filter(OMC_angle3, window_length, polynomial)
-    IMU_angle1 = scipy.signal.savgol_filter(IMU_angle1, window_length, polynomial)
-    IMU_angle2 = scipy.signal.savgol_filter(IMU_angle2, window_length, polynomial)
-    IMU_angle3 = scipy.signal.savgol_filter(IMU_angle3, window_length, polynomial)
+    # OMC_angle1 = scipy.signal.savgol_filter(OMC_angle1, window_length, polynomial)
+    # OMC_angle2 = scipy.signal.savgol_filter(OMC_angle2, window_length, polynomial)
+    # OMC_angle3 = scipy.signal.savgol_filter(OMC_angle3, window_length, polynomial)
+    # IMU_angle1 = scipy.signal.savgol_filter(IMU_angle1, window_length, polynomial)
+    # IMU_angle2 = scipy.signal.savgol_filter(IMU_angle2, window_length, polynomial)
+    # IMU_angle3 = scipy.signal.savgol_filter(IMU_angle3, window_length, polynomial)
 
     # Calculate error arrays
     error_angle1 = abs(OMC_angle1 - IMU_angle1)
@@ -154,11 +154,11 @@ def plot_compare_JAs(joint_of_interest):
 
     # Plot RMSE error lines and text
     axs[0,1].axhline(y=RMSE_angle1, linewidth=2, c="red")
-    axs[0,1].text(time[-1]+3, RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
     axs[1,1].axhline(y=RMSE_angle2, linewidth=2, c="red")
-    axs[1,1].text(time[-1]+3, RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
     axs[2,1].axhline(y=RMSE_angle3, linewidth=2, c="red")
-    axs[2,1].text(time[-1]+3, RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
 
     # Functions to define placement of max error annotation
     def y_max_line_placement(max_error):
@@ -171,8 +171,8 @@ def plot_compare_JAs(joint_of_interest):
     def y_max_text_placement(max_error, RMSE):
         if max_error > 40:
             text_placement = 40
-        elif max_error < (RMSE + 3):
-            text_placement = RMSE + 3
+        elif max_error < (RMSE*1.1):
+            text_placement = RMSE*1.1
         else:
             text_placement = max_error
         return text_placement
@@ -189,13 +189,13 @@ def plot_compare_JAs(joint_of_interest):
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
     y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
     y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
-    axs[0,1].text(time[-1]+3, y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
-    axs[1,1].text(time[-1]+3, y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
-    axs[2,1].text(time[-1]+3, y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
 
     # Set a shared x axis
     for i in range(0, 3):
-        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40))
+        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*np.max([max_error_angle1, max_error_angle2, max_error_angle3])])))
         axs[i,1].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
@@ -231,12 +231,12 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     error_angle3 = error_angle3_with_nans[~np.isnan(error_angle3_with_nans)]
 
     # Calculate RMSE
-    RMSE_angle1 = (sum(np.square(error_angle1)) / len(error_angle1)) ** 0.5
-    RMSE_angle2 = (sum(np.square(error_angle2)) / len(error_angle2)) ** 0.5
-    RMSE_angle3 = (sum(np.square(error_angle3)) / len(error_angle3)) ** 0.5
-    max_error_angle1 = np.amax(error_angle1)
-    max_error_angle2 = np.amax(error_angle2)
-    max_error_angle3 = np.amax(error_angle3)
+    RMSE_angle1 = find_RMSE_of_error_array(error_angle1)
+    RMSE_angle2 = find_RMSE_of_error_array(error_angle2)
+    RMSE_angle3 = find_RMSE_of_error_array(error_angle3)
+    max_error_angle1 = find_max_in_error_array(error_angle1)
+    max_error_angle2 = find_max_in_error_array(error_angle2)
+    max_error_angle3 = find_max_in_error_array(error_angle3)
 
     # Create figure with three subplots
     fig, axs = plt.subplots(3, 2, figsize=(14,9), width_ratios=[9,1])
@@ -273,11 +273,11 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
 
     # Plot RMSE error lines and text
     axs[0,1].axhline(y=RMSE_angle1, linewidth=2, c="red")
-    axs[0,1].text(time[-1]+3, RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
     axs[1,1].axhline(y=RMSE_angle2, linewidth=2, c="red")
-    axs[1,1].text(time[-1]+3, RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
     axs[2,1].axhline(y=RMSE_angle3, linewidth=2, c="red")
-    axs[2,1].text(time[-1]+3, RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
 
     # Functions to define placement of max error annotation
     def y_max_line_placement(max_error):
@@ -290,8 +290,8 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     def y_max_text_placement(max_error, RMSE):
         if max_error > 40:
             text_placement = 40
-        elif max_error < (RMSE + 3):
-            text_placement = RMSE + 3
+        elif max_error < (RMSE * 1.1):
+            text_placement = RMSE * 1.1
         else:
             text_placement = max_error
         return text_placement
@@ -308,13 +308,13 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
     y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
     y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
-    axs[0,1].text(time[-1]+3, y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
-    axs[1,1].text(time[-1]+3, y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
-    axs[2,1].text(time[-1]+3, y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
 
     # Set a shared x axis
     for i in range(0, 3):
-        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40), xlim=(start_time, end_time))
+        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*np.max([max_error_angle1, max_error_angle2, max_error_angle3])])), xlim=(start_time, end_time))
         axs[i,1].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
@@ -372,11 +372,11 @@ def plot_compare_body_oris(joint_of_interest):
 
     # Plot RMSE error lines and text
     axs[0].axhline(y=RMSE_angle1, linewidth=2, c="red")
-    axs[0].text(end_time+(end_time-start_time)*0.07, RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[0].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
     axs[1].axhline(y=RMSE_angle2, linewidth=2, c="red")
-    axs[1].text(end_time+(end_time-start_time)*0.07, RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
     axs[2].axhline(y=RMSE_angle3, linewidth=2, c="red")
-    axs[2].text(end_time+(end_time-start_time)*0.07, RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+    axs[2].text(time[-1]+0.1*(end_time-start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
 
     # Functions to define placement of max error annotation
     def y_max_line_placement(max_error):
@@ -390,7 +390,7 @@ def plot_compare_body_oris(joint_of_interest):
         if max_error > 40:
             text_placement = 40
         elif max_error < (RMSE + 3):
-            text_placement = RMSE + 4
+            text_placement = RMSE*1.1
         else:
             text_placement = max_error
         return text_placement
@@ -407,9 +407,9 @@ def plot_compare_body_oris(joint_of_interest):
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
     y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
     y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
-    axs[0].text(end_time+(end_time-start_time)*0.07, y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
-    axs[1].text(end_time+(end_time-start_time)*0.07, y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
-    axs[2].text(end_time+(end_time-start_time)*0.07, y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+    axs[0].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
 
     # Set a shared x axis
     y_lim_list = np.array([max_error_angle1, max_error_angle2, max_error_angle3])
@@ -462,14 +462,14 @@ def plot_vector_HT_angles(joint_of_interest):
     error_angle4 = error_angle4_with_nans[~np.isnan(error_angle4_with_nans)]
 
     # Calculate RMSE
-    RMSE_angle1 = (sum(np.square(error_angle1)) / len(error_angle1)) ** 0.5
-    RMSE_angle2 = (sum(np.square(error_angle2)) / len(error_angle2)) ** 0.5
-    RMSE_angle3 = (sum(np.square(error_angle3)) / len(error_angle3)) ** 0.5
-    RMSE_angle4 = (sum(np.square(error_angle4)) / len(error_angle4)) ** 0.5
-    max_error_angle1 = np.amax(error_angle1)
-    max_error_angle2 = np.amax(error_angle2)
-    max_error_angle3 = np.amax(error_angle3)
-    max_error_angle4 = np.amax(error_angle4)
+    RMSE_angle1 = find_RMSE_of_error_array(error_angle1)
+    RMSE_angle2 = find_RMSE_of_error_array(error_angle2)
+    RMSE_angle3 = find_RMSE_of_error_array(error_angle3)
+    RMSE_angle4 = find_RMSE_of_error_array(error_angle4)
+    max_error_angle1 = find_max_in_error_array(error_angle1)
+    max_error_angle2 = find_max_in_error_array(error_angle2)
+    max_error_angle3 = find_max_in_error_array(error_angle3)
+    max_error_angle4 = find_max_in_error_array(error_angle4)
 
     # Create figure with three subplots
     fig, axs = plt.subplots(4, 2, figsize=(14,9), width_ratios=[9,1])
@@ -515,13 +515,13 @@ def plot_vector_HT_angles(joint_of_interest):
 
     # Plot RMSE error lines and text
     axs[0,1].axhline(y=RMSE_angle1, linewidth=2, c="red")
-    axs[0,1].text(time[-1]+3, RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
     axs[1,1].axhline(y=RMSE_angle2, linewidth=2, c="red")
-    axs[1,1].text(time[-1]+3, RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
     axs[2,1].axhline(y=RMSE_angle3, linewidth=2, c="red")
-    axs[2,1].text(time[-1]+3, RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
     axs[3,1].axhline(y=RMSE_angle4, linewidth=2, c="red")
-    axs[3,1].text(time[-1]+3, RMSE_angle4, "RMSE = " + str(round(RMSE_angle4,1)) + " deg")
+    axs[3,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle4, "RMSE = " + str(round(RMSE_angle4,1)) + " deg")
 
     # Functions to define placement of max error annotation
     def y_max_line_placement(max_error):
@@ -555,14 +555,14 @@ def plot_vector_HT_angles(joint_of_interest):
     y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
     y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
     y_max_text_placement_4 = y_max_text_placement(max_error_angle4, RMSE_angle4)
-    axs[0,1].text(time[-1]+3, y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
-    axs[1,1].text(time[-1]+3, y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
-    axs[2,1].text(time[-1]+3, y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
-    axs[3,1].text(time[-1]+3, y_max_text_placement_4, "Max = " + str(round(max_error_angle4,1)) + " deg")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+    axs[3,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_4, "Max = " + str(round(max_error_angle4,1)) + " deg")
 
     # Set a shared x axis
     for i in range(0, 4):
-        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40), xlim=(start_time, end_time))
+        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*np.max([max_error_angle1, max_error_angle2, max_error_angle3])])), xlim=(start_time, end_time))
         axs[i,1].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
@@ -573,8 +573,8 @@ def plot_vector_HT_angles(joint_of_interest):
 
 
 # Plot IMU vs OMC joint angles based on OpenSim coordinates
-# plot_compare_JAs(joint_of_interest="Thorax")
-# plot_compare_JAs(joint_of_interest="Elbow")
-# plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
-# plot_compare_body_oris(joint_of_interest="Body_Orientation_Diff")
+plot_compare_JAs(joint_of_interest="Thorax")
+plot_compare_JAs(joint_of_interest="Elbow")
+plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
+plot_compare_body_oris(joint_of_interest="Body_Orientation_Diff")
 plot_vector_HT_angles(joint_of_interest="HT_Vectors")

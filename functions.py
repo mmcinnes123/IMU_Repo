@@ -390,3 +390,18 @@ def trim_vec_prof_angles(abduction_all, flexion_all, rotation_elbow_down_all, ro
     rotation_elbow_up = np.where(rotation_elbow_up_keep_condition1, rotation_elbow_up_all, np.nan)
 
     return abduction, flexion, rotation_elbow_down, rotation_elbow_up
+
+
+def find_RMSE_of_error_array(error_arr):
+    if len(error_arr) != 0:
+        RMSE = (sum(np.square(error_arr)) / len(error_arr)) ** 0.5
+    else:
+        RMSE = 0
+    return RMSE
+
+def find_max_in_error_array(error_arr):
+    if len(error_arr) != 0:
+        max = np.amax(error_arr)
+    else:
+        max = 0
+    return max
