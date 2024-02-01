@@ -12,7 +12,7 @@ import os
 
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+trial_name = 'IMU_CLUS_cal_pose6'    # Tag to describe this trial
 IK_start_time = 0
 IK_end_time = 40
 

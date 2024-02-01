@@ -6,18 +6,18 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os
 from functions import *
 import scipy
 
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+trial_name = 'IMU_CLUS_cal_pose3'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 start_time = 0
-end_time = 40  # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison2_cal_pose_1_IMUCLUS"
+end_time = 37 # If you enter same end_time as you used in IK here, OMC angles will be one too long
+results_dir = parent_dir + r"\Comparison5_cal_pose_3_IMUCLUS"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
@@ -25,9 +25,11 @@ labelB = "IMU"  # This is the label linked to all the variables with "IMU" in th
 # Define some file names
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
 OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
-path_to_IMU_model_file = "das3.osim"
+path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\IMU_Repo\das3.osim"
 path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
-
+figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
+if os.path.exists(figure_results_dir) == False:
+    os.mkdir(figure_results_dir)
 osim.Logger.addFileSink(results_dir + r'\opensim.log')
 
 
@@ -200,7 +202,7 @@ def plot_compare_JAs(joint_of_interest):
 
     fig.tight_layout(pad=2.0)
 
-    fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
+    fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
 
 
 
@@ -319,7 +321,7 @@ def plot_compare_JAs_shoulder_eulers(joint_of_interest):
 
     fig.tight_layout(pad=2.0)
 
-    fig.savefig(results_dir + "\\" + joint_of_interest + "_angles.png")
+    fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
 
 
 
@@ -419,7 +421,7 @@ def plot_compare_body_oris(joint_of_interest):
 
     fig.tight_layout(pad=2.0)
 
-    fig.savefig(results_dir + "\\" + joint_of_interest + ".png")
+    fig.savefig(figure_results_dir + "\\" + joint_of_interest + ".png")
 
 
 
@@ -567,7 +569,7 @@ def plot_vector_HT_angles(joint_of_interest):
 
     fig.tight_layout(pad=2.0)
 
-    fig.savefig(results_dir + "\\" + joint_of_interest + ".png")
+    fig.savefig(figure_results_dir + "\\" + joint_of_interest + ".png")
 
 
 

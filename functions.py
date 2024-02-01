@@ -241,6 +241,8 @@ def extract_body_quats(states_table, model_file, results_dir, tag):
                   'SC_x','SC_y','SC_z','AC_x','AC_y','AC_z','GH_y','GH_z','GH_yy','EL_x','PS_y']:
         model.getCoordinateSet().get(coord).set_locked(False)
 
+    print("Getting states info from states file...")
+
     # Get the states info from the states file
     stateTrajectory = osim.StatesTrajectory.createFromStatesTable(model, states_table)
     n_rows = stateTrajectory.getSize()
@@ -266,6 +268,8 @@ def extract_body_quats(states_table, model_file, results_dir, tag):
     time_df = pd.DataFrame({"Time": np.asarray(states_table.getIndependentColumn())[:]})
 
     all_quats_df = pd.concat([time_df, thorax_quats_df, humerus_quats_df, radius_quats_df], axis=1)
+
+    print("Writing " + tag + " orientations file to csv...")
 
     all_quats_df.to_csv(results_dir + "\\" + tag + "_quats.csv", mode='w', encoding='utf-8', na_rep='nan')
 
