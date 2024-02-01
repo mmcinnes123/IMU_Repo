@@ -73,7 +73,7 @@ def plot_compare_JAs(joint_of_interest):
         ref3 = "/jointset/base/TH_y/value"
         label1 = "Forward Tilt"
         label2 = "Lateral Tilt"
-        label3 = "Trunk Rotation"
+        label3 = "(Change in) Trunk Rotation"
 
     elif joint_of_interest == "Elbow":
         ref1 = "/jointset/hu/EL_x/value"
@@ -441,7 +441,7 @@ def plot_vector_HT_angles(joint_of_interest):
     abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU = \
         get_vec_angles_from_two_CFs(thorax_IMU, humerus_IMU)
 
-    # Trim the arrays above based on criteria to avoid singularities and only focus on angles on interest
+    # Trim the arrays above based on criteria to avoid singularities and only focus on angles of interest
     abduction_OMC, flexion_OMC, rotation_elbow_down_OMC, rotation_elbow_up_OMC = \
         trim_vec_prof_angles(abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC,
                              OMC_angle1_all, OMC_angle2_all)

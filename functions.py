@@ -310,6 +310,12 @@ def find_heading_offset(OMC_thorax_quats, IMU_thorax_quats):
 # Define functions for finding vector projected joint angles for the HT joint
 def get_vec_angles_from_two_CFs(CF1, CF2):
 
+    def angle_between_two_2D_vecs(vec1, vec2):
+        angle = np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))) * 180 / np.pi
+        if vec1[1] < 0:
+            angle = -angle
+        return angle
+
     n_rows = len(CF1)
     x_rel2_X_on_XY = np.zeros((n_rows))
     x_rel2_X_on_XZ = np.zeros((n_rows))
@@ -332,22 +338,19 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         vec_x_on_XY = [mat_x_X, mat_x_Y]
         X_on_XY = [1, 0]
         vec_x_on_XZ = [mat_x_X, mat_x_Z]
-        X_on_XZ = [1,0]
+        X_on_XZ = [1, 0]
         vec_z_on_ZY = [mat_z_Z, mat_z_Y]
-        Z_on_ZY = [1,0]
+        Z_on_ZY = [1, 0]
         # Calculate the angle of certain CF2 vectors on certain CF1 planes
-        x_rel2_X_on_XY[row] = np.arccos(np.dot(vec_x_on_XY,X_on_XY)/(np.linalg.norm(vec_x_on_XY)*np.linalg.norm(X_on_XY))) * 180 / np.pi
-        x_rel2_X_on_XZ[row] = np.arccos(np.dot(vec_x_on_XZ,X_on_XZ)/(np.linalg.norm(vec_x_on_XZ)*np.linalg.norm(X_on_XZ))) * 180 / np.pi
-        z_rel2_Z_on_ZY[row] = np.arccos(np.dot(vec_z_on_ZY,Z_on_ZY)/(np.linalg.norm(vec_z_on_ZY)*np.linalg.norm(Z_on_ZY))) * 180 / np.pi
-        # x_rel2_X_on_XY[row] = np.arctan(mat_x_Y / mat_x_X) * 180 / np.pi
-        # x_rel2_X_on_XZ[row] = np.arctan(mat_x_Z / mat_x_X) * 180 / np.pi
-        # z_rel2_Z_on_ZY[row] = np.arctan(mat_z_Y / mat_z_Z) * 180 / np.pi
+        x_rel2_X_on_XY[row] = angle_between_two_2D_vecs(vec_x_on_XY, X_on_XY)
+        x_rel2_X_on_XZ[row] = angle_between_two_2D_vecs(vec_x_on_XZ, X_on_XZ)
+        z_rel2_Z_on_ZY[row] = angle_between_two_2D_vecs(vec_z_on_ZY, Z_on_ZY)
 
     # Assign to clinically relevant joint angles
     abduction_all = x_rel2_X_on_XY
-    flexion_all = z_rel2_Z_on_ZY
+    flexion_all = -z_rel2_Z_on_ZY
     rotation_elbow_down_all = x_rel2_X_on_XZ
-    rotation_elbow_up_all = z_rel2_Z_on_ZY
+    rotation_elbow_up_all = -z_rel2_Z_on_ZY
 
     return abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all
 
