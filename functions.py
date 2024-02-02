@@ -73,17 +73,18 @@ def intial_IMU_transform(IMU_df):
 def intial_IMU_transform_alt(IMU_df):
     header = IMU_df.columns
     # Create the rotation matrix to transform the IMU orientations from Delsys global CF to OptiTrack global CF
-    rot_matrix = [[1, 0, 0], [0, 0, 1], [0, -1, 0]]
-    # Turn the rotation matrix into a quaternion (note, scipy quats are scalar LAST)
-    rot_matrix_asR = R.from_matrix(rot_matrix)
-    rot_matrix_asquat = rot_matrix_asR.as_quat()
-    rot_quat = [rot_matrix_asquat[3], rot_matrix_asquat[0], rot_matrix_asquat[1], rot_matrix_asquat[2]]
-    # For every row in IMU data_out, take the transpose, then multiply by the rotation quaternion
+    global_rot_scipy = R.from_matrix(np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]))
+    global_rot_quat = [global_rot_scipy.as_quat()[3], global_rot_scipy.as_quat()[0], global_rot_scipy.as_quat()[1], global_rot_scipy.as_quat()[2]] # Switch from scalal last format
+    # Create a rotation matrix which switches the local axes to match the Delsys namign convention
+    local_rot_scipy = R.from_euler('YXZ', [180, 90, 0], degrees=True)
+    local_rot_quat = [local_rot_scipy.as_quat()[3], local_rot_scipy.as_quat()[0], local_rot_scipy.as_quat()[1], local_rot_scipy.as_quat()[2]]
+    # For every row in IMU data_out, take the transpose, then multiply by the global and local rotation quaternions
     N = len(IMU_df)
     transformed_quats = np.zeros((N, 4))
     for row in range(N):
         quat_i = np.array([IMU_df.values[row, 0], -IMU_df.values[row, 1], -IMU_df.values[row, 2], -IMU_df.values[row, 3]])
-        transformed_quats[row] = quat_mul(rot_quat, quat_i)
+        transformed_quats_int = quat_mul(global_rot_quat, quat_i)   # Pre-multiply by the global rotation
+        transformed_quats[row] = quat_mul(transformed_quats_int, local_rot_quat)    # Post-multiply by the local rotation
     transformed_quats_df = pd.DataFrame(transformed_quats, columns=header)
     return transformed_quats_df
 
