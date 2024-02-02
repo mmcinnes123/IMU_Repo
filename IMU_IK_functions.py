@@ -79,3 +79,5 @@ def create_states_file_from_coordinates_file(analyze_settings_template_file, mod
     analyze_tool.setFinalTime(end_time)
     analyze_tool.setName(trial_name)
     analyze_tool.run()
+
+

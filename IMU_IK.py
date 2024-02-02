@@ -7,14 +7,15 @@
 
 from IMU_IK_functions import *
 import os
+from functions import *
 
 """ SETTINGS """
 
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-trial_name = 'Test_IMU_IMU_cal_pose4'    # Tag to describe this trial
-IK_start_time = 20
-IK_end_time = 35
+trial_name = 'IMU_IMU_manual_cal'    # Tag to describe this trial
+IK_start_time = 0
+IK_end_time = 37
 
 # Files required in folder:
 calibration_settings_file = "IMU_Calibration_Settings.xml"
@@ -59,7 +60,6 @@ run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rot
                     calibration_orientations_file, baseIMUName, baseIMUHeading,
                     visualize_calibration, results_dir)
 
-# Calibrate the model - assign IMUs to segments based on calibration pose
 print("\nCalibrated .osim model")
 
 # Check we're happy to go ahead with IK

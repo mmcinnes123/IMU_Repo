@@ -410,3 +410,25 @@ def find_max_in_error_array(error_arr):
     else:
         max = 0
     return max
+
+
+def manual_calibration(calibration_orientations_file, APDM_settings_file):
+
+    # path_to_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22\IMU_IMU_cal_pose4\APDM_Calibration.sto"
+    # quat_table = osim.TimeSeriesTableQuaternion(path_to_file)
+    # print(quat_table)
+    # columns = quat_table.getColumnLabels()
+    # print(columns)
+    # thorax_IMU = quat_table.getDependentColumn('thorax_imu')[0]
+    # print(thorax_IMU)
+
+    thorax_IMU_quat = np.array([0.08263394435694722,0.02911159734708903,-0.716910384569081,0.691638378516495])
+    humerus_IMU_quat = np.array([-0.4091787514070139,-0.4570159509144799,-0.6217937910141711,0.486910311518411])
+    radius_IMU_quat = np.array([0.06888069067063185,-0.6721997956615758,-0.7365677305335385,-0.02951039650605833])
+
+    thorax_offset_eul = [0, 0, 0]
+    humerus_offset_eul = [0, -90, 0]
+    radius_offset_eul = [0, 180, 0]
+
+
+    # return thorax_offset_eul, humerus_offset_eul, radius_offset_eul

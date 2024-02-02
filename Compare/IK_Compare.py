@@ -13,12 +13,12 @@ import scipy
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_IMU_cal_pose4'    # Tag to describe this trial
+trial_name = 'Test_IMU_IMU_cal_pose4'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-start_time = 14
-end_time = 14.1 # If you enter same end_time as you used in IK here, OMC angles will be one too long
-results_dir = parent_dir + r"\Comparison9_cal_pose_4_IMUIMU"
-create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
+start_time = 0
+end_time = 37 # If you enter same end_time as you used in IK here, OMC angles will be one too long
+results_dir = parent_dir + r"\Comparison11_manual_cal_IMUIMU"
+create_new_ori_csvs = True     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
@@ -38,7 +38,8 @@ osim.Logger.addFileSink(results_dir + r'\opensim.log')
 # Read in states for states files
 OMC_table = osim.TimeSeriesTable(OMC_states_file)
 IMU_table = osim.TimeSeriesTable(IMU_states_file)
-
+print(OMC_table.getNumRows())
+print(IMU_table.getNumRows())
 
 # Check if they're the same length and remove last row from OMC table if not.
 if OMC_table.getNumRows() != IMU_table.getNumRows():
