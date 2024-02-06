@@ -134,12 +134,12 @@ def find_segment_quats(segment_imu_offset, IMU_quats):
 
 
 
-
 def get_body_quat(state, body):
     Rot = body.getTransformInGround(state).R()
     quat = Rot.convertRotationToQuaternion()
     output_quat = np.array([quat.get(0), quat.get(1), quat.get(2), quat.get(3)])
     return output_quat
+
 
 def get_vec_between_bodies(state, body1, body2):
 
@@ -178,6 +178,7 @@ def get_JA_euls_from_quats(body1_quats, body2_quats, eul_seq):
 
     return eul_1_arr, eul_2_arr, eul_3_arr
 
+
 def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
     Rot = body2.findTransformBetween(state, body1).R()  # Finds rotation between two bodies
     quat = Rot.convertRotationToQuaternion()
@@ -186,6 +187,8 @@ def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
     eul = scipyR.as_euler(eul_seq, degrees=True)
 
     return eul[0], eul[1], eul[2]
+
+
 def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
 
     # Create a time series table from the states file
@@ -225,7 +228,6 @@ def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
         HT_IER_arr_x[row], HT_IER_arr_z[row], HT_IER_arr_y[row] = get_vec_between_bodies(state, thorax, humerus_r)
 
     return HT1_arr, HT2_arr, HT3_arr, HT_IER_arr_x, HT1_arr, HT2_arr, HT3_arr, HT_IER_arr_x, HT_IER_arr_z, HT_IER_arr_y
-
 
 
 # Define a function for extracting body orientations from the states table
@@ -274,6 +276,7 @@ def extract_body_quats(states_table, model_file, results_dir, tag):
 
     all_quats_df.to_csv(results_dir + "\\" + tag + "_quats.csv", mode='w', encoding='utf-8', na_rep='nan')
 
+
 def read_in_quats(start_time, end_time, file_name, trim_bool):
     with open(file_name, 'r') as file:
         df = pd.read_csv(file, header=0)
@@ -289,6 +292,7 @@ def read_in_quats(start_time, end_time, file_name, trim_bool):
     radius_quats_np = radius_quats.to_numpy()
 
     return thorax_quats_np, humerus_quats_np, radius_quats_np
+
 
 # A function for calculating the average heading offset between an array of two bodies or IMUs, relative to a global frame
 def find_heading_offset(OMC_thorax_quats, IMU_thorax_quats):
@@ -360,8 +364,6 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
     return abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all
 
 
-
-
 def trim_vec_prof_angles(abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all,
                          Eul_angle1_all, Eul_angle2_all):
 
@@ -403,6 +405,7 @@ def find_RMSE_of_error_array(error_arr):
     else:
         RMSE = 0
     return RMSE
+
 
 def find_max_in_error_array(error_arr):
     if len(error_arr) != 0:
