@@ -189,6 +189,12 @@ def get_eulers_between_two_bodies(state, body1, body2, eul_seq):
     return eul[0], eul[1], eul[2]
 
 
+def get_scipyR_of_body_in_ground(body, state):
+    Rot = body.getTransformInGround(state).R()
+    quat = Rot.convertRotationToQuaternion()
+    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    return scipyR
+
 def get_joint_angles_from_states(states_file, model_file, start_time, end_time):
 
     # Create a time series table from the states file

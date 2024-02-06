@@ -9,7 +9,7 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_IMU_manual_cal'    # Tag to describe this trial
+trial_name = 'IMU_IMU_combined_cal'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 input_file_name = "22ndJan_Movements - Report2 - IMU_Quats.txt"     # Name of the file with quaternion data
 transform_data = True  # If using marker cluster questions, make False

@@ -13,9 +13,9 @@ from functions import *
 
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-trial_name = 'IMU_IMU_manual_cal'    # Tag to describe this trial
-IK_start_time = 0
-IK_end_time = 37
+trial_name = 'IMU_IMU_combined_cal'    # Tag to describe this trial
+IK_start_time = 10
+IK_end_time = 30
 
 # Files required in folder:
 calibration_settings_file = "IMU_Calibration_Settings.xml"
