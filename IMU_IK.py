@@ -3,7 +3,6 @@
 # Calibrates an .osim model by assigning IMUs to segments
 # Outputs .mot IK results
 
-# Test Change 2 - gave up on other branch
 
 from IMU_IK_functions import *
 import os
@@ -14,8 +13,8 @@ from functions import *
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 trial_name = 'IMU_IMU_combined_cal'    # Tag to describe this trial
-IK_start_time = 10
-IK_end_time = 30
+IK_start_time = 0
+IK_end_time = 37
 
 # Files required in folder:
 calibration_settings_file = "IMU_Calibration_Settings.xml"
@@ -55,17 +54,17 @@ osim.Logger.addFileSink(IK_results_dir + r'\opensim.log')
 
 """ MAIN """
 
-# Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
-run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
-                    calibration_orientations_file, baseIMUName, baseIMUHeading,
-                    visualize_calibration, results_dir)
-
-print("\nCalibrated .osim model")
-
-# Check we're happy to go ahead with IK
-IK_confirmation = input("\nHappy to go ahead with IK?: ")
-if IK_confirmation == "No":
-    quit()
+# # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
+# run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
+#                     calibration_orientations_file, baseIMUName, baseIMUHeading,
+#                     visualize_calibration, results_dir)
+#
+# print("\nCalibrated .osim model")
+#
+# # Check we're happy to go ahead with IK
+# IK_confirmation = input("\nHappy to go ahead with IK?: ")
+# if IK_confirmation == "No":
+#     quit()
 
 # Run the IMU IK  based on settings inputs above
 run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,

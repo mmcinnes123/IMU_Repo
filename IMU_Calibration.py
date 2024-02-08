@@ -138,10 +138,12 @@ def get_IMU_offset_manual(which_body):
 
 """ Find the IMU offset for each body """
 
+
 thorax_IMU_offset = get_IMU_offset_combined(thorax_IMU_ori_rotated, thorax_ori)
 humerus_IMU_offset = get_IMU_offset_combined(humerus_IMU_ori_rotated, humerus_ori)
 radius_IMU_offset = get_IMU_offset_combined(radius_IMU_ori_rotated, radius_ori)
 
+print("Combined offsets")
 print(thorax_IMU_offset.as_euler('XYZ'))
 print(humerus_IMU_offset.as_euler('XYZ'))
 print(radius_IMU_offset.as_euler('XYZ'))
@@ -149,23 +151,28 @@ print(thorax_IMU_offset.as_matrix())
 print(humerus_IMU_offset.as_matrix())
 print(radius_IMU_offset.as_matrix())
 
-thorax_IMU_offset = get_IMU_offset_pose_based(thorax_IMU_ori_rotated, thorax_ori)
-humerus_IMU_offset = get_IMU_offset_pose_based(humerus_IMU_ori_rotated, humerus_ori)
-radius_IMU_offset = get_IMU_offset_pose_based(radius_IMU_ori_rotated, radius_ori)
-
-print(thorax_IMU_offset.as_euler('XYZ'))
-print(humerus_IMU_offset.as_euler('XYZ'))
-print(radius_IMU_offset.as_euler('XYZ'))
-print(thorax_IMU_offset.as_matrix())
-print(humerus_IMU_offset.as_matrix())
-print(radius_IMU_offset.as_matrix())
-
-thorax_IMU_offset = get_IMU_offset_manual(which_body="Thorax")
-humerus_IMU_offset = get_IMU_offset_manual(which_body="Humerus")
-radius_IMU_offset = get_IMU_offset_manual(which_body="Radius")
-
-print(thorax_IMU_offset.as_euler('XYZ'))
-print(humerus_IMU_offset.as_euler('XYZ'))
-print(radius_IMU_offset.as_euler('XYZ'))
+# thorax_IMU_offset = get_IMU_offset_pose_based(thorax_IMU_ori_rotated, thorax_ori)
+# humerus_IMU_offset = get_IMU_offset_pose_based(humerus_IMU_ori_rotated, humerus_ori)
+# radius_IMU_offset = get_IMU_offset_pose_based(radius_IMU_ori_rotated, radius_ori)
+#
+# print("OpenSim (pose-based) offsets")
+# print(thorax_IMU_offset.as_euler('XYZ'))
+# print(humerus_IMU_offset.as_euler('XYZ'))
+# print(radius_IMU_offset.as_euler('XYZ'))
+# print(thorax_IMU_offset.as_matrix())
+# print(humerus_IMU_offset.as_matrix())
+# print(radius_IMU_offset.as_matrix())
+#
+# thorax_IMU_offset = get_IMU_offset_manual(which_body="Thorax")
+# humerus_IMU_offset = get_IMU_offset_manual(which_body="Humerus")
+# radius_IMU_offset = get_IMU_offset_manual(which_body="Radius")
+#
+# print("Manual offsets")
+# print(thorax_IMU_offset.as_euler('XYZ'))
+# print(humerus_IMU_offset.as_euler('XYZ'))
+# print(radius_IMU_offset.as_euler('XYZ'))
+# print(thorax_IMU_offset.as_matrix())
+# print(humerus_IMU_offset.as_matrix())
+# print(radius_IMU_offset.as_matrix())
 
 # See this link for adding IMUs to model: https://simtk.org/api_docs/opensim/api_docs/exampleIMUTracking_answers_8py-example.html

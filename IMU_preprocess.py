@@ -30,7 +30,8 @@ input_file_path = raw_data_dir + "\\" + input_file_name
 results_dir = parent_dir + "\\" + trial_name
 if os.path.exists(results_dir) == False:
     os.mkdir(results_dir)
-osim.Logger.addFileSink(results_dir + r'\opensim.log')
+
+osim.Logger.setLevelString("Off")
 
 """ MAIN """
 
