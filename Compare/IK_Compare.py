@@ -13,12 +13,12 @@ import scipy
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_IMU_combined_cal'    # Tag to describe this trial
+trial_name = 'IMU_IMU_manual_cal'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
 start_time = 0
 end_time = 37
-results_dir = parent_dir + r"\Comparison12_combined_cal_IMUIMU"
-create_new_ori_csvs = True     # Set this to False if you've already run this code and csv file has been created
+results_dir = parent_dir + r"\Comparison13_manual_cal_IMUIMU"
+create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
@@ -333,24 +333,29 @@ def plot_compare_body_oris(joint_of_interest):
     label2 = "Humerus Orientation Error"
     label3 = "Radius Orientation Error"
 
-    # Apply heading offset to all IMU bodies
-    heading_offset_quat = np.array([np.cos(heading_offset/2), 0, np.sin(heading_offset/2), 0])
-    for row in range(len(thorax_IMU)):
-        thorax_IMU[row] = quat_mul(thorax_IMU[row], heading_offset_quat)
-        humerus_IMU[row] = quat_mul(humerus_IMU[row], heading_offset_quat)
-        radius_IMU[row] = quat_mul(radius_IMU[row], heading_offset_quat)
+    # Apply heading offset to all IMU frames
+    heading_offset_R = R.from_euler('y', [heading_offset])
+
+    thorax_IMU_R = R.from_quat(thorax_IMU[:, [1, 2, 3, 0]])
+    humerus_IMU_R = R.from_quat(humerus_IMU[:, [1, 2, 3, 0]])
+    radius_IMU_R = R.from_quat(radius_IMU[:, [1, 2, 3, 0]])
+    thorax_OMC_R = R.from_quat(thorax_OMC[:, [1, 2, 3, 0]])
+    humerus_OMC_R = R.from_quat(humerus_OMC[:, [1, 2, 3, 0]])
+    radius_OMC_R = R.from_quat(radius_OMC[:, [1, 2, 3, 0]])
+
+    thorax_IMU_rotated = thorax_IMU_R*heading_offset_R
+    humerus_IMU_rotated = humerus_IMU_R*heading_offset_R
+    radius_IMU_rotated = radius_IMU_R*heading_offset_R
 
     def find_single_angle_diff_between_two_CFs(body1, body2):
-        n_rows = len(body1)
-        angle_arr = np.zeros((n_rows))
-        for row in range(n_rows):
-            quat_diff = quat_mul(quat_conj(body1[row]), body2[row])
-            angle_arr[row] = 2 * np.arccos(abs(quat_diff[0])) * 180 / np.pi
-        return angle_arr
+        diff = body1.inv()*body2
+        angle = diff.magnitude()*180/np.pi
+        return angle
 
-    thorax_ori_error = find_single_angle_diff_between_two_CFs(thorax_OMC, thorax_IMU)
-    humerus_ori_error = find_single_angle_diff_between_two_CFs(humerus_OMC, humerus_IMU)
-    radius_ori_error = find_single_angle_diff_between_two_CFs(radius_OMC, radius_IMU)
+    thorax_ori_error = find_single_angle_diff_between_two_CFs(thorax_OMC_R, thorax_IMU_rotated)
+    humerus_ori_error = find_single_angle_diff_between_two_CFs(humerus_OMC_R, humerus_IMU_rotated)
+    radius_ori_error = find_single_angle_diff_between_two_CFs(radius_OMC_R, radius_IMU_rotated)
+
 
     # Calculate RMSE
     RMSE_angle1 = (sum(np.square(thorax_ori_error)) / len(thorax_ori_error)) ** 0.5
@@ -576,8 +581,8 @@ def plot_vector_HT_angles(joint_of_interest):
 
 
 # Plot IMU vs OMC joint angles based on OpenSim coordinates
-plot_compare_JAs(joint_of_interest="Thorax")
-plot_compare_JAs(joint_of_interest="Elbow")
-plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
+# plot_compare_JAs(joint_of_interest="Thorax")
+# plot_compare_JAs(joint_of_interest="Elbow")
+# plot_compare_JAs_shoulder_eulers(joint_of_interest="HT_Eulers")
 plot_compare_body_oris(joint_of_interest="Body_Orientation_Diff")
 plot_vector_HT_angles(joint_of_interest="HT_Vectors")
