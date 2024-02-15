@@ -1,4 +1,8 @@
+
 import opensim as osim
+from scipy.spatial.transform import Rotation as R
+import numpy as np
+
 
 
 def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
@@ -81,3 +85,30 @@ def create_states_file_from_coordinates_file(analyze_settings_template_file, mod
     analyze_tool.run()
 
 
+# A function which takes an uncalibrated model (with IMUs already associated with each body)
+# and inputs an euler orientation offset which defines the virtual IMU offset relative to the bodies
+def apply_cal_to_model(model_file, output_model_path):
+
+    import opensim as osim
+    import numpy as np
+
+    model = osim.Model(model_file)
+    IMU_frame = model.getBodySet().get('thorax').getComponent('thorax_imu')
+    exsisting_trans = IMU_frame.getOffsetTransform().T()
+
+    rot_from_eul = R.from_euler('XYZ', [0, 45, 0], degrees=True).as_matrix()
+    mat = osim.Mat33(rot_from_eul[0,0], rot_from_eul[0,1], rot_from_eul[0,2],
+                     rot_from_eul[1,0], rot_from_eul[1,1], rot_from_eul[1,2],
+                     rot_from_eul[2,0], rot_from_eul[2,1], rot_from_eul[2,2])
+
+    rot = osim.Rotation(mat)
+    transform = osim.Transform(rot, osim.Vec3(exsisting_trans))   # Create an opensim transform from the rotation
+    IMU_frame.setOffsetTransform(transform)  # Update the IMU frame transform
+    model.printToXML("Calibrated_das3.osim")
+
+
+
+
+
+    # model.setName("Calibrated_das")
+    # model.printToXML(output_model_path + r"\Calibrated_das3.osim")

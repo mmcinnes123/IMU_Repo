@@ -51,13 +51,22 @@ coord_file_for_analysis = IK_results_dir + r'\IMU_IK_results.mot'
 if os.path.exists(IK_results_dir) == False:
     os.mkdir(IK_results_dir)
 osim.Logger.addFileSink(IK_results_dir + r'\opensim.log')
+# Silence warning messages if mesh (.vtp) files cannot be found.
 
 """ MAIN """
-#
+
 # # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
 # run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
 #                     calibration_orientations_file, baseIMUName, baseIMUHeading,
 #                     visualize_calibration, results_dir)
+
+# Choose an alternative calibration
+thorax_cal_eul = [0, 0, 0]
+humerus_cal_eul = [0, 0, 0]
+radius_cal_eul = [0, 0, 0]
+apply_cal_to_model(model_file, results_dir)
+
+
 #
 # print("\nCalibrated .osim model")
 #
@@ -65,12 +74,12 @@ osim.Logger.addFileSink(IK_results_dir + r'\opensim.log')
 # IK_confirmation = input("\nHappy to go ahead with IK?: ")
 # if IK_confirmation == "No":
 #     quit()
-
-# Run the IMU IK  based on settings inputs above
-run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,
-           IK_results_dir, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
-
-
-# Create states file from the output .mot file
-create_states_file_from_coordinates_file(analyze_settings_template_file, model_file_for_analysis, coord_file_for_analysis,
-                                         IK_results_dir, IK_start_time, IK_end_time, trial_name)
+#
+# # Run the IMU IK  based on settings inputs above
+# run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,
+#            IK_results_dir, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
+#
+#
+# # Create states file from the output .mot file
+# create_states_file_from_coordinates_file(analyze_settings_template_file, model_file_for_analysis, coord_file_for_analysis,
+#                                          IK_results_dir, IK_start_time, IK_end_time, trial_name)
