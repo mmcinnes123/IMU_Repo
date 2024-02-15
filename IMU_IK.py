@@ -12,7 +12,7 @@ from functions import *
 
 # Quick Settings
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-trial_name = 'IMU_IMU_combined_cal'    # Tag to describe this trial
+trial_name = 'Shoulder_cal_compar'    # Tag to describe this trial
 IK_start_time = 0
 IK_end_time = 37
 
@@ -53,7 +53,7 @@ if os.path.exists(IK_results_dir) == False:
 osim.Logger.addFileSink(IK_results_dir + r'\opensim.log')
 
 """ MAIN """
-
+#
 # # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
 # run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
 #                     calibration_orientations_file, baseIMUName, baseIMUHeading,

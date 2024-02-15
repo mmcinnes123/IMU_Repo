@@ -13,12 +13,12 @@ import scipy
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_IMU_manual_cal'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
+trial_name = 'Shoulder_cal_compar'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22\Comparison14_diff_shoulder_calsIMUIMU"  # Name of the working folder
 start_time = 0
 end_time = 37
-results_dir = parent_dir + r"\Comparison13_manual_cal_IMUIMU"
-create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
+results_dir = parent_dir + r"\OpenSimCal"
+create_new_ori_csvs = True     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
@@ -26,7 +26,7 @@ labelB = "IMU"  # This is the label linked to all the variables with "IMU" in th
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
 OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
 path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\IMU_Repo\das3.osim"
-path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
+path_to_OMC_model_file = parent_dir.replace("\Comparison14_diff_shoulder_calsIMUIMU","") + r"\OMC\das3_scaled_and_placed.osim"
 figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
 if os.path.exists(figure_results_dir) == False:
     os.mkdir(figure_results_dir)
