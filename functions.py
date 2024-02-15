@@ -588,6 +588,7 @@ def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
 
     fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
 
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3
 
 
 # Define a function to plot IMU vs OMC for the shoulder joint euler anlges
@@ -708,6 +709,8 @@ def plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humeru
 
     fig.savefig(figure_results_dir + r"\HT_Eulers.png")
 
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3
+
 
 # Define a function to plot IMU vs OMC model body orientation errors (single angle quaternion difference)
 def plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
@@ -813,6 +816,7 @@ def plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, hume
 
     fig.savefig(figure_results_dir + r"\Body_Orientation_Diff.png")
 
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3
 
 
 # Define a function to plot IMU vs OMC HT angles, based on projected vector directions
@@ -962,3 +966,4 @@ def plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
 
     fig.savefig(figure_results_dir + r"\HT_Vectors.png")
 
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3

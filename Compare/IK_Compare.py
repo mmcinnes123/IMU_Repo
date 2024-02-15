@@ -18,7 +18,7 @@ parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22\Compar
 start_time = 0
 end_time = 37
 results_dir = parent_dir + r"\OpenSimCal"
-create_new_ori_csvs = True     # Set this to False if you've already run this code and csv file has been created
+create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
@@ -69,17 +69,40 @@ time = OMC_table.getIndependentColumn()  # Get the time data
 """ PLOT """
 
 # Plot IMU vs OMC joint angles based on OpenSim coordinates
-plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
+RMSE_thorax_forward_tilt, RMSE_thorax_lateral_tilt, RMSE_thorax_rotation = \
+    plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                      figure_results_dir, labelA, labelB, joint_of_interest="Thorax")
 
-plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
+RMSE_elbow_flexion, RMSE_elbow_pronation, RMSE_elbow_pronation_2 = \
+    plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                  figure_results_dir, labelA, labelB, joint_of_interest="Elbow")
 
-plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
+RMSE_HT_Y_plane_of_elevation, RMSE_HT_Z_elevation, RMSE_HT_YY_rotation = \
+    plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
                                  time, start_time, end_time, figure_results_dir, labelA, labelB)
 
-plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
+RMSE_thorax_ori, RMSE_humerus_ori, RMSE_radius_ori = \
+    plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
                        heading_offset, time, start_time, end_time, figure_results_dir)
 
-plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
+RMSE_HT_abd, RMSE_HT_flexion, RMSE_HT_rotation = plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
                       time, start_time, end_time, figure_results_dir, labelA, labelB)
+
+
+
+
+# Write final RMSE values to a csv
+final_RMSE_values_df = pd.DataFrame.from_dict(
+    {"RMSE_thorax_ori": RMSE_thorax_ori, "RMSE_humerus_ori": RMSE_humerus_ori,
+     "RMSE_radius_ori": RMSE_radius_ori, "RMSE_thorax_forward_tilt": RMSE_thorax_forward_tilt,
+     "RMSE_thorax_lateral_tilt": RMSE_thorax_lateral_tilt, "RMSE_thorax_rotation": RMSE_thorax_rotation,
+     "RMSE_elbow_flexion": RMSE_elbow_flexion, "RMSE_elbow_pronation": RMSE_elbow_pronation,
+     "RMSE_HT_abd": RMSE_HT_abd, "RMSE_HT_flexion": RMSE_HT_flexion,
+     "RMSE_HT_rotation": RMSE_HT_rotation, "RMSE_HT_Y_plane_of_elevation": RMSE_HT_Y_plane_of_elevation,
+     "RMSE_HT_Z_elevation": RMSE_HT_Z_elevation, "RMSE_HT_YY_rotation": RMSE_HT_YY_rotation},
+    orient='index')
+
+
+final_RMSE_values_df.to_csv(figure_results_dir + r"\Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
+                            mode='w', encoding='utf-8', na_rep='nan')
+
