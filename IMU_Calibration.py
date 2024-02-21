@@ -37,6 +37,7 @@ for i in range(model.getCoordinateSet().getSize()):
 default_state = model.initSystem()
 
 # Get the orientation of each body in the given state
+osim.Logger.setLevelString("Off")
 thorax_ori = get_scipyR_of_body_in_ground(thorax, default_state)
 humerus_ori = get_scipyR_of_body_in_ground(humerus, default_state)
 radius_ori = get_scipyR_of_body_in_ground(radius, default_state)
@@ -47,7 +48,7 @@ radius_ori = get_scipyR_of_body_in_ground(radius, default_state)
 if base_IMU_axis_label == 'x':
     base_IMU_axis = (thorax_IMU_ori.as_matrix()[:, 0])  # The x-axis of the IMU in ground frame
 else:
-    print("Need to add code if axis is different from 'x'")
+    print("Error: Need to add code if axis is different from 'x'")
     quit()
 
 base_body_axis = thorax_ori.as_matrix()[:, 0]  # The x-axis of the base body in ground frame
@@ -56,8 +57,8 @@ base_body_axis = thorax_ori.as_matrix()[:, 0]  # The x-axis of the base body in 
 heading_offset = np.arccos(np.dot(base_body_axis, base_IMU_axis) /
                            (np.linalg.norm(base_body_axis) * np.linalg.norm(base_IMU_axis)))
 
-# Check the sign of the heading offset (if the z-component of IMU x-axis is negative, rotation is negative)
-if base_IMU_axis[2] < 0:  # Calculate the sign of the rotation
+# Update the sign of the heading offset
+if base_IMU_axis[2] < 0:  # Calculate the sign of the rotation (if the z-component of IMU x-axis is negative, rotation is negative)
     heading_offset = -heading_offset
 print("Heading offset is: " + str(round(heading_offset * 180 / np.pi, 2)))
 print("(i.e. IMU heading is rotated " + str(round(-heading_offset * 180 / np.pi, 2))
