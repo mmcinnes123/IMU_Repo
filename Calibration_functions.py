@@ -104,6 +104,27 @@ def get_IMU_cal_POSE_BASED(IMU_ori, body_ori):
     return virtual_IMU
 
 
+# This function calculates the IMU offset required which is equivalent to relying on 'manual alignment'
+# The only reason we need to apply an offset (and not just have 0 offset) is because the IMU axis names 'xyz' don't
+# match the names of the body axes, so are only rotated in multiples of 90degrees
+def get_IMU_cal_MANUAL(which_body):
+
+    if which_body == "Thorax":
+        virtual_IMU = R.from_euler('XYZ', [0, 0, 0], degrees=True)
+
+    elif which_body == "Humerus":
+        virtual_IMU = R.from_euler('XYZ', [0, -90, 0], degrees=True)
+
+    elif which_body == "Radius":
+        virtual_IMU = R.from_euler('XYZ', [0, 180, 0], degrees=True)
+
+    return virtual_IMU
+
+
+    # TODO: Input y-axis only calibration function here
+    # TODO: Write y-axis with forearm y-axis cailbration
+
+
 """ Function to calculate the IMU offset depending on the method defined """
 
 def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, base_IMU_axis_label):
@@ -132,12 +153,24 @@ def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, ba
 
     """ Get the IMU offset """
 
-    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated, thorax_ori)
-    print("Thorax virtual IMU eulers: " + str(thorax_virtual_IMU.as_euler('XYZ')))
+    # Options:
 
-        # TODO: Add ability to quickly choose which calibration method I want to apply to which IMU
-    humerus_virtual_IMU = get_IMU_cal_POSE_BASED(humerus_IMU_ori_rotated, humerus_ori)
-    radius_virtual_IMU = get_IMU_cal_POSE_BASED(radius_IMU_ori_rotated, radius_ori)
+    # # Pose-only (OpenSim): get_IMU_cal_POSE_BASED()
+    # thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated, thorax_ori)
+    # print("Thorax virtual IMU eulers: " + str(thorax_virtual_IMU.as_euler('XYZ')))
+    # humerus_virtual_IMU = get_IMU_cal_POSE_BASED(humerus_IMU_ori_rotated, humerus_ori)
+    # print("Humerus virtual IMU eulers: " + str(humerus_virtual_IMU.as_euler('XYZ')))
+    # radius_virtual_IMU = get_IMU_cal_POSE_BASED(radius_IMU_ori_rotated, radius_ori)
+    # print("Radius virtual IMU eulers: " + str(radius_virtual_IMU.as_euler('XYZ')))
+
+    # Manual alignment: get_IMU_cal_MANUAL()
+    thorax_virtual_IMU = get_IMU_cal_MANUAL('Thorax')
+    print("Thorax virtual IMU eulers: " + str(thorax_virtual_IMU.as_euler('XYZ')))
+    humerus_virtual_IMU = get_IMU_cal_MANUAL('Humerus')
+    print("Humerus virtual IMU eulers: " + str(humerus_virtual_IMU.as_euler('XYZ')))
+    radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+    print("Radius virtual IMU eulers: " + str(radius_virtual_IMU.as_euler('XYZ')))
+
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 

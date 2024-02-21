@@ -71,19 +71,19 @@ thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = get_IMU_offset(pos
 apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, results_dir)
 
 
-print("\nCalibrated .osim model")
-
-# Check we're happy to go ahead with IK
-IK_confirmation = input("\nHappy to go ahead with IK?: ")
-if IK_confirmation == "No":
-    quit()
-
-# Run the IMU IK  based on settings inputs above
-osim.Model.setDebugLevel(0)  # Update debug level so we can see IK progress
-run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,
-           IK_results_dir, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
-
-
-# Create states file from the output .mot file
-create_states_file_from_coordinates_file(analyze_settings_template_file, model_file_for_analysis, coord_file_for_analysis,
-                                         IK_results_dir, IK_start_time, IK_end_time, trial_name)
+# print("\nCalibrated .osim model")
+#
+# # Check we're happy to go ahead with IK
+# IK_confirmation = input("\nHappy to go ahead with IK?: ")
+# if IK_confirmation == "No":
+#     quit()
+#
+# # Run the IMU IK  based on settings inputs above
+# osim.Model.setDebugLevel(0)  # Update debug level so we can see IK progress
+# run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file, sensor_to_opensim_rotations,
+#            IK_results_dir, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
+#
+#
+# # Create states file from the output .mot file
+# create_states_file_from_coordinates_file(analyze_settings_template_file, model_file_for_analysis, coord_file_for_analysis,
+#                                          IK_results_dir, IK_start_time, IK_end_time, trial_name)
