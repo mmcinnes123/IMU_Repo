@@ -84,6 +84,11 @@ radius_IMU_ori_rotated = heading_offset_ori * radius_IMU_ori
 """ Define different functions for finding IMU offset """
 
 
+""" ARCHIVED FUNCTIONS"""
+
+# The functions below work on the same prinicple as get_IMU_cal_POSE_and_MANUAL_Y, but get there slightly
+# differently (define IMU rel to body, not body rel to IMU, or they define different axes first...)
+
 # This function calculates an IMU offset (to create a virtual IMU in the model) based on
 # the orientation of the associated body (when the model is in default pose)
 # and on the orientation of the experimental IMU at the time of calibration pose
@@ -230,32 +235,6 @@ def get_IMU_offset_combined_alt3(IMU_ori, body_ori):
 
     return virtual_IMU
 
-
-# This function calculates the IMU offset based purely on the intial pose
-# - this is replicating OpenSim's built-in calibration tool
-def get_IMU_offset_pose_based(IMU_ori, body_ori):
-
-    IMU_offset = body_ori.inv() * IMU_ori
-
-    return IMU_offset
-
-
-
-# This function calculates the IMU offset required which is equivalent to relying on 'manual alignment'
-# The only reason we need to apply an offset (and not just have 0 offset) is because the IMU axis names 'xyz' don't
-# match the names of the body axes, so are only rotated in multiples of 90degrees
-def get_IMU_offset_manual(which_body):
-
-    if which_body == "Thorax":
-        IMU_offset = R.from_euler('XYZ', [0, 0, 0], degrees=True)
-
-    elif which_body == "Humerus":
-        IMU_offset = R.from_euler('Y', [-90], degrees=True)
-
-    elif which_body == "Radius":
-        IMU_offset = R.from_euler('Y', [180], degrees=True)
-
-    return IMU_offset
 
 
 # This function calculates an IMU offset (to create a virtual IMU in the model) based on

@@ -98,7 +98,7 @@ def get_IMU_cal_POSE_BASED(IMU_ori, body_ori):
     # Find the body frame, expressed in IMU frame
     body_inIMU = IMU_ori.inv() * body_ori
 
-    # Express the virtual IMU frame in the model's body frame:
+    # Express the virtual IMU frame in the model's body frame
     virtual_IMU = body_inIMU.inv()
 
     return virtual_IMU
@@ -121,8 +121,68 @@ def get_IMU_cal_MANUAL(which_body):
     return virtual_IMU
 
 
-    # TODO: Input y-axis only calibration function here
     # TODO: Write y-axis with forearm y-axis cailbration
+
+# This function calculates an IMU offset defined by the pose of the body,
+# but with a correction which defines the long axis of the body to be aligned with the long axis of the IMU.
+# It uses the cross product of the new y-axis, and pose-based z axis to define the new x (and then z) axes.
+def get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori, body_ori):
+
+    # Get pose-based offset:
+    pose_based_body_inIMU = IMU_ori.inv() * body_ori   # Find the body frame, expressed in IMU frame
+    pose_based_body_z = pose_based_body_inIMU.as_matrix()[:, 2]
+
+    # Redefine body's long axis as aligned with IMU's long-axis
+    body_y = [0, 1, 0]
+
+    # Body x and z axis must be redefined to create an orthogonal CF
+    body_x = np.cross(body_y, pose_based_body_z)    # use cross_prod(y, z) to define x-axis
+    body_z = np.cross(body_x, body_y)   # then cross_prod(x, y) to define z-axis
+
+    # Create an orthogonal CF from these vectors
+    body_matrix = np.array([body_x, body_y, body_z]).T
+    body_in_IMU = R.from_matrix(body_matrix)
+
+    # Check how non-orthogonal the matrix was
+    print("Non-orthogonality has been accounted for (determinant was: " + str(
+        round(np.linalg.det(body_matrix), 4)) + ")")
+
+    # Express the virtual IMU frame in the model's body frame
+    virtual_IMU = body_in_IMU.inv()
+
+    return virtual_IMU
+
+
+
+# This funtion calculates an IMU offset for the humerus, where the long axis of the humerus is defined by the long axis
+# of the IMU, and the z-axis of the humerus is defined by the long axis of the forearm IMU
+def get_humerus_IMU_cal_MANUAL_Ys(humerus_IMU_ori, radius_IMU_ori):
+
+    # Define the y axis of the humerus to be aligned with the y axis of the humerus IMU
+    body_y = [0, 1, 0]
+
+    # Get the orientation of the radius IMU, expressed in the humerus IMU frame
+    radius_IMU_inHumIMU = humerus_IMU_ori.inv() * radius_IMU_ori
+
+    # Get the direction of the radius IMUs y-axis
+    rad_y_inHumIMU = radius_IMU_inHumIMU.as_matrix()[:, 1]
+
+    # Define the int/ext rotation of the humerus using the radius IMU y-axis
+    body_x = np.cross(body_y, rad_y_inHumIMU)   # humerus x-axis is cross_prod of humerus y-axis and radius IMU y-axis
+    body_z = np.cross(body_x, body_y)   # remaining z-axis is cross_prod of x and y
+
+    # Create an orthogonal CF from these vectors
+    body_matrix = np.array([body_x, body_y, body_z]).T
+    body_in_IMU = R.from_matrix(body_matrix)
+
+    # Check how non-orthogonal the matrix was
+    print("Non-orthogonality has been accounted for (determinant was: " + str(
+        round(np.linalg.det(body_matrix), 4)) + ")")
+
+    # Express the virtual IMU frame in the model's body frame
+    virtual_IMU = body_in_IMU.inv()
+
+    return virtual_IMU
 
 
 """ Function to calculate the IMU offset depending on the method defined """
@@ -163,14 +223,29 @@ def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, ba
     # radius_virtual_IMU = get_IMU_cal_POSE_BASED(radius_IMU_ori_rotated, radius_ori)
     # print("Radius virtual IMU eulers: " + str(radius_virtual_IMU.as_euler('XYZ')))
 
-    # Manual alignment: get_IMU_cal_MANUAL()
+    # # Manual alignment: get_IMU_cal_MANUAL()
     thorax_virtual_IMU = get_IMU_cal_MANUAL('Thorax')
     print("Thorax virtual IMU eulers: " + str(thorax_virtual_IMU.as_euler('XYZ')))
-    humerus_virtual_IMU = get_IMU_cal_MANUAL('Humerus')
-    print("Humerus virtual IMU eulers: " + str(humerus_virtual_IMU.as_euler('XYZ')))
+    # humerus_virtual_IMU = get_IMU_cal_MANUAL('Humerus')
+    # print("Humerus virtual IMU eulers: " + str(humerus_virtual_IMU.as_euler('XYZ')))
     radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
     print("Radius virtual IMU eulers: " + str(radius_virtual_IMU.as_euler('XYZ')))
 
+
+    # Combined: Pose-based, but then correct with manual Y
+    # thorax_virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(thorax_IMU_ori_rotated, thorax_ori)
+    # print("Thorax virtual IMU eulers: " + str(thorax_virtual_IMU.as_euler('XYZ')))
+    # humerus_virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(humerus_IMU_ori_rotated, humerus_ori)
+    # print("Humerus virtual IMU eulers: " + str(humerus_virtual_IMU.as_euler('XYZ')))
+    # radius_virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(radius_IMU_ori_rotated, radius_ori)
+    # print("Radius virtual IMU eulers: " + str(radius_virtual_IMU.as_euler('XYZ')))
+
+
+    # Combined: Humerus-specific, manual-only, using humerus IMU y-axis and radius IMU y-axis
+    humerus_virtual_IMU = get_humerus_IMU_cal_MANUAL_Ys(humerus_IMU_ori_rotated, radius_IMU_ori_rotated)
+    print("Humerus virtual IMU eulers: " + str(humerus_virtual_IMU.as_euler('XYZ')))
+
+        # TODO: Double check you're happy the has worked as expected
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 

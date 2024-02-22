@@ -66,9 +66,9 @@ osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
 
 
 # Calibrate the model based on my own methods (method for each body is defined within get_IMU_offset function)
-pose_time = 14
+pose_time = 14  # Note this pose time affects pose-based AND humerus defined by forearm-based manual alignment
 thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = get_IMU_offset(pose_time, orientations_file, model_file, results_dir, base_IMU_axis_label='x')
-apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, results_dir)
+# apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, results_dir)
 
 
 # print("\nCalibrated .osim model")
