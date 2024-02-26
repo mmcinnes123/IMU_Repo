@@ -2,22 +2,17 @@
 # Inputs are: two .mot files
 # Outputs are: .png plots of each joint of interest
 
-# Test change made in Master
-
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 from functions import *
-import scipy
 
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'Shoulder_cal_compar'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22\Comparison14_diff_shoulder_calsIMUIMU"  # Name of the working folder
+trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26"  # Name of the working folder
 start_time = 0
 end_time = 37
-results_dir = parent_dir + r"\OpenSimCal"
+results_dir = parent_dir + r"\Comparison2_IMU_CLUS_cal_pose1"
 create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
@@ -26,7 +21,7 @@ labelB = "IMU"  # This is the label linked to all the variables with "IMU" in th
 IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
 OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
 path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\IMU_Repo\das3.osim"
-path_to_OMC_model_file = parent_dir.replace("\Comparison14_diff_shoulder_calsIMUIMU","") + r"\OMC\das3_scaled_and_placed.osim"
+path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
 figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
 if os.path.exists(figure_results_dir) == False:
     os.mkdir(figure_results_dir)
@@ -93,7 +88,8 @@ RMSE_HT_abd, RMSE_HT_flexion, RMSE_HT_rotation = plot_vector_HT_angles(thorax_OM
 
 # Write final RMSE values to a csv
 final_RMSE_values_df = pd.DataFrame.from_dict(
-    {"RMSE_thorax_ori": RMSE_thorax_ori, "RMSE_humerus_ori": RMSE_humerus_ori,
+    {"Trial Name:": str(trial_name),
+     "RMSE_thorax_ori": RMSE_thorax_ori, "RMSE_humerus_ori": RMSE_humerus_ori,
      "RMSE_radius_ori": RMSE_radius_ori, "RMSE_thorax_forward_tilt": RMSE_thorax_forward_tilt,
      "RMSE_thorax_lateral_tilt": RMSE_thorax_lateral_tilt, "RMSE_thorax_rotation": RMSE_thorax_rotation,
      "RMSE_elbow_flexion": RMSE_elbow_flexion, "RMSE_elbow_pronation": RMSE_elbow_pronation,
@@ -103,6 +99,6 @@ final_RMSE_values_df = pd.DataFrame.from_dict(
     orient='index')
 
 
-final_RMSE_values_df.to_csv(figure_results_dir + r"\Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
+final_RMSE_values_df.to_csv(figure_results_dir + "\\" + str(trial_name) + r"_Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
                             mode='w', encoding='utf-8', na_rep='nan')
 

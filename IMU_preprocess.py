@@ -9,11 +9,11 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'CalCodeTest'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22"  # Name of the working folder
-input_file_name = "22ndJan_Movements - Report2 - IMU_Quats.txt"     # Name of the file with quaternion data
-transform_data = True  # If using marker cluster questions, make False
-cal_pose_time = 14  # Enter time (s) when subject was in calibration pose
+trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26"  # Name of the working folder
+input_file_name = "26thFeb_Marz - Report3 - Cluster_Quats.txt"     # Name of the file with quaternion data
+transform_data = False  # Only True if IMU data needs transformed (function should be checked first)
+cal_pose_time = 5  # Enter time (s) when subject was in calibration pose
 trim_data = False
 start_time = 0  # Only relevant if trim_data = True
 end_time = 24   # Only relevant if trim_data = True
