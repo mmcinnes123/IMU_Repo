@@ -13,8 +13,8 @@ from Calibration_functions import get_IMU_offset, apply_cal_to_model
 """ SETTINGS """
 
 # Quick Settings
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26"  # Name of the working folder
-trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Marz\Shoulder_Cal_Comparisons"  # Name of the working folder
+trial_name = "Hum_pose_with_y_corr"   # Tag to describe this trial
 IK_start_time = 0
 IK_end_time = 37
 
@@ -22,7 +22,6 @@ IK_end_time = 37
 calibration_settings_file = "IMU_Calibration_Settings.xml"
 IMU_IK_settings_file = 'IMU_IK_Settings.xml'
 model_file = 'das3.osim'
-# + Geometry file for model
 
 # Specify the results directory
 results_dir = parent_dir + "\\" + trial_name  # Define the working folder
@@ -59,16 +58,22 @@ osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
 
 """ MAIN """
 
-# # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
-run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
-                    calibration_orientations_file, baseIMUName, baseIMUHeading,
-                    visualize_calibration, results_dir)
+# Check we've set the default pose of the model correctly
+pose_confirmation = input("\nIs the default pose of the model set to match the expected subject pose?: ")
+if pose_confirmation == "No":
+    quit()
+
+
+# # # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
+# run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
+#                     calibration_orientations_file, baseIMUName, baseIMUHeading,
+#                     visualize_calibration, results_dir)
 
 
 # Calibrate the model based on my own methods (method for each body is defined within get_IMU_offset function)
-# pose_time = 14  # Note this pose time affects pose-based AND humerus defined by forearm-based manual alignment
-# thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = get_IMU_offset(pose_time, orientations_file, model_file, results_dir, base_IMU_axis_label='x')
-# apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, results_dir)
+pose_time = 14  # Note this pose time affects pose-based AND humerus defined by forearm-based manual alignment
+thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = get_IMU_offset(pose_time, orientations_file, model_file, results_dir, base_IMU_axis_label='x')
+apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, results_dir)
 
 
 print("\nCalibrated .osim model")

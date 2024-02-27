@@ -18,7 +18,6 @@ humerus_IMU_ori = R.from_quat(
     np.array([0.09537702302148852, -0.6124921478393913, -0.03382600816470299, 0.7839721892301341]))
 radius_IMU_ori = R.from_quat(
     np.array([0.5416990385483884, -0.4266110303584951, -0.5240230372905286, 0.4999650355785131]))
-# TODO: Read in .sto file automatically - just read it in as a read_csv file...
 
 osim.Logger.setLevelString("Off")
 

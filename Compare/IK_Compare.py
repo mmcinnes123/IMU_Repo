@@ -8,24 +8,28 @@ from functions import *
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_CLUS_cal_pose1'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26"  # Name of the working folder
+trial_name = "Hum_pose_with_both_ys_corr"    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Marz\Shoulder_Cal_Comparisons"  # Name of the working folder
 start_time = 0
 end_time = 37
-results_dir = parent_dir + r"\Comparison2_IMU_CLUS_cal_pose1"
-create_new_ori_csvs = False     # Set this to False if you've already run this code and csv file has been created
+results_dir = parent_dir + r"\Comparison_" + trial_name
+create_new_ori_csvs = True     # Set this to False if you've already run this code and csv file has been created
 labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
 labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
 # Define some file names
-IMU_states_file = results_dir + "\\" + trial_name + '_StatesReporter_states.sto'
-OMC_states_file = results_dir + r'\OMC_StatesReporter_states.sto'
+IMU_states_file = parent_dir + "\\" + trial_name + "\\" + trial_name + "_IMU_IK_results" + "\\" + trial_name + "_StatesReporter_states.sto"
+# IMU_states_file = results_dir + "\\" + trial_name + "_StatesReporter_states.sto"
+OMC_states_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Marz\OMC\26thFebMarzIK_Results" + r"\OMC_StatesReporter_states.sto"
+# OMC_states_file = results_dir + r"\OMC_StatesReporter_states.sto"
 path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\IMU_Repo\das3.osim"
-path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
+path_to_OMC_model_file = parent_dir.replace("\Shoulder_Cal_Comparisons", "") + r"\OMC\das3_scaled_and_placed.osim"
 figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
+if os.path.exists(results_dir) == False:
+    os.mkdir(results_dir)
 if os.path.exists(figure_results_dir) == False:
     os.mkdir(figure_results_dir)
-osim.Logger.addFileSink(results_dir + r'\opensim.log')
+osim.Logger.addFileSink(results_dir + r"\opensim.log")
 
 
 """ MAIN """
