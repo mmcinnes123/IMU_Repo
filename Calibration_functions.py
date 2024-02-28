@@ -238,16 +238,14 @@ def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, ba
 
     # Use this as a setting to decide which method you want to apply
     thorax_cal_method = "get_IMU_cal_POSE_BASED"
-    humerus_cal_method = "get_IMU_cal_MANUAL"
-    radius_cal_method = "get_IMU_cal_POSE_BASED"
+    humerus_cal_method = "get_humerus_IMU_cal_MANUAL_Ys"
+    radius_cal_method = "get_IMU_cal_MANUAL"
 
     # Apply the chosen calibration method:
     thorax_virtual_IMU = apply_chosen_method("Thorax", thorax_IMU_ori_rotated, thorax_ori, humerus_IMU_ori_rotated, thorax_cal_method)
     humerus_virtual_IMU = apply_chosen_method("Humerus", humerus_IMU_ori_rotated, humerus_ori, radius_IMU_ori_rotated, humerus_cal_method)
     radius_virtual_IMU = apply_chosen_method("Radius", radius_IMU_ori_rotated, radius_ori, radius_IMU_ori_rotated, radius_cal_method)
 
-
-        # TODO: Double check you're happy get_humerus_IMU_cal_MANUAL_Ys() has worked as expected
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 

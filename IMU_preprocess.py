@@ -9,11 +9,11 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_CLUS_cal_pose2d'    # Tag to describe this trial
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Marz"  # Name of the working folder
-input_file_name = "26thFeb_Marz - Report3 - Cluster_Quats.txt"     # Name of the file with quaternion data
+trial_name = 'IMU_CLUS_cal_pose2b'    # Tag to describe this trial
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Greg"  # Name of the working folder
+input_file_name = "26thFeb_Greg - Report3 - Cluster_Quats.txt"     # Name of the file with quaternion data
 transform_data = False  # Only True if IMU data needs transformed (function should be checked first)
-cal_pose_time = 18  # Enter time (s) when subject was in calibration pose
+cal_pose_time = 15  # Enter time (s) when subject was in calibration pose
 trim_data = False
 start_time = 0  # Only relevant if trim_data = True
 end_time = 24   # Only relevant if trim_data = True
