@@ -89,7 +89,9 @@ def write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotat
                          output_file_name=results_dir + r"\APDM_RotatedCalibration.sto")
 
 
-""" Functions which define different methods of calibration """
+
+""" Functions which apply different methods of calibration """
+
 
 # This method uses the default pose of the model to calculate and initial orientation offset between body and IMU.
 # It replicates the built-in OpenSim calibration
@@ -102,6 +104,7 @@ def get_IMU_cal_POSE_BASED(IMU_ori, body_ori):
     virtual_IMU = body_inIMU.inv()
 
     return virtual_IMU
+
 
 
 # This function calculates the IMU offset required which is equivalent to relying on 'manual alignment'
@@ -118,10 +121,12 @@ def get_IMU_cal_MANUAL(which_body):
     elif which_body == "Radius":
         virtual_IMU = R.from_euler('XYZ', [0, 0, 180], degrees=True)
 
+    else:
+        print("Which_body input wasn't 'Thorax', 'Humerus', or 'Radius'")
+
     return virtual_IMU
 
 
-    # TODO: Write y-axis with forearm y-axis cailbration
 
 # This function calculates an IMU offset defined by the pose of the body,
 # but with a correction which defines the long axis of the body to be aligned with the long axis of the IMU.
@@ -185,9 +190,10 @@ def get_humerus_IMU_cal_MANUAL_Ys(humerus_IMU_ori, radius_IMU_ori):
     return virtual_IMU
 
 
-""" Function to calculate the IMU offset depending on the method defined """
 
+""" Functions to calculate and apply IMU offset depending on the method defined """
 
+# This function applies one of the calibration method functions above, depending on the method name specified
 def apply_chosen_method(which_body, IMU_ori_rotated, body_ori, second_IMU_ori_rotated, method_name):
     if method_name == "get_IMU_cal_POSE_BASED":
         virtual_IMU = get_IMU_cal_POSE_BASED(IMU_ori_rotated, body_ori)
@@ -204,6 +210,9 @@ def apply_chosen_method(which_body, IMU_ori_rotated, body_ori, second_IMU_ori_ro
 
     return virtual_IMU
 
+
+# A function which calls several other functions to calculate a virtual IMU offset for the thorax, humerus and radius
+# Within this function, the type of calibration method for each IMU can be specified
 def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, base_IMU_axis_label):
 
     """ Get IMU orientations at pose time """
@@ -248,8 +257,6 @@ def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, ba
 
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
-
-
 
 
 # A function which takes an uncalibrated model (with IMUs already associated with each body)
