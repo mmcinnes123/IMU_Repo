@@ -111,7 +111,7 @@ def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
     new_df = pd.DataFrame(new_array)
 
     # Add the new dataframe into the template
-    new_df.to_csv(output_dir + r"\APDM_" + tag + ".csv", mode='w', index=False, header=False, encoding='utf-8', na_rep='nan')
+    new_df.to_csv(output_dir + "\\" + tag + ".csv", mode='w', index=False, header=False, encoding='utf-8', na_rep='nan')
 
 
 

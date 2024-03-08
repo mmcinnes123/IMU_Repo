@@ -284,4 +284,4 @@ def apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_I
     set_IMU_transform(radius_virtual_IMU, body_name='radius_r', imu_name='radius_r_imu')
 
     model.setName("IMU_Calibrated_das")
-    model.printToXML(results_dir + r"\Calibrated_das3.osim")
+    model.printToXML(results_dir + r"\Calibrated_" + model_file)

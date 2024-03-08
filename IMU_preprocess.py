@@ -9,14 +9,10 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-trial_name = 'IMU_CLUS_cal_pose2b'    # Tag to describe this trial
 parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Greg"  # Name of the working folder
-input_file_name = "26thFeb_Greg - Report3 - Cluster_Quats.txt"     # Name of the file with quaternion data
-transform_data = False  # Only True if IMU data needs transformed (function should be checked first)
-cal_pose_time = 15  # Enter time (s) when subject was in calibration pose
-trim_data = False
-start_time = 0  # Only relevant if trim_data = True
-end_time = 24   # Only relevant if trim_data = True
+input_file_Perfect = "26thFeb_Greg - Report3 - Cluster_Quats.txt"     # Name of the txt file with perfect IMU data
+input_file_Real = "26thFeb_Greg - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
+cal_pose_time_dict = {"Cal_pose_1a": 10, "Cal_pose_2a": 13, "Cal_pose_2b": 15}  # List of pose times for calibration
 sample_rate = 100
 
 # Required Files in Folder
@@ -24,10 +20,11 @@ template_file = "APDM_template_4S.csv"
 APDM_settings_file = "APDMDataConverter_Settings.xml"
 
 raw_data_dir = parent_dir + "\RawData"
-input_file_path = raw_data_dir + "\\" + input_file_name
+file_path_Perfect = raw_data_dir + "\\" + input_file_Perfect
+file_path_Real = raw_data_dir + "\\" + input_file_Real
 
 # Create a new results directory
-results_dir = parent_dir + "\\" + trial_name
+results_dir = parent_dir + "\Preprocessed_Data"
 if os.path.exists(results_dir) == False:
     os.mkdir(results_dir)
 
@@ -35,38 +32,34 @@ osim.Logger.setLevelString("Off")
 
 """ MAIN """
 
-# Read data in from file
-IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(input_file_path)
+def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type):
 
-# Trim the data based on start and end time
-if trim_data == True:
-    IMU1_df = trim_df(IMU1_df, start_time, end_time, sample_rate)
-    IMU2_df = trim_df(IMU2_df, start_time, end_time, sample_rate)
-    IMU3_df = trim_df(IMU3_df, start_time, end_time, sample_rate)
+    # Read data in from file
+    IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(file_path)
 
-# # Interpolate for missing data_out
-# IMU1_df, IMU1_nan_count = interpolate_df(IMU1_df)
-# IMU2_df, IMU2_nan_count = interpolate_df(IMU2_df)
-# IMU3_df, IMU3_nan_count = interpolate_df(IMU3_df)
-# print("Total missing data_out: " + str(IMU1_nan_count + IMU2_nan_count + IMU3_nan_count))
+    # Write transformed IMU quaternions to .sto file (write to APDM .csv first, then convert)
+    file_tag = "APDM_Quats_" + IMU_type
+    write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, file_tag)
+    APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
+                         output_file_name=results_dir + "\\" + file_tag + ".sto")
 
-# Do initial transform of IMU data_out to match OptiTrack Y-up convention, and take transpose
-if transform_data == True:
-    IMU1_df = intial_IMU_transform_alt(IMU1_df)
-    IMU2_df = intial_IMU_transform_alt(IMU2_df)
-    IMU3_df = intial_IMU_transform_alt(IMU3_df)
+    # Iterate through list of calibration poses and associated times to create separate .sto files
+    for pose_name in cal_pose_time_dict.keys():
 
-# Write transformed IMU quaternions to .sto file (write to APDM .csv first, then convert)
-write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, tag="Movements")
-APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_Movements.csv", output_file_name=results_dir + r"\APDM_Movements.sto")
+        cal_pose_time = cal_pose_time_dict[pose_name]
+
+        # Extract row based on moment of calibration pose
+        IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
+        IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
+        IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
+
+        # Write calibration quaternions to .sto file (write to APDM .csv first, then convert)
+        file_tag = "APDM_Quats_" + IMU_type + "_" + str(cal_pose_time) + "s_"
+        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, file_tag)
+        APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
+                             output_file_name=results_dir + "\\" + file_tag + ".sto")
 
 
-# Extract row based on moment of calibration pose
-new_cal_pose_time = cal_pose_time - start_time
-IMU1_cal_df = extract_cal_row(IMU1_df, new_cal_pose_time, sample_rate)
-IMU2_cal_df = extract_cal_row(IMU2_df, new_cal_pose_time, sample_rate)
-IMU3_cal_df = extract_cal_row(IMU3_df, new_cal_pose_time, sample_rate)
 
-# Write calibration quaternions to .sto file (write to APDM .csv first, then convert)
-write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, tag="Calibration")
-APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_Calibration.csv", output_file_name=results_dir + r"\APDM_Calibration.sto")
+write_movements_and_calibration_stos(file_path_Perfect, cal_pose_time_dict, IMU_type="Perfect")
+write_movements_and_calibration_stos(file_path_Real, cal_pose_time_dict, IMU_type="Real")
