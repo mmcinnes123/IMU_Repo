@@ -1,10 +1,13 @@
 # This script preprocess IMU data, ready for use in OpenSim
 # Input is Motion Monitor .txt report file
 # Output is .sto OpenSim file
+# It also does an initial comparison of the raw orientation data from the 'real' and 'perfect' IMUs
+# Output is a .csv with RMSE values for each IMU, and a .png plot
 
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
 import os
+
 
 """ SETTINGS """
 
@@ -31,8 +34,11 @@ if os.path.exists(results_dir) == False:
 
 osim.Logger.setLevelString("Off")
 
+
 """ MAIN """
 
+
+# Function to extract quaternion orientation data from .txt file and save as .sto file
 def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type):
 
     # Read data from TMM .txt report
@@ -64,16 +70,12 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
 
     return IMU1_df, IMU2_df, IMU3_df
 
+# Apply function above to create orientation dataframes and to write data to .sto files
 IMU1_df_Perfect, IMU2_df_Perfect, IMU3_df_Perfect = write_movements_and_calibration_stos(file_path_Perfect, cal_pose_time_dict, IMU_type="Perfect")
 IMU1_df_Real, IMU2_df_Real, IMU3_df_Real = write_movements_and_calibration_stos(file_path_Real, cal_pose_time_dict, IMU_type="Real")
 
 
-
-    # TODO: Tidy below
-
-# Calculate orientation accuracy of real IMUs compared with perfect IMUs
-    # Comparing CHANGE in orientation, since exact orientations will be different due to different global frames
-
+# Function to calculate orientation accuracy of real IMUs compared with perfect IMUs
 def compare_oris_real_vs_perfect(IMU_df_Real, IMU_df_Perfect):
 
     # Get orientation at specified static time
@@ -102,18 +104,19 @@ def compare_oris_real_vs_perfect(IMU_df_Real, IMU_df_Perfect):
             single_angle_diff_i = ori_diff.magnitude() * 180 / np.pi
 
         else:
-            single_angle_diff_i = np.nan
+            single_angle_diff_i = np.nan     # If there are nans in either perfect or real dfs, set the angle diff to nan
 
         single_angle_diff[row] = single_angle_diff_i
 
     return single_angle_diff
 
 
+# Apply the function above to compare the real and perfect IMUs
 IMU1_single_angle_diff = compare_oris_real_vs_perfect(IMU1_df_Real, IMU1_df_Perfect)
 IMU2_single_angle_diff = compare_oris_real_vs_perfect(IMU2_df_Real, IMU2_df_Perfect)
 IMU3_single_angle_diff = compare_oris_real_vs_perfect(IMU3_df_Real, IMU3_df_Perfect)
 
-# Calculate RMSE and plot time-varying error
+# Calculate RMSE and plot the time-varying error
 IMU1_single_angle_RMSE, IMU2_single_angle_RMSE, IMU3_single_angle_RMSE = plot_compare_real_vs_perfect(IMU1_single_angle_diff, IMU2_single_angle_diff, IMU3_single_angle_diff, parent_dir)
 
 # Write final RMSE values to a csv

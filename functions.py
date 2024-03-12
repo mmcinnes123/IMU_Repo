@@ -1,9 +1,4 @@
-### Functions needed to read in the raw data_out, apply transformations, and write to APDM template file.
-    # Raw data_out is in  MotionMonitor report file
-    # APDM template file can be used to visualise quats in OpenSim
-    # Transformations:
-        # IMU data_out into Y-Up convention
-        # LCF alginment - transform cluster data_out based on relative orientation to IMU at t=0, or average
+### A mix of funtions for use in IMU_preprocess.py and IK_Compare.py
 
 
 import matplotlib.pyplot as plt
@@ -26,6 +21,7 @@ def read_data_frame_from_file(input_file):
     IMU3_df = df.filter(["IMU3_Q0", "IMU3_Q1", "IMU3_Q2", "IMU3_Q3"], axis=1)
     return IMU1_df, IMU2_df, IMU3_df
 
+
 # Trim the data_out frames based on start and end time
 def trim_df(df, start_time, end_time, sample_rate):
     first_index = int(start_time*sample_rate)
@@ -34,6 +30,7 @@ def trim_df(df, start_time, end_time, sample_rate):
     df_new = df.iloc[index_range, :]
     df_new_new = df_new.reset_index(drop=True)
     return df_new_new
+
 
 def extract_cal_row(df, cal_time, sample_rate):
     first_index = int(cal_time*sample_rate)
@@ -49,6 +46,7 @@ def interpolate_df(df):
     df = df.interpolate(limit=50)
     nan_count = df.isna().sum().sum()
     return df, nan_count
+
 
 # Transform IMU data_out into Y-up convention (and apply transpose so orientations are in global frame, not local)
 # Used when MM settings are: North: -X, Up: +Z, SubjectFacing: -X
@@ -69,6 +67,7 @@ def intial_IMU_transform(IMU_df):
     transformed_quats_df = pd.DataFrame(transformed_quats, columns=header)
     return transformed_quats_df
 
+
 # Transform IMU data_out into Y-up convention (and apply transpose so orientations are in global frame, not local)
 # Used when MM settings are: North: +X, Up: +Y, SubjectFacing: -Z
 def intial_IMU_transform_alt(IMU_df):
@@ -88,6 +87,7 @@ def intial_IMU_transform_alt(IMU_df):
         transformed_quats[row] = quat_mul(transformed_quats_int, local_rot_quat)    # Post-multiply by the local rotation
     transformed_quats_df = pd.DataFrame(transformed_quats, columns=header)
     return transformed_quats_df
+
 
 # Write new data_out to APDM file template
 def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
@@ -422,31 +422,14 @@ def find_max_in_error_array(error_arr):
     return max
 
 
-def manual_calibration(calibration_orientations_file, APDM_settings_file):
-
-    # path_to_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_01_22\IMU_IMU_cal_pose4\APDM_Calibration.sto"
-    # quat_table = osim.TimeSeriesTableQuaternion(path_to_file)
-    # print(quat_table)
-    # columns = quat_table.getColumnLabels()
-    # print(columns)
-    # thorax_IMU = quat_table.getDependentColumn('thorax_imu')[0]
-    # print(thorax_IMU)
-
-    thorax_IMU_quat = np.array([0.08263394435694722,0.02911159734708903,-0.716910384569081,0.691638378516495])
-    humerus_IMU_quat = np.array([-0.4091787514070139,-0.4570159509144799,-0.6217937910141711,0.486910311518411])
-    radius_IMU_quat = np.array([0.06888069067063185,-0.6721997956615758,-0.7365677305335385,-0.02951039650605833])
-
-    thorax_offset_eul = [0, 0, 0]
-    humerus_offset_eul = [0, -90, 0]
-    radius_offset_eul = [0, 180, 0]
-
-
-    # return thorax_offset_eul, humerus_offset_eul, radius_offset_eul
-
 
 def convert_scipy_to_scalar_first_np_quat(scipy):
     arr = np.array([[scipy.as_quat()[3], scipy.as_quat()[0], scipy.as_quat()[1], scipy.as_quat()[2]]])
     return arr
+
+
+
+""" Plotting Functions"""
 
 
 # Define a function to plot IMU vs OMC, with extra plot of errors to see distribution, using OpenSim coords
@@ -969,6 +952,7 @@ def plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
     return RMSE_angle1, RMSE_angle2, RMSE_angle3
 
 
+# Define a function to plot the error between real IMUs and cluster orientations, representing 'perfect' IMUs
 def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results_dir):
 
     label1 = "Thorax IMU orientation error"
