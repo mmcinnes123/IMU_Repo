@@ -56,6 +56,8 @@ def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label):
     # Calculate the heading offset
     if base_IMU_axis_label == 'x':
         base_IMU_axis = (base_IMU_ori.as_matrix()[:, 0])  # The x-axis of the IMU in ground frame
+    elif base_IMU_axis_label == '-x':
+        base_IMU_axis = (-base_IMU_ori.as_matrix()[:, 0])  # The x-axis of the IMU in ground frame
     else:
         print("Error: Need to add code if axis is different from 'x'")
         quit()
@@ -84,7 +86,7 @@ def write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotat
     df3 = pd.DataFrame(convert_scipy_to_scalar_first_np_quat(radius_IMU_ori_rotated))
     template_file="APDM_template_4S.csv"
     APDM_settings_file = "APDMDataConverter_Settings.xml"
-    write_to_APDM(df1, df2, df3, df3, template_file, results_dir, tag="RotatedCalibration")
+    write_to_APDM(df1, df2, df3, df3, template_file, results_dir, tag="APDM_RotatedCalibration")
     APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_RotatedCalibration.csv",
                          output_file_name=results_dir + r"\APDM_RotatedCalibration.sto")
 
@@ -113,7 +115,7 @@ def get_IMU_cal_POSE_BASED(IMU_ori, body_ori):
 def get_IMU_cal_MANUAL(which_body):
 
     if which_body == "Thorax":
-        virtual_IMU = R.from_euler('XYZ', [180, 0, 0], degrees=True)
+        virtual_IMU = R.from_euler('XYZ', [0, 180, 0], degrees=True)
 
     elif which_body == "Humerus":
         virtual_IMU = R.from_euler('XYZ', [180, 90, 0], degrees=True)
@@ -246,8 +248,8 @@ def get_IMU_offset(pose_time, IMU_orientations_file, model_file, results_dir, ba
     # Manual: Humerus-specific, using humerus IMU y-axis and radius IMU y-axis: get_humerus_IMU_cal_MANUAL_Ys
 
     # Use this as a setting to decide which method you want to apply
-    thorax_cal_method = "get_IMU_cal_POSE_BASED"
-    humerus_cal_method = "get_humerus_IMU_cal_MANUAL_Ys"
+    thorax_cal_method = "get_IMU_cal_MANUAL"
+    humerus_cal_method = "get_IMU_cal_MANUAL"
     radius_cal_method = "get_IMU_cal_MANUAL"
 
     # Apply the chosen calibration method:
