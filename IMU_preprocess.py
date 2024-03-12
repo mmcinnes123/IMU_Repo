@@ -38,29 +38,29 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
     # Read data from TMM .txt report
     IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(file_path)
 
-    # # Write data to APDM format .csv
-    # file_tag = "APDM_Quats_" + IMU_type
-    # write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, file_tag)
-    # # Write data to .sto using OpenSim APDM converter tool
-    # APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
-    #                      output_file_name=results_dir + "\\" + file_tag + ".sto")
-    #
-    # # Iterate through list of calibration poses and associated times to create separate .sto files
-    # for pose_name in cal_pose_time_dict.keys():
-    #
-    #     cal_pose_time = cal_pose_time_dict[pose_name]
-    #
-    #     # Extract one row based on time of calibration pose
-    #     IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
-    #     IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
-    #     IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
-    #
-    #     # Write data to APDM format .csv
-    #     file_tag = "APDM_Quats_" + IMU_type + "_" + str(cal_pose_time) + "s"
-    #     write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, file_tag)
-    #     # Write data to .sto using OpenSim APDM converter tool
-    #     APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
-    #                          output_file_name=results_dir + "\\" + file_tag + ".sto")
+    # Write data to APDM format .csv
+    file_tag = "APDM_Quats_" + IMU_type
+    write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, file_tag)
+    # Write data to .sto using OpenSim APDM converter tool
+    APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
+                         output_file_name=results_dir + "\\" + file_tag + ".sto")
+
+    # Iterate through list of calibration poses and associated times to create separate .sto files
+    for pose_name in cal_pose_time_dict.keys():
+
+        cal_pose_time = cal_pose_time_dict[pose_name]
+
+        # Extract one row based on time of calibration pose
+        IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
+        IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
+        IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
+
+        # Write data to APDM format .csv
+        file_tag = "APDM_Quats_" + IMU_type + "_" + str(cal_pose_time) + "s"
+        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, file_tag)
+        # Write data to .sto using OpenSim APDM converter tool
+        APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
+                             output_file_name=results_dir + "\\" + file_tag + ".sto")
 
     return IMU1_df, IMU2_df, IMU3_df
 
@@ -76,23 +76,35 @@ IMU1_df_Real, IMU2_df_Real, IMU3_df_Real = write_movements_and_calibration_stos(
 
 def compare_oris_real_vs_perfect(IMU_df_Real, IMU_df_Perfect):
 
-    # Remove any rows (from both real and perfect dfs) where nan values appear (due to cluster occlusion)
-    IMU_Perfect = IMU_df_Perfect[IMU_df_Perfect.notna().any(axis=1) & IMU_df_Real.notna().any(axis=1)]
-    IMU_Real = IMU_df_Real[IMU_df_Perfect.notna().any(axis=1) & IMU_df_Real.notna().any(axis=1)]
+    # Get orientation at specified static time
+    static_time_index = static_time * sample_rate
+    IMU_Perfect_R_atT = R.from_quat(IMU_df_Perfect.iloc[static_time_index].to_numpy()[[1, 2, 3, 0]])
+    IMU_Real_R_atT = R.from_quat(IMU_df_Real.iloc[static_time_index].to_numpy()[[1, 2, 3, 0]])
 
+    # Create an array to fill with error values
+    single_angle_diff = np.zeros((len(IMU_df_Real)))
 
-    # Get scipy format orientations, ready for comparison
-    IMU_Perfect_R = R.from_quat(IMU_Perfect.to_numpy()[:, [1, 2, 3, 0]])
-    IMU_Real_R = R.from_quat(IMU_Real.to_numpy()[:, [1, 2, 3, 0]])
+    for row in range(len(IMU_df_Real)):
 
-    # Get CHANGE in orientations, relative to orientation at time = ? (Needs to be static - add a variable to quick settings)
-    static_time_index = static_time*sample_rate
-    ori_change_Perfect_R = IMU_Perfect_R[static_time_index].inv() * IMU_Perfect_R
-    ori_change_Real_R = IMU_Real_R[static_time_index].inv() * IMU_Real_R
+        # For all rows which don't contain any nan values in either perfect or real df
+        if IMU_df_Real.iloc[row].isna().any() == False and IMU_df_Perfect.iloc[row].isna().any() == False:
 
-    # Compare real vs perfect change in orientations
-    ori_diff = ori_change_Perfect_R.inv() * ori_change_Real_R
-    single_angle_diff = ori_diff.magnitude() * 180 / np.pi
+            # Get scipy format orientations, ready for comparison
+            IMU_Perfect_R = R.from_quat(IMU_df_Perfect.iloc[row].to_numpy()[[1, 2, 3, 0]])
+            IMU_Real_R = R.from_quat(IMU_df_Real.iloc[row].to_numpy()[[1, 2, 3, 0]])
+
+            # Get CHANGE in orientations, relative to orientation at specified static time
+            ori_change_Perfect_R = IMU_Perfect_R_atT.inv() * IMU_Perfect_R
+            ori_change_Real_R = IMU_Real_R_atT.inv() * IMU_Real_R
+
+            # Compare real vs perfect change in orientations
+            ori_diff = ori_change_Perfect_R.inv() * ori_change_Real_R
+            single_angle_diff_i = ori_diff.magnitude() * 180 / np.pi
+
+        else:
+            single_angle_diff_i = np.nan
+
+        single_angle_diff[row] = single_angle_diff_i
 
     return single_angle_diff
 
@@ -100,8 +112,6 @@ def compare_oris_real_vs_perfect(IMU_df_Real, IMU_df_Perfect):
 IMU1_single_angle_diff = compare_oris_real_vs_perfect(IMU1_df_Real, IMU1_df_Perfect)
 IMU2_single_angle_diff = compare_oris_real_vs_perfect(IMU2_df_Real, IMU2_df_Perfect)
 IMU3_single_angle_diff = compare_oris_real_vs_perfect(IMU3_df_Real, IMU3_df_Perfect)
-
-
 
 # Calculate RMSE and plot time-varying error
 IMU1_single_angle_RMSE, IMU2_single_angle_RMSE, IMU3_single_angle_RMSE = plot_compare_real_vs_perfect(IMU1_single_angle_diff, IMU2_single_angle_diff, IMU3_single_angle_diff, parent_dir)
