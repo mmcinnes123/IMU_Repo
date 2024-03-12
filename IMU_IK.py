@@ -13,14 +13,14 @@ from Calibration_functions import get_IMU_offset, apply_cal_to_model
 """ SETTINGS """
 
 # Quick Settings
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Greg"  # Name of the working folder
-trial_name = "PracticeTrialName"   # Tag to describe this trial
-# Specify which orientation .sto data to use - 'perfect' (marker cluster oris) or 'real' (IMU oris)
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_03_11"  # Name of the working folder
+trial_name = "Manual_cal"   # Tag to describe this trial
+# Specify which orientation .sto data to use: 'perfect' (marker cluster oris) or 'real' (IMU oris)
 orientations_file = parent_dir + r"\Preprocessed_Data" + r"\APDM_Quats_Perfect.sto"
 # Specify which orientation data at which time to use for calibration
-calibration_orientations_file = parent_dir + r"\Preprocessed_Data" + r"\APDM_Quats_Perfect15s_.sto"
+calibration_orientations_file = parent_dir + r"\Preprocessed_Data" + r"\APDM_Quats_Perfect_3s.sto"
 IK_start_time = 0
-IK_end_time = 3
+IK_end_time = 30
 
 # Files required in folder:
 calibration_settings_file = "IMU_Calibration_Settings.xml"
@@ -30,7 +30,7 @@ model_file = 'das3.osim'
 # Calibration Settings
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
 baseIMUName = 'thorax_imu'
-baseIMUHeading = 'x'    # Which axis of the thorax IMU points in same direction as the model's thorax x-axis?
+baseIMUHeading = '-x'    # Which axis of the thorax IMU points in same direction as the model's thorax x-axis?
 visualize_calibration = False
 
 # IMU IK Settings
@@ -61,17 +61,17 @@ pose_confirmation = input("\nIs the default pose of the model set to match the e
 if pose_confirmation == "No":
     quit()
 
-#
-# Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
-run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
-                    calibration_orientations_file, baseIMUName, baseIMUHeading,
-                    visualize_calibration, IK_results_dir)
+
+# # Calibrate the model based on calibration settings defined above (assign IMUs to segments based on calibration pose)
+# run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
+#                     calibration_orientations_file, baseIMUName, baseIMUHeading,
+#                     visualize_calibration, IK_results_dir)
 
 
-# # Calibrate the model based on my own methods (method for each body is defined within get_IMU_offset function)
-# pose_time = 15  # Note this pose time affects pose-based AND humerus defined by forearm-based manual alignment
-# thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = get_IMU_offset(pose_time, orientations_file, model_file, IK_results_dir, base_IMU_axis_label='x')
-# apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, IK_results_dir)
+# Calibrate the model based on my own methods (method for each body is defined within get_IMU_offset function)
+pose_time = 3  # Note this pose time affects pose-based AND humerus defined by forearm-based manual alignment
+thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = get_IMU_offset(pose_time, orientations_file, model_file, IK_results_dir, base_IMU_axis_label='x')
+apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, IK_results_dir)
 
 
 print("\nCalibrated .osim model")

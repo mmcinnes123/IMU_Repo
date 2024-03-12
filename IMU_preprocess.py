@@ -9,12 +9,12 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_02_26_Greg"  # Name of the working folder
-input_file_Perfect = "26thFeb_Greg - Report3 - Cluster_Quats.txt"     # Name of the txt file with perfect IMU data
-input_file_Real = "26thFeb_Greg - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
-cal_pose_time_dict = {"Cal_pose_1a": 10, "Cal_pose_2a": 13, "Cal_pose_2b": 15}  # List of pose times for calibration
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_03_11"  # Name of the working folder
+input_file_Perfect = "Test_3rdMarch - Report3 - Cluster_Quats.txt"     # Name of the txt file with perfect IMU data
+input_file_Real = "Test_3rdMarch - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
+cal_pose_time_dict = {"Cal_pose_1": 3}  # List of pose times for calibration
 sample_rate = 100
-static_time = 10    # Input first known static time to use as reference for changing orientation error
+static_time = 3    # Input first known static time to use as reference for changing orientation error
 
 # Required Files in Folder
 template_file = "APDM_template_4S.csv"
@@ -38,29 +38,29 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
     # Read data from TMM .txt report
     IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(file_path)
 
-    # Write data to APDM format .csv
-    file_tag = "APDM_Quats_" + IMU_type
-    write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, file_tag)
-    # Write data to .sto using OpenSim APDM converter tool
-    APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
-                         output_file_name=results_dir + "\\" + file_tag + ".sto")
-
-    # Iterate through list of calibration poses and associated times to create separate .sto files
-    for pose_name in cal_pose_time_dict.keys():
-
-        cal_pose_time = cal_pose_time_dict[pose_name]
-
-        # Extract one row based on time of calibration pose
-        IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
-        IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
-        IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
-
-        # Write data to APDM format .csv
-        file_tag = "APDM_Quats_" + IMU_type + "_" + str(cal_pose_time) + "s_"
-        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, file_tag)
-        # Write data to .sto using OpenSim APDM converter tool
-        APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
-                             output_file_name=results_dir + "\\" + file_tag + ".sto")
+    # # Write data to APDM format .csv
+    # file_tag = "APDM_Quats_" + IMU_type
+    # write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, results_dir, file_tag)
+    # # Write data to .sto using OpenSim APDM converter tool
+    # APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
+    #                      output_file_name=results_dir + "\\" + file_tag + ".sto")
+    #
+    # # Iterate through list of calibration poses and associated times to create separate .sto files
+    # for pose_name in cal_pose_time_dict.keys():
+    #
+    #     cal_pose_time = cal_pose_time_dict[pose_name]
+    #
+    #     # Extract one row based on time of calibration pose
+    #     IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
+    #     IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
+    #     IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
+    #
+    #     # Write data to APDM format .csv
+    #     file_tag = "APDM_Quats_" + IMU_type + "_" + str(cal_pose_time) + "s"
+    #     write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, results_dir, file_tag)
+    #     # Write data to .sto using OpenSim APDM converter tool
+    #     APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + "\\" + file_tag + ".csv",
+    #                          output_file_name=results_dir + "\\" + file_tag + ".sto")
 
     return IMU1_df, IMU2_df, IMU3_df
 
