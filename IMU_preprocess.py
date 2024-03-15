@@ -12,12 +12,12 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\Tests\24_03_11"  # Name of the working folder
-input_file_Perfect = "Test_3rdMarch - Report3 - Cluster_Quats.txt"     # Name of the txt file with perfect IMU data
-input_file_Real = "Test_3rdMarch - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
-cal_pose_time_dict = {"Cal_pose_1": 3}  # List of pose times for calibration
+parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P2"  # Name of the working folder
+input_file_Perfect = "P2_CP - Report3 - Cluster_Quats.txt"     # Name of the txt file with perfect IMU data
+input_file_Real = "P2_CP - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
+cal_pose_time_dict = {"Pose2_assisted": 26}  # List of pose times for calibration
 sample_rate = 100
-static_time = 3    # Input first known static time to use as reference for changing orientation error
+static_time = 1    # Input first known static time to use as reference for change in orientation error
 
 # Required Files in Folder
 template_file = "APDM_template_4S.csv"
