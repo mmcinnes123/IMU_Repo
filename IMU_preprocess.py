@@ -3,10 +3,15 @@
 # Output is .sto OpenSim file
 # It also does an initial comparison of the raw orientation data from the 'real' and 'perfect' IMUs
 # Output is a .csv with RMSE values for each IMU, and a .png plot
+import numpy as np
+import pandas as pd
 
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
 import os
+from scipy.spatial.transform import Rotation as R
+from scipy.spatial.transform import Slerp
+
 
 
 """ SETTINGS """
@@ -134,73 +139,139 @@ IMU1_df_Real, IMU2_df_Real, IMU3_df_Real = write_movements_and_calibration_stos(
 """ Finding global misalignment """
 
 
-def angular_velocities(q1, q2, dt):
-    return (2 / dt) * np.array([
-        q1[0]*q2[1] - q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2],
-        q1[0]*q2[2] + q1[1]*q2[3] - q1[2]*q2[0] - q1[3]*q2[1],
-        q1[0]*q2[3] - q1[1]*q2[2] + q1[2]*q2[1] - q1[3]*q2[0]])
+# Use SLERP to fill gaps in quaternion data
+def fill_nan_gaps_in_quat_df(IMU_df):
 
-qs = IMU3_df_Perfect.iloc[3800:3900].to_numpy()
-real_qs = IMU3_df_Real.iloc[3800:3900].to_numpy()
+    # From the quaternion array, create a dataframe with scipy Rs where there is data, and np.nans where there isn't any
+    both_list = []
+    for row in range(len(IMU_df)):
+        if IMU_df.iloc[row].isna().any() == False:  # If the row doesn't have any nans
+            IMU_df_i = R.from_quat(IMU_df.iloc[row][[1, 2, 3, 0]])  # Make a scipy R from the quat values
+            both_list.append(IMU_df_i)
+        else:
+            both_list.append(np.nan)    # Else, append a nan value
+    both_df = pd.DataFrame(both_list)
 
-ang_vel_arr_perfect = np.zeros(((len(qs)-10), 3))
-for i in range(0, len(qs)-10):
-    ang_vel = angular_velocities(qs[i], qs[i+10], 0.1)
-    ang_vel_arr_perfect[i] = ang_vel
+    # Iterating through the Rs dataframe, check for nan values. When nan value is encountered,
+    # use the last R and the next non-nan R, to create interpolated Rs to fill in the gaps
+    row = 0
+    while row <= len(both_df)-1:
 
-ang_vel_arr_real = np.zeros(((len(qs)-10), 3))
-for i in range(0, len(qs)-10):
-    ang_vel = angular_velocities(real_qs[i], real_qs[i+10], 0.1)
-    ang_vel_arr_real[i] = ang_vel
+        if both_df.iloc[row].isna().any() == True:  # If there are any nan values
+            # Get closest previous rot
+            rot_prev = both_df.at[row-1, 0]
+            # Iterate through next rows until you find next non-nan
+            inner_row = row + 1
+            while inner_row < len(both_df):
+                if both_df.iloc[inner_row].notna().any():
+                    break
+                inner_row += 1
+            rot_next = both_df.at[inner_row, 0] # This is the next available R to use for the interpolation
+
+            # Create sequence of the two scipy Rs
+            key_rots = []
+            key_rots.append(rot_prev)
+            key_rots.append(rot_next)
+            key_rots_R = R.concatenate(key_rots)    # The start and finish Rs
+
+            # Create the inputs for the slerp
+            key_times = [(row-1), inner_row]    # The start and finish times
+            new_times = list(range((row-1), inner_row))     # The rows where we need to create new Rs
+            slerp = Slerp(key_times, key_rots_R)    # Create the Slerp
+            interp_rots = slerp(new_times)      # Create the new Rs from the previous and next known non-nan Rs
+
+            # Turn the Rs back into quaternions to update the original dataframe
+            interp_quats = interp_rots.as_quat()
+
+            # Add the right quats into the dataframe
+            for fill_row in range(row, inner_row):
+                IMU_df.iloc[fill_row] = interp_quats[(fill_row-row), [3, 0, 1, 2]]
+
+            # Update row to the next non-nan row so the while loop continues looking for the next gap
+            row = inner_row
+        else:
+            row += 1
+
+    return IMU_df
+
+IMU3_df_Perfect = fill_nan_gaps_in_quat_df(IMU3_df_Perfect)
 
 
-# Calculate the angle between the two angular velocity vectors
-diff_arr = np.zeros((len(ang_vel_arr_perfect)))
-for i in range(len(ang_vel_arr_perfect)):
-    ang_vel_perfect = ang_vel_arr_perfect[i]
-    ang_vel_real = ang_vel_arr_real[i]
-    diff = np.arccos(np.dot(ang_vel_perfect, ang_vel_real) /
-                           (np.linalg.norm(ang_vel_perfect) * np.linalg.norm(ang_vel_real)))
-    diff_arr[i] = diff*180/np.pi
 
-print(diff_arr[:10])
-print(np.nanmean(diff_arr))
 
-# Animate the 3d vectors
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+#
+# # Some code to calculate angular velocities in the local frame
+# def angular_velocities(q1, q2, dt):
+#     return (2 / dt) * np.array([
+#         q1[0]*q2[1] - q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2],
+#         q1[0]*q2[2] + q1[1]*q2[3] - q1[2]*q2[0] - q1[3]*q2[1],
+#         q1[0]*q2[3] - q1[1]*q2[2] + q1[2]*q2[1] - q1[3]*q2[0]])
+#
+# qs = IMU3_df_Perfect.iloc[3800:3900].to_numpy()
+# real_qs = IMU3_df_Real.iloc[3800:3900].to_numpy()
+#
+# ang_vel_arr_perfect = np.zeros(((len(qs)-10), 3))
+# for i in range(0, len(qs)-10):
+#     ang_vel = angular_velocities(qs[i], qs[i+10], 0.1)
+#     ang_vel_arr_perfect[i] = ang_vel
+#
+# ang_vel_arr_real = np.zeros(((len(qs)-10), 3))
+# for i in range(0, len(qs)-10):
+#     ang_vel = angular_velocities(real_qs[i], real_qs[i+10], 0.1)
+#     ang_vel_arr_real[i] = ang_vel
+#
+#
+# # Calculate the angle between the two angular velocity vectors
+# diff_arr = np.zeros((len(ang_vel_arr_perfect)))
+# for i in range(len(ang_vel_arr_perfect)):
+#     ang_vel_perfect = ang_vel_arr_perfect[i]
+#     ang_vel_real = ang_vel_arr_real[i]
+#     diff = np.arccos(np.dot(ang_vel_perfect, ang_vel_real) /
+#                            (np.linalg.norm(ang_vel_perfect) * np.linalg.norm(ang_vel_real)))
+#     diff_arr[i] = diff*180/np.pi
+# print("Average angular difference between the angular velocity vectors of the IMU and cluster CFs (expressed in their local frames):")
+# print(np.nanmean(diff_arr))
+#
+#
+# # CUse scipy's 'align_vectors' to try to solve for the average misalignment (this shouldn't actually apply to the local CFs)
+# a = ang_vel_arr_perfect
+# b = ang_vel_arr_real
+# rot, rssd, sens = R.align_vectors(a, b, return_sensitivity=True)
+# print(rot.as_matrix())
+# print(rot.as_euler('yxz', degrees=True))
+# print(rssd)
+# print(sens)
 
-fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
-def get_arrow(theta, ang_vel_arr):
-    x = 0
-    y = 0
-    z = 0
-    u = ang_vel_arr[theta,0]
-    v = ang_vel_arr[theta,1]
-    w = ang_vel_arr[theta,2]
-    return x,y,z,u,v,w
 
-quiver_perfect = ax.quiver(*get_arrow(0, ang_vel_arr_perfect), color='red')
-quiver_real = ax.quiver(*get_arrow(0, ang_vel_arr_real), color='blue')
-
-plot_range = 1
-ax.set_xlim(-plot_range, plot_range)
-ax.set_ylim(-plot_range, plot_range)
-ax.set_zlim(-plot_range, plot_range)
-
-def update_perfect(theta):
-    global quiver_perfect
-    quiver_perfect.remove()
-    quiver_perfect = ax.quiver(*get_arrow(theta, ang_vel_arr_perfect), color='red')
-
-def update_real(theta):
-    global quiver_real
-    quiver_real.remove()
-    quiver_real = ax.quiver(*get_arrow(theta, ang_vel_arr_real), color='blue')
-
-ani_perfect = FuncAnimation(fig, update_perfect, frames=np.array(range(len(ang_vel_arr_perfect))), interval=10, repeat_delay=1000)
-ani_real = FuncAnimation(fig, update_real, frames=np.array(range(len(ang_vel_arr_perfect))), interval=10, repeat_delay=1000)
-
-plt.show()
+# # Animate the 3d vectors
+# import matplotlib.pyplot as plt
+# from matplotlib.animation import FuncAnimation
+#
+# fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
+#
+# # Create new quivers
+# quiver_real = ax.quiver(0, 0, 0, ang_vel_arr_real[0,0], ang_vel_arr_real[0,1], ang_vel_arr_real[0,2], color='blue')
+# quiver_perfect = ax.quiver(0, 0, 0, ang_vel_arr_perfect[0,0], ang_vel_arr_perfect[0,1], ang_vel_arr_perfect[0,2], color='red')
+#
+# # Set the range of the plot axes
+# plot_range = 1
+# ax.set_xlim(-plot_range, plot_range)
+# ax.set_ylim(-plot_range, plot_range)
+# ax.set_zlim(-plot_range, plot_range)
+#
+# # Define a function for updating the quiver (vector) values, by iterating theta through the arrays created above
+# def update_ang_vel_vec_real(theta):
+#     global quiver_real
+#     quiver_real.remove()
+#     quiver_real = ax.quiver(0, 0, 0, ang_vel_arr_real[theta,0], ang_vel_arr_real[theta,1], ang_vel_arr_real[theta,2], color='blue')
+# def update_ang_vel_vec_perfect(theta):
+#     global quiver_perfect
+#     quiver_perfect.remove()
+#     quiver_perfect = ax.quiver(0, 0, 0, ang_vel_arr_perfect[theta,0], ang_vel_arr_perfect[theta,1], ang_vel_arr_perfect[theta,2], color='red')
+#
+# # Create the animations, where 'update' is the function, 'frames' creates the values of theta to iterate through, and interval is the gap between frames (ms)
+# ani_perfect = FuncAnimation(fig, update_ang_vel_vec_real, frames=np.array(range(len(ang_vel_arr_perfect))), interval=10, repeat_delay=1000)
+# ani_real = FuncAnimation(fig, update_ang_vel_vec_perfect, frames=np.array(range(len(ang_vel_arr_perfect))), interval=10, repeat_delay=1000)
+#
+# plt.show()
