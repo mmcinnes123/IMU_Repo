@@ -20,8 +20,8 @@ from scipy.spatial.transform import Slerp
 subject_code = 'P2'
 trial_name_list = ['CP', 'JA_Slow', 'JA_Fast', 'ROM', 'ADL']
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
-input_file_Perfect = "P2_JA_Slow - Report4 - Cluster_Quats_Stylus_CFs.txt"     # Name of the txt file with perfect IMU data
-input_file_Real = "P2_JA_Slow - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
+input_file_Perfect = "P2_ADL - Report4 - Cluster_Quats_Stylus_CFs.txt"     # Name of the txt file with perfect IMU data
+input_file_Real = "P2_ADL - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
 cal_pose_time_dict = {"Pose2_assisted": 26}  # List of pose times for calibration
 sample_rate = 100
 static_time = 1    # Input first known static time to use as reference for change in orientation error
@@ -139,62 +139,65 @@ IMU1_df_Real, IMU2_df_Real, IMU3_df_Real = write_movements_and_calibration_stos(
 """ Finding global misalignment """
 
 
-# Use SLERP to fill gaps in quaternion data
+# Use SLERP to fill gaps in quaternion data (awkward because scipy.spatial.transform.Rotation can't handle nans,
+# so we can't just make a sequence of scipy Rs from an array of quaternions if it has any nans in)
 def fill_nan_gaps_in_quat_df(IMU_df):
 
-    # From the quaternion array, create a dataframe with scipy Rs where there is data, and np.nans where there isn't any
-    both_list = []
-    for row in range(len(IMU_df)):
-        if IMU_df.iloc[row].isna().any() == False:  # If the row doesn't have any nans
-            IMU_df_i = R.from_quat(IMU_df.iloc[row][[1, 2, 3, 0]])  # Make a scipy R from the quat values
-            both_list.append(IMU_df_i)
-        else:
-            both_list.append(np.nan)    # Else, append a nan value
-    both_df = pd.DataFrame(both_list)
-
-    # Iterating through the Rs dataframe, check for nan values. When nan value is encountered,
-    # use the last R and the next non-nan R, to create interpolated Rs to fill in the gaps
     row = 0
-    while row <= len(both_df)-1:
+    while row < len(IMU_df):
 
-        if both_df.iloc[row].isna().any() == True:  # If there are any nan values
-            # Get closest previous rot
-            rot_prev = both_df.at[row-1, 0]
-            # Iterate through next rows until you find next non-nan
+        if IMU_df.iloc[row].isna().any() == True:  # If there are any nan values
+
+            # Get closest previous non-nan rot
+            prev_rot_row = row-1
+            prev_rot = IMU_df.iloc[prev_rot_row, [1, 2, 3, 0]].to_numpy()
+
+            # Get the next non-nan rot
             inner_row = row + 1
-            while inner_row < len(both_df):
-                if both_df.iloc[inner_row].notna().any():
+            while inner_row < len(IMU_df):   # Iterate through next rows until you find next non-nan, until end of df
+                if IMU_df.iloc[inner_row].notna().any():
                     break
                 inner_row += 1
-            rot_next = both_df.at[inner_row, 0] # This is the next available R to use for the interpolation
 
-            # Create sequence of the two scipy Rs
-            key_rots = []
-            key_rots.append(rot_prev)
-            key_rots.append(rot_next)
-            key_rots_R = R.concatenate(key_rots)    # The start and finish Rs
+            if inner_row == len(IMU_df):    # If we have reached the end of the dataframe and there's non more non-nans
+                for fill_row in range(row, inner_row):
+                    IMU_df.iloc[fill_row] = IMU_df.iloc[prev_rot_row]  # Fill in all the last nans with the previous non-nan rot
 
-            # Create the inputs for the slerp
-            key_times = [(row-1), inner_row]    # The start and finish times
-            new_times = list(range((row-1), inner_row))     # The rows where we need to create new Rs
-            slerp = Slerp(key_times, key_rots_R)    # Create the Slerp
-            interp_rots = slerp(new_times)      # Create the new Rs from the previous and next known non-nan Rs
+            else:
+                next_rot_row = inner_row    # This is the next available non-nan row
+                next_rot = IMU_df.iloc[next_rot_row, [1, 2, 3, 0]].to_numpy()  # This is the next available quat to use for the interpolation
 
-            # Turn the Rs back into quaternions to update the original dataframe
-            interp_quats = interp_rots.as_quat()
+                # Turn the two quats into scipy Rs
+                prev_rot_R = R.from_quat(prev_rot)
+                next_rot_R = R.from_quat(next_rot)
 
-            # Add the right quats into the dataframe
-            for fill_row in range(row, inner_row):
-                IMU_df.iloc[fill_row] = interp_quats[(fill_row-row), [3, 0, 1, 2]]
+                # Create sequence of the two scipy Rs, ready to be used in the slerp
+                key_rots = []
+                key_rots.append(prev_rot_R)
+                key_rots.append(next_rot_R)
+                key_rots_R = R.concatenate(key_rots)    # The start and finish Rs
+
+                # Create the inputs for the slerp
+                key_times = [prev_rot_row, next_rot_row]    # The start and finish times corresponding to the Rs
+                new_times = list(range(row, next_rot_row))     # The rows where we need to create new Rs
+                slerp = Slerp(key_times, key_rots_R)    # Create the Slerp
+                interp_rots = slerp(new_times)      # Create the new Rs from the previous and next known non-nan Rs
+
+                # Turn the Rs back into quaternions to update the original dataframe
+                interp_quats = interp_rots.as_quat()
+
+                # Add the new quats into the dataframe where previously there were nans
+                for fill_row in range(row, next_rot_row):
+                    IMU_df.iloc[fill_row] = interp_quats[(fill_row-row), [3, 0, 1, 2]]
 
             # Update row to the next non-nan row so the while loop continues looking for the next gap
-            row = inner_row
+            row = inner_row     # This is row with next non-nan rot, or it's = len(IMU_df), so while loop will break
+
         else:
             row += 1
 
     return IMU_df
 
-IMU3_df_Perfect = fill_nan_gaps_in_quat_df(IMU3_df_Perfect)
 
 
 
