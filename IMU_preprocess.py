@@ -9,9 +9,6 @@ import pandas as pd
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
 import os
-from scipy.spatial.transform import Rotation as R
-from scipy.spatial.transform import Slerp
-from scipy.signal import savgol_filter
 
 
     # TODO: use os.join(x,y) instead of adding strings
@@ -21,9 +18,11 @@ from scipy.signal import savgol_filter
 
 # Quick Settings
 subject_code = 'P2'
-trial_name_dict = {'CP': {'N_self': 1, 'Alt_self': 2}, 'JA_Slow': {'N_self': 1, 'Alt_self': 2},
-                   'JA_Fast': {'N_self': 1, 'Alt_self': 2}, 'ROM': {'N_self': 1, 'Alt_self': 2},
-                   'ADL': {'N_self': 1, 'Alt_self': 2}}     # Looking at OMC data, input time values next to each type of pose
+trial_name_dict = {'CP': {'N_self': 6, 'Alt_self': 10, 'N_asst': 15, 'Alt_asst': 22},
+                   'JA_Slow': {'N_self': 8, 'Alt_self': 12},
+                   'JA_Fast': {'N_self': 5, 'Alt_self': 9},
+                   'ROM': {'N_self': 3, 'Alt_self': 7},
+                   'ADL': {'N_self': 1, 'Alt_self': 1}}     # Looking at OMC data, input time values next to each type of pose
 IMU_type_dict = {'IMU': ' - Report2 - IMU_Quats.txt', 'Cluster': ' - Report3 - Cluster_Quats.txt',
                  'Stylus': ' - Report4 - Cluster_Quats_Stylus_CFs.txt'}     # Edit this depending on what data you want to look at
 sample_rate = 100
@@ -46,6 +45,11 @@ osim.Logger.setLevelString("Off")
 
 
 """ MAIN """
+
+# Save trial name and times dict to .txt
+file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'w')
+file_obj.write(str(trial_name_dict))
+file_obj.close()
 
 # Function to extract quaternion orientation data from .txt file and save as .sto file
 def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type, trial_results_dir):
@@ -84,21 +88,21 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
 # apply the function above to create orientation dataframes and write data to .sto files for full time-frame,
 # and for each moment in time specified in the trial_name_dict
 
-for trial_name in trial_name_dict:
-
-    cal_pose_time_dict = trial_name_dict[trial_name]
-    # raw_data_file = x|x
-
-    # Create a new results directory
-    trial_results_dir = os.path.join(results_dir, trial_name)
-    if os.path.exists(trial_results_dir) == False:
-        os.mkdir(trial_results_dir)
-
-    for IMU_key in IMU_type_dict:
-
-        raw_data_file = subject_code + '_' + trial_name + IMU_type_dict[IMU_key]
-        raw_data_file_path = os.path.join(raw_data_dir, raw_data_file)
-        IMU1_df, IMU2_df, IMU3_df = write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
+# for trial_name in trial_name_dict:
+#
+#     cal_pose_time_dict = trial_name_dict[trial_name]
+#     # raw_data_file = x|x
+#
+#     # Create a new results directory
+#     trial_results_dir = os.path.join(results_dir, trial_name)
+#     if os.path.exists(trial_results_dir) == False:
+#         os.mkdir(trial_results_dir)
+#
+#     for IMU_key in IMU_type_dict:
+#
+#         raw_data_file = subject_code + '_' + trial_name + IMU_type_dict[IMU_key]
+#         raw_data_file_path = os.path.join(raw_data_dir, raw_data_file)
+#         IMU1_df, IMU2_df, IMU3_df = write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
 
 
 
