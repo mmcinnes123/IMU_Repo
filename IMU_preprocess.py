@@ -11,9 +11,6 @@ from IMU_IK_functions import APDM_2_sto_Converter
 import os
 
 
-    # TODO: use os.join(x,y) instead of adding strings
-    # TODO: Look at OMC data and choose calibration pose times
-
 """ SETTINGS """
 
 # Quick Settings
@@ -37,9 +34,9 @@ parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 raw_data_dir = os.path.join(parent_dir, 'RawData')
 
 # Create a new results directory
-results_dir = parent_dir + "\Preprocessed_Data"
-if os.path.exists(results_dir) == False:
-    os.mkdir(results_dir)
+sto_files_dir = os.path.join(parent_dir, 'Preprocessed_Data')
+if os.path.exists(sto_files_dir) == False:
+    os.mkdir(sto_files_dir)
 
 osim.Logger.setLevelString("Off")
 
@@ -88,21 +85,21 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
 # apply the function above to create orientation dataframes and write data to .sto files for full time-frame,
 # and for each moment in time specified in the trial_name_dict
 
-# for trial_name in trial_name_dict:
-#
-#     cal_pose_time_dict = trial_name_dict[trial_name]
-#     # raw_data_file = x|x
-#
-#     # Create a new results directory
-#     trial_results_dir = os.path.join(results_dir, trial_name)
-#     if os.path.exists(trial_results_dir) == False:
-#         os.mkdir(trial_results_dir)
-#
-#     for IMU_key in IMU_type_dict:
-#
-#         raw_data_file = subject_code + '_' + trial_name + IMU_type_dict[IMU_key]
-#         raw_data_file_path = os.path.join(raw_data_dir, raw_data_file)
-#         IMU1_df, IMU2_df, IMU3_df = write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
+for trial_name in trial_name_dict:
+
+    cal_pose_time_dict = trial_name_dict[trial_name]
+    # raw_data_file = x|x
+
+    # Create a new results directory
+    trial_results_dir = os.path.join(sto_files_dir, trial_name)
+    if os.path.exists(trial_results_dir) == False:
+        os.mkdir(trial_results_dir)
+
+    for IMU_key in IMU_type_dict:
+
+        raw_data_file = subject_code + '_' + trial_name + IMU_type_dict[IMU_key]
+        raw_data_file_path = os.path.join(raw_data_dir, raw_data_file)
+        IMU1_df, IMU2_df, IMU3_df = write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
 
 
 
