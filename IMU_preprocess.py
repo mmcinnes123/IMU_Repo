@@ -103,16 +103,3 @@ for trial_name in trial_name_dict:
 
 
 
-
-# # Some code if you only want to read in two files
-# input_file_Perfect = "P2_JA_Slow - Report3 - Cluster_Quats.txt"     # Name of the txt file with perfect IMU data
-# input_file_Real = "P2_JA_Slow - Report2 - IMU_Quats.txt"     # Name of the txt file with real IMU data
-# file_path_Perfect = os.path.join(raw_data_dir, input_file_Perfect)
-# file_path_Real = os.path.join(raw_data_dir, input_file_Real)
-# cal_pose_time_dict = {"Pose2_assisted": 26}  # List of pose times for calibration
-# IMU1_df_Perfect, IMU2_df_Perfect, IMU3_df_Perfect = read_data_frame_from_file(file_path_Perfect)
-# IMU1_df_Real, IMU2_df_Real, IMU3_df_Real = read_data_frame_from_file(file_path_Real)
-#
-
-
-
