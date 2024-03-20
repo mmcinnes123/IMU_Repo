@@ -5,29 +5,31 @@
 import os
 from functions import *
 
-def fun(trial_name):
+def fun(compare_name):
 
 
     """ SETTINGS """
 
     # Quick Settings
-    # trial_name = "IMU_CLUS_cal_pose2a"    # Tag to describe this trial
-    print("Running IK_Compare function for " + trial_name)
-    parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\DataCollection2024\P2"  # Name of the working folder
+    trial_name = 'JA_Slow'
+    print("Running IK_Compare function for " + compare_name)
+    parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P2"  # Name of the working folder
     start_time = 0
     end_time = 100
-    results_dir = parent_dir + r"\Comparison_" + trial_name
-    create_new_ori_csvs = True     # Set this to False if you've already run this code and csv file has been created
+    calibration_name = 'ALL_POSE_BASED'  # Used to find the calibrated model file
+    IMU_IK_results_file_name = 'ALL_POSE_BASED_JA_Slow_IMU_IK_results'  # Used to find the states and .csv file
+
     labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
     labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
     # Define some file names
-    # IMU_states_file = parent_dir + "\\" + trial_name + "\\" + trial_name + "_IMU_IK_results" + "\\" + trial_name + "_StatesReporter_states.sto"
-    IMU_states_file = parent_dir + r"\OMC" + r"\P2_JA_SlowIK_Results" + r"\OMC_StatesReporter_states.sto"
-    OMC_states_file = parent_dir + r"\OMC" + r"\P2_JA_SlowIK_Results" + r"\OMC_StatesReporter_states.sto"
-    # path_to_IMU_model_file = r"C:\Users\r03mm22\Documents\Protocol_Testing\IMU_Repo\das3.osim"
-    path_to_IMU_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
-    path_to_OMC_model_file = parent_dir + r"\OMC\das3_scaled_and_placed.osim"
+    IMU_IK_results_dir = os.path.join(parent_dir, IMU_IK_results_file_name)
+    results_dir = parent_dir + r"\Comparison_" + compare_name
+    IMU_states_file = os.path.join(IMU_IK_results_dir, IMU_IK_results_file_name.replace('_IMU_IK_results', '_StatesReporter_states.sto'))
+    IMU_csv_file = os.path.join(IMU_IK_results_dir, IMU_IK_results_file_name.replace('_IMU_IK_results', '_IMU_quats.csv'))
+    OMC_states_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', 'OMC_StatesReporter_states.sto')
+    OMC_csv_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', trial_name + '_OMC_quats.csv')
+
     figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
     if os.path.exists(results_dir) == False:
         os.mkdir(results_dir)
@@ -48,20 +50,24 @@ def fun(trial_name):
     if OMC_table.getNumRows() != IMU_table.getNumRows():
         OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
 
-    # Calculate body orientations from states table for full recording period and write to csv file
-    if create_new_ori_csvs == True:
-        extract_body_quats(OMC_table, path_to_OMC_model_file, results_dir, tag="OMC")
-        extract_body_quats(IMU_table, path_to_IMU_model_file, results_dir, tag="IMU")
-
-
+    # TODO: Maybe don't need this code anymore...?
     # Find the heading offset between IMU model thorax and OMC model thorax (as a descriptor of global frame offset) (read in untrimmed data)
-    thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=results_dir + r"\OMC_quats.csv", trim_bool=False)
-    thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv", trim_bool=False)
+    thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=False)
+    thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=False)
     heading_offset = find_heading_offset(thorax_OMC_all, thorax_IMU_all)
 
     # Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
-    thorax_OMC, humerus_OMC, radius_OMC = read_in_quats(start_time, end_time, file_name=results_dir + r"\OMC_quats.csv", trim_bool=True)
-    thorax_IMU, humerus_IMU, radius_IMU = read_in_quats(start_time, end_time, file_name=results_dir + r"\IMU_quats.csv", trim_bool=True)
+    thorax_OMC, humerus_OMC, radius_OMC = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=True)
+    thorax_IMU, humerus_IMU, radius_IMU = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=True)
+
+    # Account for different in length of results between IMU data and OMC data
+    if len(thorax_OMC) == len(thorax_IMU) + 1:
+        np.delete(thorax_OMC, [-1], 0)
+        np.delete(humerus_OMC, [-1], 0)
+        np.delete(radius_OMC, [-1], 0)
+    elif len(thorax_OMC) != len(thorax_IMU):
+        print('OMC and IMU csvs are different sizes')
+        quit()
 
     # Trim tables based on time of interest
     OMC_table.trim(start_time, end_time)
@@ -96,7 +102,7 @@ def fun(trial_name):
 
     # Write final RMSE values to a csv
     final_RMSE_values_df = pd.DataFrame.from_dict(
-        {"Trial Name:": str(trial_name),
+        {"Trial Name:": str(compare_name),
          "RMSE_thorax_ori": RMSE_thorax_ori, "RMSE_humerus_ori": RMSE_humerus_ori,
          "RMSE_radius_ori": RMSE_radius_ori, "RMSE_thorax_forward_tilt": RMSE_thorax_forward_tilt,
          "RMSE_thorax_lateral_tilt": RMSE_thorax_lateral_tilt, "RMSE_thorax_rotation": RMSE_thorax_rotation,
@@ -107,9 +113,8 @@ def fun(trial_name):
         orient='index')
 
 
-    final_RMSE_values_df.to_csv(figure_results_dir + "\\" + str(trial_name) + r"_Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
+    final_RMSE_values_df.to_csv(figure_results_dir + "\\" + str(compare_name) + r"_Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
                                 mode='w', encoding='utf-8', na_rep='nan')
 
 
-
-fun(trial_name="OMC_JA_Slow")
+fun(compare_name="ALL_POSE_BASED_JA_Slow")

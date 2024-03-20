@@ -52,7 +52,8 @@ def run_calibrate_model(calibration_settings_file, modelFileName, sensor_to_open
 
 
 def run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
-                           sensor_to_opensim_rotations, results_directory, start_time, end_time, IK_output_file_name, visualize_tracking):
+               sensor_to_opensim_rotations, results_directory, trim_bool,
+               start_time, end_time, IK_output_file_name, visualize_tracking):
 
     # Instantiate an InverseKinematicsTool
     imuIK = osim.IMUInverseKinematicsTool(IMU_IK_settings_file)
@@ -62,8 +63,9 @@ def run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
     imuIK.set_orientations_file(orientations_file)
     imuIK.set_sensor_to_opensim_rotations(sensor_to_opensim_rotations)
     imuIK.set_results_directory(results_directory)
-    imuIK.set_time_range(0, start_time)
-    imuIK.set_time_range(1, end_time)
+    if trim_bool == True:
+        imuIK.set_time_range(0, start_time)
+        imuIK.set_time_range(1, end_time)
     imuIK.setOutputMotionFileName(IK_output_file_name)
 
     # Run IK
