@@ -6,7 +6,7 @@ from scipy.spatial.transform import Rotation as R
 import pandas as pd
 from quat_functions import *
 import opensim as osim
-
+from scipy.spatial.transform import Slerp
 
 """ FUNCTIONS FOR READING IN DATA"""
 
@@ -1041,3 +1041,69 @@ def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results
     fig.savefig(figure_results_dir + r"\IMU_Orientation_Diff.png")
 
     return RMSE_angle1, RMSE_angle2, RMSE_angle3
+
+
+
+# Use SLERP to fill gaps in quaternion data (awkward because scipy.spatial.transform.Rotation can't handle nans,
+# so we can't just make a sequence of scipy Rs from an array of quaternions if it has any nans in)
+def fill_nan_gaps_in_quat_df(IMU_df, max_gap):
+    row = 0
+    while row < len(IMU_df):
+
+        if IMU_df.iloc[row].isna().any() == True:  # If there are any nan values
+
+            # Get closest previous non-nan rot
+            prev_rot_row = row - 1
+            prev_rot = IMU_df.iloc[prev_rot_row, [1, 2, 3, 0]].to_numpy()
+
+            # Get the next non-nan rot
+            inner_row = row + 1
+            while inner_row < len(IMU_df):  # Iterate through next rows until you find next non-nan, until end of df
+                if IMU_df.iloc[inner_row].notna().any():
+                    break
+                inner_row += 1
+
+            if inner_row == len(IMU_df):  # If we have reached the end of the dataframe and there's non more non-nans
+                for fill_row in range(row, inner_row):
+                    IMU_df.iloc[fill_row] = IMU_df.iloc[
+                        prev_rot_row]  # Fill in all the last nans with the previous non-nan rot
+
+            else:
+                next_rot_row = inner_row  # This is the next available non-nan row
+                next_rot = IMU_df.iloc[next_rot_row, [1, 2, 3,
+                                                      0]].to_numpy()  # This is the next available quat to use for the interpolation
+
+                # Turn the two quats into scipy Rs
+                prev_rot_R = R.from_quat(prev_rot)
+                next_rot_R = R.from_quat(next_rot)
+
+                # Create sequence of the two scipy Rs, ready to be used in the slerp
+                key_rots = []
+                key_rots.append(prev_rot_R)
+                key_rots.append(next_rot_R)
+                key_rots_R = R.concatenate(key_rots)  # The start and finish Rs
+
+                # Create the inputs for the slerp
+                key_times = [prev_rot_row, next_rot_row]  # The start and finish times corresponding to the Rs
+                new_times = list(range(row, next_rot_row))  # The rows where we need to create new Rs
+                slerp = Slerp(key_times, key_rots_R)  # Create the Slerp
+                interp_rots = slerp(new_times)  # Create the new Rs from the previous and next known non-nan Rs
+
+                # Turn the Rs back into quaternions to update the original dataframe
+                interp_quats = interp_rots.as_quat()
+
+                # Add the new quats into the dataframe where previously there were nans
+                for fill_row in range(row, next_rot_row):
+                    IMU_df.iloc[fill_row] = interp_quats[(fill_row - row), [3, 0, 1, 2]]
+
+            if inner_row - row > max_gap:
+                print(f"There was a gap in the data larger than {max_gap} samples ({inner_row-row} samples), "
+                      f"which has been filled with SLERP.")
+
+            # Update row to the next non-nan row so the while loop continues looking for the next gap
+            row = inner_row  # This is row with next non-nan rot, or it's = len(IMU_df), so while loop will break
+
+        else:
+            row += 1
+
+    return IMU_df

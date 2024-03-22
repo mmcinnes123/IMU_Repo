@@ -24,7 +24,7 @@ def fun(compare_name):
 
     # Define some file names
     IMU_IK_results_dir = os.path.join(parent_dir, IMU_IK_results_file_name)
-    results_dir = parent_dir + r"\Comparison_" + compare_name
+    results_dir = os.path.join(parent_dir, "Comparison_" + compare_name)
     IMU_states_file = os.path.join(IMU_IK_results_dir, IMU_IK_results_file_name.replace('_IMU_IK_results', '_StatesReporter_states.sto'))
     IMU_csv_file = os.path.join(IMU_IK_results_dir, IMU_IK_results_file_name.replace('_IMU_IK_results', '_IMU_quats.csv'))
     OMC_states_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', 'OMC_StatesReporter_states.sto')
