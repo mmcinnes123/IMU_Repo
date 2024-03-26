@@ -13,12 +13,12 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P2'
-trial_name_dict = {'CP': {'N_self': 6, 'Alt_self': 10, 'N_asst': 15, 'Alt_asst': 22},
-                   'JA_Slow': {'N_self': 8, 'Alt_self': 12},
-                   'JA_Fast': {'N_self': 5, 'Alt_self': 9},
-                   'ROM': {'N_self': 3, 'Alt_self': 7},
-                   'ADL': {'N_self': 1, 'Alt_self': 1}}     # Looking at OMC data, input time values next to each type of pose
+subject_code = 'P3'
+trial_name_dict = {'CP': {'N_self': 10, 'Alt_self': 19, 'N_asst': 13, 'Alt_asst': 23},
+                   'JA_Slow': {'N_self': 7, 'Alt_self': 10},
+                   'JA_Fast': {'N_self': 8, 'Alt_self': 11},
+                   'ROM': {'N_self': 5, 'Alt_self': 8},
+                   'ADL': {'N_self': 3, 'Alt_self': 6}}     # Looking at OMC data, input time values next to each type of pose
 IMU_type_dict = {'IMU': ' - Report2 - IMU_Quats.txt', 'Cluster': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 sample_rate = 100
 
@@ -69,7 +69,7 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
         IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
 
         # Write data to APDM format .csv
-        file_tag = IMU_type + '_Quats_' + str(pose_name) + '_' + str(cal_pose_time) + 's'
+        file_tag = IMU_type + '_Quats_' + str(pose_name)
         write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, trial_results_dir, file_tag)
         # Write data to .sto using OpenSim APDM converter tool
         APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",

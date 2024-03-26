@@ -7,7 +7,7 @@ from scipy.spatial.transform import Rotation as R
 
 """ Set the elbow angle to 0 or 90 degrees """
 
-EL_X_new = 90  # Specify the default elbow flexion angle in degrees
+EL_X_new = 0  # Specify the default elbow flexion angle in degrees
 
 model_file = 'das3.osim'
 model = osim.Model(model_file)

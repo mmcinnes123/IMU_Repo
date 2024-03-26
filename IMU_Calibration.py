@@ -5,27 +5,28 @@ from Calibration_functions import *
 from IMU_IK_functions import *
 import os
 
-
 """ SETTINGS """
 
 # Quick Settings
 subject_code = 'P2'
-calibration_name = 'ALL_MANUAL'     # Choose what you want this calibration to be called
+calibration_name = 'ALL_POSE_BASED_N_asst'     # Choose what you want this calibration to be called
 trial_name = 'CP'   # Specify which trial to use for calibration pose
-calibration_orientations_file = 'Cluster_Quats_Alt_asst_22s.sto'  # Specify which orientation data at which time to use for calibration
+IMU_type = 'Cluster'    # either Cluster or IMU
+pose_name = 'N_asst'  # Same as used to save the .sto files
 
 # Calibration Method Options:
 # Pose-only (OpenSim): get_IMU_cal_POSE_BASED
 # Manual alignment: get_IMU_cal_MANUAL
 # Combined: Pose-based, but then correct with manual Y: get_IMU_cal_POSE_and_MANUAL_Y
 # Manual: Humerus-specific, using humerus IMU y-axis and radius IMU y-axis: get_humerus_IMU_cal_MANUAL_Ys
-cal_method_dict = {'Thorax': 'get_IMU_cal_MANUAL',
-                   'Humerus': 'get_IMU_cal_MANUAL',
-                   'Radius': 'get_IMU_cal_MANUAL'}
+cal_method_dict = {'Thorax': 'get_IMU_cal_POSE_BASED',
+                   'Humerus': 'get_IMU_cal_POSE_BASED',
+                   'Radius': 'get_IMU_cal_POSE_BASED'}
 
 # Define some file paths
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
 sto_files_dir = os.path.join(os.path.join(parent_dir, 'Preprocessed_Data'), trial_name)
+calibration_orientations_file = IMU_type + '_Quats_' + pose_name + '.sto'
 calibration_orientations_file_path = os.path.join(sto_files_dir, calibration_orientations_file)
 calibrated_models_dir = os.path.join(parent_dir, 'Calibrated_Models')
 if os.path.exists(calibrated_models_dir) == False:

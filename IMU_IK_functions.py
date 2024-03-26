@@ -51,7 +51,7 @@ def run_calibrate_model(calibration_settings_file, modelFileName, sensor_to_open
     model.printToXML(output_dir + r'\Calibrated_' + modelFileName)
 
 
-def run_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
+def run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
                sensor_to_opensim_rotations, results_directory, trim_bool,
                start_time, end_time, IK_output_file_name, visualize_tracking):
 

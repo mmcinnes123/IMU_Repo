@@ -5,17 +5,10 @@
 import os
 from functions import *
 
-def fun():
+def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time):
 
 
     """ SETTINGS """
-
-    # Quick Settings
-    subject_code = 'P2'
-    trial_name = 'JA_Slow'
-    start_time = 0
-    end_time = 100
-    calibration_name = 'ALL_POSE_BASED_N_asst'  # Used to find the calibrated model file
 
     labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
     labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
@@ -113,5 +106,3 @@ def fun():
     final_RMSE_values_df.to_csv(figure_results_dir + "\\" + str(compare_name) + r"_Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
                                 mode='w', encoding='utf-8', na_rep='nan')
 
-
-fun()
