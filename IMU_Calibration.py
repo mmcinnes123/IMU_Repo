@@ -1,30 +1,27 @@
 # This script takes an uncalibrated model, applies the chosen calibration method, and outputs a calibrated model
 
-import numpy as np
-from scipy.spatial.transform import Rotation as R
-from quat_functions import *
+
 from Calibration_functions import *
-import opensim as osim
-from functions import *
 from IMU_IK_functions import *
 import os
+
 
 """ SETTINGS """
 
 # Quick Settings
 subject_code = 'P2'
-# Specify which orientation data at which time to use for calibration
-calibration_orientations_file = 'Cluster_Quats_N_self_6s.sto'
-trial_name = 'CP'
-calibration_name = 'ALL_POSE_BASED'
-# Options:
+calibration_name = 'ALL_MANUAL'     # Choose what you want this calibration to be called
+trial_name = 'CP'   # Specify which trial to use for calibration pose
+calibration_orientations_file = 'Cluster_Quats_Alt_asst_22s.sto'  # Specify which orientation data at which time to use for calibration
+
+# Calibration Method Options:
 # Pose-only (OpenSim): get_IMU_cal_POSE_BASED
 # Manual alignment: get_IMU_cal_MANUAL
 # Combined: Pose-based, but then correct with manual Y: get_IMU_cal_POSE_and_MANUAL_Y
 # Manual: Humerus-specific, using humerus IMU y-axis and radius IMU y-axis: get_humerus_IMU_cal_MANUAL_Ys
-cal_method_dict = {'Thorax': 'get_IMU_cal_POSE_BASED',
-                   'Humerus': 'get_IMU_cal_POSE_BASED',
-                   'Radius': 'get_IMU_cal_POSE_BASED'}
+cal_method_dict = {'Thorax': 'get_IMU_cal_MANUAL',
+                   'Humerus': 'get_IMU_cal_MANUAL',
+                   'Radius': 'get_IMU_cal_MANUAL'}
 
 # Define some file paths
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code

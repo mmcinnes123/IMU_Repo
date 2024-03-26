@@ -1,10 +1,9 @@
-# This script preprocess IMU data, ready for use in OpenSim
+# This script preprocess IMU data, ready for use in OpenSim.
 # Input is Motion Monitor .txt report file
 # Output is .sto OpenSim file
-# It also does an initial comparison of the raw orientation data from the 'real' and 'perfect' IMUs
-# Output is a .csv with RMSE values for each IMU, and a .png plot
-import numpy as np
-import pandas as pd
+# It also uses a dictionary of specified times to create .sto files for each moment a calibration pose was performed
+# It also creates these outputs for multiple verions of the IMU data (e.g. 'real' and 'perfect' IMUs)
+
 
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
@@ -20,10 +19,8 @@ trial_name_dict = {'CP': {'N_self': 6, 'Alt_self': 10, 'N_asst': 15, 'Alt_asst':
                    'JA_Fast': {'N_self': 5, 'Alt_self': 9},
                    'ROM': {'N_self': 3, 'Alt_self': 7},
                    'ADL': {'N_self': 1, 'Alt_self': 1}}     # Looking at OMC data, input time values next to each type of pose
-IMU_type_dict = {'IMU': ' - Report2 - IMU_Quats.txt', 'Cluster': ' - Report3 - Cluster_Quats.txt',
-                 'Stylus': ' - Report4 - Cluster_Quats_Stylus_CFs.txt'}     # Edit this depending on what data you want to look at
+IMU_type_dict = {'IMU': ' - Report2 - IMU_Quats.txt', 'Cluster': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 sample_rate = 100
-static_time = 1    # Input first known static time to use as reference for change in orientation error
 
 # Required Files in Folder
 template_file = "APDM_template_4S.csv"
@@ -78,7 +75,6 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
         APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
                              output_file_name=trial_results_dir + "\\" + file_tag + ".sto")
 
-    return IMU1_df, IMU2_df, IMU3_df
 
 
 # Iterating through each trial, for each type of quaternion data (real IMU or 'perfect' cluster-based quaternions),
@@ -88,7 +84,6 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
 for trial_name in trial_name_dict:
 
     cal_pose_time_dict = trial_name_dict[trial_name]
-    # raw_data_file = x|x
 
     # Create a new results directory
     trial_results_dir = os.path.join(sto_files_dir, trial_name)
@@ -99,7 +94,7 @@ for trial_name in trial_name_dict:
 
         raw_data_file = subject_code + '_' + trial_name + IMU_type_dict[IMU_key]
         raw_data_file_path = os.path.join(raw_data_dir, raw_data_file)
-        IMU1_df, IMU2_df, IMU3_df = write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
+        write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
 
 
 

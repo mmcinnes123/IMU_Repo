@@ -5,32 +5,32 @@
 import os
 from functions import *
 
-def fun(compare_name):
+def fun():
 
 
     """ SETTINGS """
 
     # Quick Settings
+    subject_code = 'P2'
     trial_name = 'JA_Slow'
-    print("Running IK_Compare function for " + compare_name)
-    parent_dir = r"C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P2"  # Name of the working folder
     start_time = 0
     end_time = 100
-    calibration_name = 'ALL_POSE_BASED'  # Used to find the calibrated model file
-    IMU_IK_results_file_name = 'ALL_POSE_BASED_JA_Slow_IMU_IK_results'  # Used to find the states and .csv file
+    calibration_name = 'ALL_POSE_BASED_N_asst'  # Used to find the calibrated model file
 
     labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
     labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
     # Define some file names
-    IMU_IK_results_dir = os.path.join(parent_dir, IMU_IK_results_file_name)
-    results_dir = os.path.join(parent_dir, "Comparison_" + compare_name)
-    IMU_states_file = os.path.join(IMU_IK_results_dir, IMU_IK_results_file_name.replace('_IMU_IK_results', '_StatesReporter_states.sto'))
-    IMU_csv_file = os.path.join(IMU_IK_results_dir, IMU_IK_results_file_name.replace('_IMU_IK_results', '_IMU_quats.csv'))
+    compare_name = calibration_name + '_' + trial_name
+    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    IMU_IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
+    results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
+    IMU_states_file = os.path.join(IMU_IK_results_dir, trial_name + '_StatesReporter_states.sto')
+    IMU_csv_file = os.path.join(IMU_IK_results_dir, trial_name + '_IMU_quats.csv')
     OMC_states_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', 'OMC_StatesReporter_states.sto')
     OMC_csv_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', trial_name + '_OMC_quats.csv')
-
     figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
+
     if os.path.exists(results_dir) == False:
         os.mkdir(results_dir)
     if os.path.exists(figure_results_dir) == False:
@@ -43,14 +43,11 @@ def fun(compare_name):
     # Read in states for states files
     OMC_table = osim.TimeSeriesTable(OMC_states_file)
     IMU_table = osim.TimeSeriesTable(IMU_states_file)
-    print(OMC_table.getNumRows())
-    print(IMU_table.getNumRows())
 
     # Check if they're the same length and remove last row from OMC table if not.
     if OMC_table.getNumRows() != IMU_table.getNumRows():
         OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
 
-    # TODO: Maybe don't need this code anymore...?
     # Find the heading offset between IMU model thorax and OMC model thorax (as a descriptor of global frame offset) (read in untrimmed data)
     thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=False)
     thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=False)
@@ -117,4 +114,4 @@ def fun(compare_name):
                                 mode='w', encoding='utf-8', na_rep='nan')
 
 
-fun(compare_name="ALL_POSE_BASED_JA_Slow")
+fun()

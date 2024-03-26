@@ -15,7 +15,6 @@ def read_sto_quaternion_file(IMU_orientations_file):
     # index = df['time'].index[np.isclose(df['time'].loc[:], pose_time, atol=0.001)].to_list()
     # df = df.iloc[index[0]]
     df = df.iloc[0]
-    print(df)
 
     # Create scipy orientations from the dataframe
     thorax_IMU_ori_np = np.fromstring(df.loc['thorax_imu'], sep=",")
