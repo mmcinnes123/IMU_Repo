@@ -336,6 +336,7 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
     x_rel2_X_on_XY = np.zeros((n_rows))
     x_rel2_X_on_XZ = np.zeros((n_rows))
     z_rel2_Z_on_ZY = np.zeros((n_rows))
+    y_rel2_Y_on_XY = np.zeros((n_rows))
     for row in range(n_rows):
         joint_rot = quat_mul(quat_conj(CF1[row]), CF2[row])  # Calculate joint rotation quaternion
         joint_scipyR = R.from_quat([joint_rot[1], joint_rot[2], joint_rot[3], joint_rot[0]])  # In scalar last format
@@ -357,13 +358,16 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         X_on_XZ = [1, 0]
         vec_z_on_ZY = [mat_z_Z, mat_z_Y]
         Z_on_ZY = [1, 0]
+        vec_y_on_XY = [mat_y_X, mat_y_Y]
+        Y_on_XY = [0, 1]
         # Calculate the angle of certain CF2 vectors on certain CF1 planes
         x_rel2_X_on_XY[row] = angle_between_two_2D_vecs(vec_x_on_XY, X_on_XY)
         x_rel2_X_on_XZ[row] = angle_between_two_2D_vecs(vec_x_on_XZ, X_on_XZ)
         z_rel2_Z_on_ZY[row] = angle_between_two_2D_vecs(vec_z_on_ZY, Z_on_ZY)
+        y_rel2_Y_on_XY[row] = angle_between_two_2D_vecs(vec_y_on_XY, Y_on_XY)
 
     # Assign to clinically relevant joint angles
-    abduction_all = x_rel2_X_on_XY
+    abduction_all = y_rel2_Y_on_XY
     flexion_all = -z_rel2_Z_on_ZY
     rotation_elbow_down_all = x_rel2_X_on_XZ
     rotation_elbow_up_all = -z_rel2_Z_on_ZY
