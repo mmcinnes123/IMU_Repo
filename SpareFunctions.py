@@ -1,9 +1,26 @@
 
 
+# For quick changing on model coord settings
+def change_model_settings():
+    import opensim as osim
+    import numpy as np
 
+    model_file_path = r"das3.osim"
 
+    my_model = osim.Model(model_file_path)
 
+    min_value = - 200 * np.pi / 180
+    max_value = 200 * np.pi / 180
 
+    for coord in my_model.getCoordinateSet():
+        print(coord.getName())
+        my_model.getCoordinateSet().get(coord.getName()).set_clamped(True)
+        my_model.getCoordinateSet().get(coord.getName()).set_range(0, min_value)
+        my_model.getCoordinateSet().get(coord.getName()).set_range(1, max_value)
+
+    my_model.getCoordinateSet().get('TH_y').set_clamped(False)
+
+    my_model.printToXML(model_file_path)
 
 
 
