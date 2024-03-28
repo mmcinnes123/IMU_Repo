@@ -1,18 +1,40 @@
+
 import opensim as osim
+import os
+from scipy.spatial.transform import Rotation as R
 import numpy as np
 
-model_file_path = r"das3.osim"
+parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P3'
+analysis_template = os.path.join(parent_dir, 'Analysis_template.xml')
+model_file_path = os.path.join(parent_dir, 'Calibrated_das3.osim')
 
-my_model = osim.Model(model_file_path)
+mot_file = 'IMU_IK_results.mot'
+mot_file_path = os.path.join(parent_dir, mot_file)
 
-min_value = - np.pi
-max_value = np.pi
+start_time = 0
+end_time = 5
 
-my_model.getCoordinateSet().get('GH_y').set_range(0, min_value)
-my_model.getCoordinateSet().get('GH_y').set_range(1, max_value)
-my_model.getCoordinateSet().get('GH_z').set_range(0, min_value)
-my_model.getCoordinateSet().get('GH_z').set_range(1, max_value)
-my_model.getCoordinateSet().get('GH_x').set_range(0, min_value)
-my_model.getCoordinateSet().get('GH_x').set_range(1, max_value)
+# def run_analyze_tool(results_dir, model_file_path, mot_file_path, start_time, end_time):
+#
+#     analyze_Tool = osim.AnalyzeTool('Analyze_Settings.xml')
+#     analyze_Tool.updAnalysisSet().cloneAndAppend(osim.BodyKinematics())
+#     analyze_Tool.setModelFilename(model_file_path)
+#     analyze_Tool.setName("analyze")
+#     analyze_Tool.setCoordinatesFileName(mot_file_path)
+#     analyze_Tool.setStartTime(start_time)
+#     analyze_Tool.setFinalTime(end_time)
+#     analyze_Tool.setResultsDir(results_dir)
+#     analyze_Tool.run()
+#
+# run_analyze_tool(parent_dir, model_file_path, mot_file_path, start_time, end_time)
+#
 
-my_model.printToXML(model_file_path)
+#
+analysis_sto = 'analyze_BodyKinematics_pos_global.sto'
+analysis_sto_path = os.path.join(parent_dir, analysis_sto)
+
+
+
+thorax_OMC, humerus_OMC, radius_OMC = get_body_quats_from_analysis_sto(analysis_sto_path)
+
+

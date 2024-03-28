@@ -18,10 +18,12 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     IMU_IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
     results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
+    IMU_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
+    OMC_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
     IMU_states_file = os.path.join(IMU_IK_results_dir, trial_name + '_StatesReporter_states.sto')
-    IMU_csv_file = os.path.join(IMU_IK_results_dir, trial_name + '_IMU_quats.csv')
+    # IMU_csv_file = os.path.join(IMU_IK_results_dir, trial_name + '_IMU_quats.csv')
     OMC_states_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', 'OMC_StatesReporter_states.sto')
-    OMC_csv_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', trial_name + '_OMC_quats.csv')
+    # OMC_csv_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', trial_name + '_OMC_quats.csv')
     figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
 
     if os.path.exists(results_dir) == False:
@@ -42,14 +44,12 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     if OMC_table.getNumRows() != IMU_table.getNumRows():
         OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
 
-    # Find the heading offset between IMU model thorax and OMC model thorax (as a descriptor of global frame offset) (read in untrimmed data)
-    thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=True)
-    thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=True)
-    heading_offset = find_heading_offset(thorax_OMC_all, thorax_IMU_all)
 
     # Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
-    thorax_OMC, humerus_OMC, radius_OMC = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=True)
-    thorax_IMU, humerus_IMU, radius_IMU = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=True)
+    thorax_IMU, humerus_IMU, radius_IMU = get_body_quats_from_analysis_sto(IMU_analysis_sto_path, start_time, end_time)
+    thorax_OMC, humerus_OMC, radius_OMC = get_body_quats_from_analysis_sto(OMC_analysis_sto_path, start_time, end_time)
+    heading_offset = find_heading_offset(thorax_OMC, thorax_IMU)
+
 
     # Account for different in length of results between IMU data and OMC data
     if len(thorax_OMC) == len(thorax_IMU) + 1:

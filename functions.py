@@ -811,7 +811,7 @@ def plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, hume
 def plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
                           time, start_time, end_time, figure_results_dir, labelA, labelB):
 
-    label1 = "Abduction (x_rel2_X_on_XY)"
+    label1 = "Abduction (y_rel2_Y_on_XY)"
     label2 = "Flexion (z_rel2_Z_on_ZY)"
     label3 = "Rotation - Elbow Down (x_rel2_X_on_XZ)"
     label4 = "Rotation - Elbow Up (z_rel2_Z_on_ZY)"
@@ -1112,3 +1112,52 @@ def fill_nan_gaps_in_quat_df(IMU_df, max_gap):
             row += 1
 
     return IMU_df
+
+
+def run_analyze_tool(analyze_settings_template_file, results_dir, model_file_path, mot_file_path, start_time, end_time):
+
+    analyze_Tool = osim.AnalyzeTool(analyze_settings_template_file)
+    analyze_Tool.updAnalysisSet().cloneAndAppend(osim.BodyKinematics())
+    analyze_Tool.setModelFilename(model_file_path)
+    analyze_Tool.setName("analyze")
+    analyze_Tool.setCoordinatesFileName(mot_file_path)
+    analyze_Tool.setStartTime(start_time)
+    analyze_Tool.setFinalTime(end_time)
+    analyze_Tool.setResultsDir(results_dir)
+    print('Running Analyze Tool...')
+    analyze_Tool.run()
+    print('Analyze Tool run finished.')
+
+
+def get_body_quats_from_analysis_sto(analysis_sto_path, start_time, end_time):
+
+    # Read in the analysis .sto file with pos and ori data for each model body
+    analysis_table = osim.TimeSeriesTable(analysis_sto_path)   # Read in new states
+
+    # Trim based on start and end times
+    analysis_table.trim(start_time, end_time)
+
+    # Create an array of the XYZ Eulers used to define the body oris
+    thorax_Ox = analysis_table.getDependentColumn('thorax_Ox').to_numpy()
+    thorax_Oy = analysis_table.getDependentColumn('thorax_Oy').to_numpy()
+    thorax_Oz = analysis_table.getDependentColumn('thorax_Oz').to_numpy()
+    humerus_Ox = analysis_table.getDependentColumn('humerus_r_Ox').to_numpy()
+    humerus_Oy = analysis_table.getDependentColumn('humerus_r_Oy').to_numpy()
+    humerus_Oz = analysis_table.getDependentColumn('humerus_r_Oz').to_numpy()
+    radius_Ox = analysis_table.getDependentColumn('radius_r_Ox').to_numpy()
+    radius_Oy = analysis_table.getDependentColumn('radius_r_Oy').to_numpy()
+    radius_Oz = analysis_table.getDependentColumn('radius_r_Oz').to_numpy()
+    thorax_eulers = np.stack((thorax_Ox, thorax_Oy, thorax_Oz), axis=1)
+    humerus_eulers = np.stack((humerus_Ox, humerus_Oy, humerus_Oz), axis=1)
+    radius_eulers = np.stack((radius_Ox, radius_Oy, radius_Oz), axis=1)
+
+    # Create an array of scipy Rotations
+    thorax_R = R.from_euler('XYZ', thorax_eulers, degrees=True)
+    humerus_R = R.from_euler('XYZ', humerus_eulers, degrees=True)
+    radius_R = R.from_euler('XYZ', radius_eulers, degrees=True)
+
+    thorax_quats = thorax_R.as_quat()[:,[1, 2, 3, 0]]
+    humerus_quats = humerus_R.as_quat()[:,[1, 2, 3, 0]]
+    radius_quats = radius_R.as_quat()[:,[1, 2, 3, 0]]
+
+    return thorax_quats, humerus_quats, radius_quats

@@ -9,7 +9,6 @@ from functions import *
 
 def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool):
 
-
     """ SETTINGS """
 
     sample_rate = 100
@@ -19,10 +18,9 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
     IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
     coord_file_for_analysis = os.path.join(IK_results_dir, "IMU_IK_results.mot")
     calibrated_model_file = os.path.join(parent_dir, 'Calibrated_Models', calibration_name, 'Calibrated_das3.osim')
-    new_states_file_path = os.path.join(IK_results_dir, trial_name + '_StatesReporter_states.sto')
 
     # Analyze Settings
-    analyze_settings_template_file = "Analysis_Settings.xml"
+    analyze_settings_template_file = "Analyze_Settings.xml"
     model_file_for_analysis = calibrated_model_file
 
     # Create opensim logger file
@@ -43,15 +41,7 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
 
     """ MAIN """
 
-    # Create states file from the output .mot file
-    create_states_file_from_coordinates_file(analyze_settings_template_file, model_file_for_analysis, coord_file_for_analysis,
-                                             IK_results_dir, start_time, end_time, trial_name)
-
-    # Create a csv file with body oris
-    print(f'\nCreating {trial_name} body orientations csv file from states file')
-    states_table = osim.TimeSeriesTable(new_states_file_path)   # Read in new states
-    # Match the model to the states, extract the orientation of each body, then save to csv
-    extract_body_quats(states_table, model_file_for_analysis, IK_results_dir, tag=trial_name + '_IMU')
+    run_analyze_tool(analyze_settings_template_file, IK_results_dir, calibrated_model_file, coord_file_for_analysis, start_time, end_time)
 
 
 
