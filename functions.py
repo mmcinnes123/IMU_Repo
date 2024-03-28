@@ -442,17 +442,17 @@ def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                      figure_results_dir, labelA, labelB, joint_of_interest):
 
     if joint_of_interest == "Thorax":
-        ref1 = "/jointset/base/TH_x/value"
-        ref2 = "/jointset/base/TH_z/value"
-        ref3 = "/jointset/base/TH_y/value"
+        ref1 = "TH_x"
+        ref2 = "TH_z"
+        ref3 = "TH_y"
         label1 = "Forward Tilt"
         label2 = "Lateral Tilt"
         label3 = "(Change in) Trunk Rotation"
 
     elif joint_of_interest == "Elbow":
-        ref1 = "/jointset/hu/EL_x/value"
-        ref2 = "/jointset/ur/PS_y/value"
-        ref3 = "/jointset/ur/PS_y/value"
+        ref1 = "EL_x"
+        ref2 = "PS_y"
+        ref3 = "PS_y"
         label1 = "Elbow Flexion"
         label2 = "Pro/Supination"
         label3 = "Pro/Supination"
@@ -462,12 +462,12 @@ def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
         quit()
 
     # Extract coordinates from states table
-    OMC_angle1 = OMC_table.getDependentColumn(ref1).to_numpy() * 180 / np.pi
-    OMC_angle2 = OMC_table.getDependentColumn(ref2).to_numpy() * 180 / np.pi
-    OMC_angle3 = OMC_table.getDependentColumn(ref3).to_numpy() * 180 / np.pi
-    IMU_angle1 = IMU_table.getDependentColumn(ref1).to_numpy() * 180 / np.pi
-    IMU_angle2 = IMU_table.getDependentColumn(ref2).to_numpy() * 180 / np.pi
-    IMU_angle3 = IMU_table.getDependentColumn(ref3).to_numpy() * 180 / np.pi
+    OMC_angle1 = OMC_table.getDependentColumn(ref1).to_numpy()
+    OMC_angle2 = OMC_table.getDependentColumn(ref2).to_numpy()
+    OMC_angle3 = OMC_table.getDependentColumn(ref3).to_numpy()
+    IMU_angle1 = IMU_table.getDependentColumn(ref1).to_numpy()
+    IMU_angle2 = IMU_table.getDependentColumn(ref2).to_numpy()
+    IMU_angle3 = IMU_table.getDependentColumn(ref3).to_numpy()
 
     # Update trunk rotation angle to be the change in direction based on initial direction
     if joint_of_interest == "Thorax":

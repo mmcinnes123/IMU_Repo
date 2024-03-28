@@ -26,7 +26,7 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
     # Create opensim logger file
     osim.Logger.removeFileSink()
     osim.Logger.addFileSink(IK_results_dir + r'\Analysis.log')
-    osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
+    # osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
 
     # Set end time by checking length of data
     if trim_bool == False:

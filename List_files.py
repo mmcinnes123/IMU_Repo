@@ -18,7 +18,7 @@ analysis_start_time = 0
 analysis_end_time = 104
 analysis_trim_bool = False
 compare_start_time = 0
-compare_end_time = 10
+compare_end_time = 90
 
 for calibration_name in calibration_list:
 

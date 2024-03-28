@@ -7,6 +7,7 @@ from functions import *
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time):
 
+    print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, calibration type: {calibration_name}')
 
     """ SETTINGS """
 
@@ -17,13 +18,12 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     compare_name = calibration_name + '_' + trial_name
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     IMU_IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
+    OMC_IK_results_dir = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results')
     results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
     IMU_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
-    OMC_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
-    IMU_states_file = os.path.join(IMU_IK_results_dir, trial_name + '_StatesReporter_states.sto')
-    # IMU_csv_file = os.path.join(IMU_IK_results_dir, trial_name + '_IMU_quats.csv')
-    OMC_states_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', 'OMC_StatesReporter_states.sto')
-    # OMC_csv_file = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results', trial_name + '_OMC_quats.csv')
+    OMC_analysis_sto_path = os.path.join(OMC_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
+    IMU_mot_file = os.path.join(IMU_IK_results_dir, 'IMU_IK_results.mot')
+    OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
     figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
 
     if os.path.exists(results_dir) == False:
@@ -36,39 +36,40 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     """ MAIN """
 
-    # Read in states for states files
-    OMC_table = osim.TimeSeriesTable(OMC_states_file)
-    IMU_table = osim.TimeSeriesTable(IMU_states_file)
-
-    # Check if they're the same length and remove last row from OMC table if not.
-    if OMC_table.getNumRows() != IMU_table.getNumRows():
-        OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
-
+    # Read in coordinates from IK results .mot files
+    print('Reading coordinates from .mot files...')
+    OMC_table = osim.TimeSeriesTable(OMC_mot_file)
+    IMU_table = osim.TimeSeriesTable(IMU_mot_file)
 
     # Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
+    print('Getting model body orientations from .sto files...')
     thorax_IMU, humerus_IMU, radius_IMU = get_body_quats_from_analysis_sto(IMU_analysis_sto_path, start_time, end_time)
     thorax_OMC, humerus_OMC, radius_OMC = get_body_quats_from_analysis_sto(OMC_analysis_sto_path, start_time, end_time)
     heading_offset = find_heading_offset(thorax_OMC, thorax_IMU)
-
-
-    # Account for different in length of results between IMU data and OMC data
-    if len(thorax_OMC) == len(thorax_IMU) + 1:
-        np.delete(thorax_OMC, [-1], 0)
-        np.delete(humerus_OMC, [-1], 0)
-        np.delete(radius_OMC, [-1], 0)
-    elif len(thorax_OMC) != len(thorax_IMU):
-        print('OMC and IMU csvs are different sizes')
-        quit()
 
     # Trim tables based on time of interest
     OMC_table.trim(start_time, end_time)
     IMU_table.trim(start_time, end_time)
 
+    # Account for discrepancies between trimming function/time values
+    if OMC_table.getNumRows() == IMU_table.getNumRows() + 1:
+        OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
+        thorax_OMC = np.delete(thorax_OMC, [-1], 0)
+        humerus_OMC = np.delete(humerus_OMC, [-1], 0)
+        radius_OMC = np.delete(radius_OMC, [-1], 0)
+        thorax_IMU = np.delete(thorax_IMU, [-1], 0)
+        humerus_IMU = np.delete(humerus_IMU, [-1], 0)
+        radius_IMU = np.delete(radius_IMU, [-1], 0)
+    if OMC_table.getNumRows() != IMU_table.getNumRows():
+        print('Tables are different sizes.')
+
     time = OMC_table.getIndependentColumn()  # Get the time data
+
 
     """ PLOT """
 
     # Plot IMU vs OMC joint angles based on OpenSim coordinates
+    print('Plotting results...')
     RMSE_thorax_forward_tilt, RMSE_thorax_lateral_tilt, RMSE_thorax_rotation = \
         plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                          figure_results_dir, labelA, labelB, joint_of_interest="Thorax")
@@ -92,6 +93,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
 
     # Write final RMSE values to a csv
+    print('Writing results to .csv.')
     final_RMSE_values_df = pd.DataFrame.from_dict(
         {"Trial Name:": str(compare_name),
          "RMSE_thorax_ori": RMSE_thorax_ori, "RMSE_humerus_ori": RMSE_humerus_ori,
