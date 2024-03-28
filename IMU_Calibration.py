@@ -8,20 +8,20 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P2'
-calibration_name = 'ALL_POSE_BASED_N_asst'     # Choose what you want this calibration to be called
+subject_code = 'P3'
+calibration_name = 'ALL_MANUAL'     # Choose what you want this calibration to be called
 trial_name = 'CP'   # Specify which trial to use for calibration pose
-IMU_type = 'Cluster'    # either Cluster or IMU
-pose_name = 'N_asst'  # Same as used to save the .sto files
+IMU_type = 'IMU'    # either Cluster or IMU
+pose_name = 'N_self'  # Same as used to save the .sto files
 
 # Calibration Method Options:
 # Pose-only (OpenSim): get_IMU_cal_POSE_BASED
 # Manual alignment: get_IMU_cal_MANUAL
 # Combined: Pose-based, but then correct with manual Y: get_IMU_cal_POSE_and_MANUAL_Y
 # Manual: Humerus-specific, using humerus IMU y-axis and radius IMU y-axis: get_humerus_IMU_cal_MANUAL_Ys
-cal_method_dict = {'Thorax': 'get_IMU_cal_POSE_BASED',
-                   'Humerus': 'get_IMU_cal_POSE_BASED',
-                   'Radius': 'get_IMU_cal_POSE_BASED'}
+cal_method_dict = {'Thorax': 'get_IMU_cal_MANUAL',
+                   'Humerus': 'get_IMU_cal_MANUAL',
+                   'Radius': 'get_IMU_cal_MANUAL'}
 
 # Define some file paths
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code

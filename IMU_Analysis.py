@@ -7,12 +7,11 @@ from IMU_IK_functions import *
 import os
 from functions import *
 
-def run_analysis(subject_code, trial_name, calibration_name):
+def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool):
 
 
     """ SETTINGS """
 
-    trim_bool = False   # Whether to use the start and end times defined below, or to use whole trial time frame
     sample_rate = 100
 
     # Define some file paths
@@ -38,8 +37,8 @@ def run_analysis(subject_code, trial_name, calibration_name):
         start_time = 0
         end_time = n_rows / sample_rate
     else:
-        start_time = 0
-        end_time = 5
+        start_time = start_time
+        end_time = end_time
 
 
     """ MAIN """

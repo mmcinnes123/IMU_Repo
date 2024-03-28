@@ -9,11 +9,14 @@ from scipy.spatial.transform import Rotation as R
 
 EL_X_new = 0  # Specify the default elbow flexion angle in degrees
 
+osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
 model_file = 'das3.osim'
 model = osim.Model(model_file)
-model.getCoordinateSet().get('EL_x').setDefaultValue(EL_X_new * np.pi/180 )
-model.printToXML(model_file)
-
+# model.getCoordinateSet().get('EL_x').setDefaultValue(EL_X_new * np.pi/180 )
+# model.printToXML(model_file)
+#
+# print(f'\nIMU das3.osim default elbow angle has been updated to {EL_X_new} degrees.')
+#
 
 """ 
 Calculate the GH euler angles required to achieve 0 degree HT angles
@@ -30,48 +33,48 @@ Theory:
 Note: The default orientation of the scapula and clavicle should remain the same as original model
 """
 
-# # Get scipy orientation of body 2, expressed in body 1 frame
-# def get_scipy_rel_ori(body1, body2):
-#     Rot = body2.findTransformBetween(default_state, body1).R()
-#     quat = Rot.convertRotationToQuaternion()
-#     quat_arr = np.array([quat.get(0), quat.get(1), quat.get(2), quat.get(3)])
-#     scipy_R = R.from_quat(quat_arr[[1, 2, 3, 0]])
-#     return scipy_R
-#
-#
-# # Get the default state of the model
-# default_state = model.initSystem()
-#
-# # Get each body
-# thorax = model.getBodySet().get('thorax')
-# humerus = model.getBodySet().get('humerus_r')
-# scapula = model.getBodySet().get('scapula_r')
-#
-# # Get the relative orientation of the scapula in the thorax frame
-# R_s_in_t = get_scipy_rel_ori(thorax, scapula)
-#
-# # Calculate the required rotational offset of the humerus relative to the scapula frame
-# R_h_in_s = R_s_in_t.inv()
-#
-# # Decompose into 'YZY' Eulers, used to update the coordinates of the model.
-# GH_Y_new, GH_Z_new, GH_YY_new = R_h_in_s.as_euler('YZY')
-# print('\nThe GH coordinates will be set as follows: (GH_y, GH_z, GH_yy)')
-# print('(Remember these are subject to gimbal lock, so may look random)')
-# print(GH_Y_new*180/np.pi, GH_Z_new*180/np.pi, GH_YY_new*180/np.pi)
-#
-# # Update the model coordinates
-# model.getCoordinateSet().get('GH_y').setDefaultValue(GH_Y_new)
-# model.getCoordinateSet().get('GH_z').setDefaultValue(GH_Z_new)
-# model.getCoordinateSet().get('GH_yy').setDefaultValue(GH_YY_new)
-#
-#
-# # Check the resultant HT angles
-# model.initSystem()      # Reset the state of the model to the default state
-# HT_R = get_scipy_rel_ori(thorax, humerus)
-# HT_1, HT_2, HT_3 = HT_R.as_euler('YXZ', degrees=True)
-# print('\nThe HT angles of the updated model are: (HT_y, HT_x, HT_z)')
-# print("%.2f" % HT_1, "%.2f" % HT_2, "%.2f" % HT_3)
-#
-# model.printToXML(model_file)
+# Get scipy orientation of body 2, expressed in body 1 frame
+def get_scipy_rel_ori(body1, body2):
+    Rot = body2.findTransformBetween(default_state, body1).R()
+    quat = Rot.convertRotationToQuaternion()
+    quat_arr = np.array([quat.get(0), quat.get(1), quat.get(2), quat.get(3)])
+    scipy_R = R.from_quat(quat_arr[[1, 2, 3, 0]])
+    return scipy_R
+
+
+# Get the default state of the model
+default_state = model.initSystem()
+
+# Get each body
+thorax = model.getBodySet().get('thorax')
+humerus = model.getBodySet().get('humerus_r')
+scapula = model.getBodySet().get('scapula_r')
+
+# Get the relative orientation of the scapula in the thorax frame
+R_s_in_t = get_scipy_rel_ori(thorax, scapula)
+
+# Calculate the required rotational offset of the humerus relative to the scapula frame
+R_h_in_s = R_s_in_t.inv()
+
+# Decompose into 'YZY' Eulers, used to update the coordinates of the model.
+GH_Y_new, GH_Z_new, GH_YY_new = R_h_in_s.as_euler('YZX')
+print('\nThe GH coordinates will be set as follows: (GH_y, GH_z, GH_yy)')
+print('(Remember these are subject to gimbal lock, so may look random)')
+print(GH_Y_new*180/np.pi, GH_Z_new*180/np.pi, GH_YY_new*180/np.pi)
+
+# Update the model coordinates
+model.getCoordinateSet().get('GH_y').setDefaultValue(GH_Y_new)
+model.getCoordinateSet().get('GH_z').setDefaultValue(GH_Z_new)
+model.getCoordinateSet().get('GH_x').setDefaultValue(GH_YY_new)
+
+
+# Check the resultant HT angles
+model.initSystem()      # Reset the state of the model to the default state
+HT_R = get_scipy_rel_ori(thorax, humerus)
+HT_1, HT_2, HT_3 = HT_R.as_euler('YXZ', degrees=True)
+print('\nThe HT angles of the updated model are: (HT_y, HT_x, HT_z)')
+print("%.2f" % HT_1, "%.2f" % HT_2, "%.2f" % HT_3)
+
+model.printToXML(model_file)
 
 

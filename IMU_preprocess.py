@@ -13,12 +13,12 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P3'
-trial_name_dict = {'CP': {'N_self': 10, 'Alt_self': 19, 'N_asst': 13, 'Alt_asst': 23},
-                   'JA_Slow': {'N_self': 7, 'Alt_self': 10},
-                   'JA_Fast': {'N_self': 8, 'Alt_self': 11},
-                   'ROM': {'N_self': 5, 'Alt_self': 8},
-                   'ADL': {'N_self': 3, 'Alt_self': 6}}     # Looking at OMC data, input time values next to each type of pose
+subject_code = 'P1'
+trial_name_dict = {'CP': {'N_self': 6, 'Alt_self': 10, 'N_asst': 18, 'Alt_asst': 25},
+                   'JA_Slow': {'N_self': 7, 'Alt_self': 14},
+                   'JA_Fast': {'N_self': 3, 'Alt_self': 6},
+                   'ROM': {'N_self': 6, 'Alt_self': 10},
+                   'ADL': {'N_self': 8, 'Alt_self': 10}}     # Looking at OMC data, input time values next to each type of pose
 IMU_type_dict = {'IMU': ' - Report2 - IMU_Quats.txt', 'Cluster': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 sample_rate = 100
 

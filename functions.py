@@ -256,6 +256,7 @@ def extract_body_quats(states_table, model_file, results_dir, tag):
     # Get the states info from the states file (this is the step which is computationally slow)
     stateTrajectory = osim.StatesTrajectory.createFromStatesTable(model, states_table)
     n_rows = stateTrajectory.getSize()
+    print('Made stateTrajectory from states file.')
 
     # Initiate the system so that the model can actively realise positions based on states
     model.initSystem()

@@ -28,6 +28,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         os.mkdir(results_dir)
     if os.path.exists(figure_results_dir) == False:
         os.mkdir(figure_results_dir)
+    osim.Logger.removeFileSink()
     osim.Logger.addFileSink(results_dir + r"\opensim.log")
 
 
@@ -42,8 +43,8 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
 
     # Find the heading offset between IMU model thorax and OMC model thorax (as a descriptor of global frame offset) (read in untrimmed data)
-    thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=False)
-    thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=False)
+    thorax_OMC_all, humerus_OMC_all, radius_OMC_all = read_in_quats(start_time, end_time, file_name=OMC_csv_file, trim_bool=True)
+    thorax_IMU_all, humerus_IMU_all, radius_IMU_all = read_in_quats(start_time, end_time, file_name=IMU_csv_file, trim_bool=True)
     heading_offset = find_heading_offset(thorax_OMC_all, thorax_IMU_all)
 
     # Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
