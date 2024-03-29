@@ -5,17 +5,17 @@
 import os
 from functions import *
 
-def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time):
+def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool):
 
     print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, calibration type: {calibration_name}')
 
     """ SETTINGS """
-
+    sample_rate = 100
     labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
     labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
     # Define some file names
-    compare_name = calibration_name + '_' + trial_name
+    compare_name = subject_code + '_' + calibration_name + '_' + trial_name
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     IMU_IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
     OMC_IK_results_dir = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results')
@@ -24,12 +24,9 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     OMC_analysis_sto_path = os.path.join(OMC_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
     IMU_mot_file = os.path.join(IMU_IK_results_dir, 'IMU_IK_results.mot')
     OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
-    figure_results_dir = results_dir + "\\TimeRange_" + str(start_time) + "_" + str(end_time) + "s"
 
     if os.path.exists(results_dir) == False:
         os.mkdir(results_dir)
-    if os.path.exists(figure_results_dir) == False:
-        os.mkdir(figure_results_dir)
     osim.Logger.removeFileSink()
     osim.Logger.addFileSink(results_dir + r"\opensim.log")
 
@@ -40,6 +37,11 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     print('Reading coordinates from .mot files...')
     OMC_table = osim.TimeSeriesTable(OMC_mot_file)
     IMU_table = osim.TimeSeriesTable(IMU_mot_file)
+
+    # Set start and end time if trim_bool is false
+    if trim_bool == False:
+        start_time = 0
+        end_time = (IMU_table.getNumRows() - 1) / sample_rate
 
     # Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
     print('Getting model body orientations from .sto files...')
@@ -72,22 +74,22 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     print('Plotting results...')
     RMSE_thorax_forward_tilt, RMSE_thorax_lateral_tilt, RMSE_thorax_rotation = \
         plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
-                         figure_results_dir, labelA, labelB, joint_of_interest="Thorax")
+                         results_dir, labelA, labelB, joint_of_interest="Thorax")
 
     RMSE_elbow_flexion, RMSE_elbow_pronation, RMSE_elbow_pronation_2 = \
         plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
-                     figure_results_dir, labelA, labelB, joint_of_interest="Elbow")
+                     results_dir, labelA, labelB, joint_of_interest="Elbow")
 
     RMSE_HT_Y_plane_of_elevation, RMSE_HT_Z_elevation, RMSE_HT_YY_rotation = \
         plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
-                                     time, start_time, end_time, figure_results_dir, labelA, labelB)
+                                     time, start_time, end_time, results_dir, labelA, labelB)
 
     RMSE_thorax_ori, RMSE_humerus_ori, RMSE_radius_ori = \
         plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
-                           heading_offset, time, start_time, end_time, figure_results_dir)
+                           heading_offset, time, start_time, end_time, results_dir)
 
     RMSE_HT_abd, RMSE_HT_flexion, RMSE_HT_rotation = plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
-                          time, start_time, end_time, figure_results_dir, labelA, labelB)
+                          time, start_time, end_time, results_dir, labelA, labelB)
 
 
 
@@ -106,6 +108,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         orient='index')
 
 
-    final_RMSE_values_df.to_csv(figure_results_dir + "\\" + str(compare_name) + r"_Final_RMSEs_" + str(start_time) + "_" + str(end_time) + "s" + ".csv",
+    final_RMSE_values_df.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
                                 mode='w', encoding='utf-8', na_rep='nan')
 
