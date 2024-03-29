@@ -193,6 +193,48 @@ def get_humerus_IMU_cal_MANUAL_Ys(humerus_IMU_ori, radius_IMU_ori):
     return virtual_IMU
 
 
+# This method starts with a pose-based humerus calibration, then adjusts the calibration in the
+# abduction plane usign hte humerus IMU long axis, then adjust int/ext using forearm IMU long axis.
+def get_IMU_cal_hum_method_3(humerus_IMU_ori, radius_IMU_ori, body_ori):
+
+    # Get pose-based offset:
+    pose_based_body_inIMU = humerus_IMU_ori.inv() * body_ori   # Find the body frame, expressed in IMU frame
+    pose_based_body_z = pose_based_body_inIMU.as_matrix()[:, 2]
+
+    # Calculate the body's x-axis as cross product of IMUs y-axis and body's z-axis
+    # i.e. humeral abduction is defined by IMU long axis
+    int_body_x = np.cross(pose_based_body_z, [0, 1, 0])
+
+    # Lock in the newly created body y-axis, based on this new x-axis
+    body_y = np.cross(pose_based_body_z, int_body_x)
+    # This new y is a combination of the abduction defined by the pose, and the flexion defined by the humerus IMU
+
+    # Get the orientation of the radius IMU, expressed in the humerus IMU frame
+    radius_IMU_inHumIMU = humerus_IMU_ori.inv() * radius_IMU_ori
+    rad_y_inHumIMU = radius_IMU_inHumIMU.as_matrix()[:, 1]  # Get the direction of the radius IMUs y-axis
+
+    # Now, define the int/ext rotation by defining new body x-axis as cross prod between new body y and the forearm y
+    body_x = np.cross(rad_y_inHumIMU, body_y)
+
+    # Lastly:
+    body_z = np.cross(body_x, body_y)
+
+    # Finish the orthogonal CF from these vectors
+    body_matrix = np.array([body_x, body_y, body_z]).T
+    body_in_IMU = R.from_matrix(body_matrix)
+
+    # Check how non-orthogonal the matrix was
+    print("Non-orthogonality has been accounted for (determinant was: " + str(
+        round(np.linalg.det(body_matrix), 4)) + ")")
+
+    # Express the virtual IMU frame in the model's body frame
+    virtual_IMU = body_in_IMU.inv()
+
+    return virtual_IMU
+
+
+
+
 
 """ Functions to calculate and apply IMU offset depending on the method defined """
 
@@ -206,6 +248,8 @@ def apply_chosen_method(which_body, IMU_ori_rotated, body_ori, second_IMU_ori_ro
         virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori_rotated, body_ori)
     elif method_name == "get_humerus_IMU_cal_MANUAL_Ys":
         virtual_IMU = get_humerus_IMU_cal_MANUAL_Ys(IMU_ori_rotated, second_IMU_ori_rotated)
+    elif method_name == "get_IMU_cal_hum_method_3":
+        virtual_IMU = get_IMU_cal_hum_method_3(IMU_ori_rotated, second_IMU_ori_rotated, body_ori)
     else:
         print("Method not defined")
 

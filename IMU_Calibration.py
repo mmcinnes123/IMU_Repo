@@ -9,18 +9,19 @@ import os
 
 # Quick Settings
 subject_code = 'P3'
-calibration_name = 'ALL_MANUAL'     # Choose what you want this calibration to be called
+calibration_name = 'METHOD_2'     # Choose what you want this calibration to be called
 trial_name = 'CP'   # Specify which trial to use for calibration pose
 IMU_type = 'IMU'    # either Cluster or IMU
-pose_name = 'N_self'  # Same as used to save the .sto files
+pose_name = 'Alt_self'  # Same as used to save the .sto files
 
 # Calibration Method Options:
 # Pose-only (OpenSim): get_IMU_cal_POSE_BASED
 # Manual alignment: get_IMU_cal_MANUAL
 # Combined: Pose-based, but then correct with manual Y: get_IMU_cal_POSE_and_MANUAL_Y
 # Manual: Humerus-specific, using humerus IMU y-axis and radius IMU y-axis: get_humerus_IMU_cal_MANUAL_Ys
-cal_method_dict = {'Thorax': 'get_IMU_cal_MANUAL',
-                   'Humerus': 'get_IMU_cal_MANUAL',
+# Humerus method 3: pose defines flexion, humerus IMU defines adb, forearm IMU defines int/ext: get_IMU_cal_hum_method_3
+cal_method_dict = {'Thorax': 'get_IMU_cal_POSE_BASED',
+                   'Humerus': 'get_IMU_cal_hum_method_3',
                    'Radius': 'get_IMU_cal_MANUAL'}
 
 # Define some file paths
