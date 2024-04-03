@@ -7,6 +7,7 @@ import pandas as pd
 from quat_functions import *
 import opensim as osim
 from scipy.spatial.transform import Slerp
+from scipy.stats.stats import pearsonr
 
 """ FUNCTIONS FOR READING IN DATA"""
 
@@ -474,15 +475,10 @@ def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
         OMC_angle3 = OMC_angle3 - OMC_angle3[0]
         IMU_angle3 = IMU_angle3 - IMU_angle3[0]
 
-    # Smooth data
-    window_length = 20
-    polynomial = 3
-    # OMC_angle1 = scipy.signal.savgol_filter(OMC_angle1, window_length, polynomial)
-    # OMC_angle2 = scipy.signal.savgol_filter(OMC_angle2, window_length, polynomial)
-    # OMC_angle3 = scipy.signal.savgol_filter(OMC_angle3, window_length, polynomial)
-    # IMU_angle1 = scipy.signal.savgol_filter(IMU_angle1, window_length, polynomial)
-    # IMU_angle2 = scipy.signal.savgol_filter(IMU_angle2, window_length, polynomial)
-    # IMU_angle3 = scipy.signal.savgol_filter(IMU_angle3, window_length, polynomial)
+    # Calculate Pearson correlation coefficient
+    R_1 = pearsonr(OMC_angle1, IMU_angle1)[0]
+    R_2 = pearsonr(OMC_angle2, IMU_angle2)[0]
+    R_3 = pearsonr(OMC_angle3, IMU_angle3)[0]
 
     # Calculate error arrays
     error_angle1 = abs(OMC_angle1 - IMU_angle1)
@@ -576,7 +572,9 @@ def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
 
     fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
 
-    return RMSE_angle1, RMSE_angle2, RMSE_angle3
+    fig.close()
+
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
 
 
 # Define a function to plot IMU vs OMC for the shoulder joint euler anlges
@@ -596,6 +594,32 @@ def plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humeru
     OMC_angle3 = np.where(OMC_angle2 > elevation_threshold, OMC_angle3_all, np.nan)
     IMU_angle1 = np.where(OMC_angle2 > elevation_threshold, IMU_angle1_all, np.nan)
     IMU_angle3 = np.where(OMC_angle2 > elevation_threshold, IMU_angle3_all, np.nan)
+
+
+    # Remove rows from both arrays where there's a nan in either
+    OMC_angle1_for_R_calc = np.delete(OMC_angle1, np.union1d(np.where(np.isnan(OMC_angle1)), np.where(np.isnan(IMU_angle1))))
+    IMU_angle1_for_R_calc = np.delete(IMU_angle1, np.union1d(np.where(np.isnan(OMC_angle1)), np.where(np.isnan(IMU_angle1))))
+    OMC_angle2_for_R_calc = np.delete(OMC_angle2, np.union1d(np.where(np.isnan(OMC_angle2)), np.where(np.isnan(IMU_angle2))))
+    IMU_angle2_for_R_calc = np.delete(IMU_angle2, np.union1d(np.where(np.isnan(OMC_angle2)), np.where(np.isnan(IMU_angle2))))
+    OMC_angle3_for_R_calc = np.delete(OMC_angle3, np.union1d(np.where(np.isnan(OMC_angle3)), np.where(np.isnan(IMU_angle3))))
+    IMU_angle3_for_R_calc = np.delete(IMU_angle3, np.union1d(np.where(np.isnan(OMC_angle3)), np.where(np.isnan(IMU_angle3))))
+
+
+    # Calculate Pearson correlation coefficient
+    # Check if there is at least some data to compare
+    if len(np.union1d(np.where(~np.isnan(OMC_angle1)), np.where(~np.isnan(IMU_angle1)))) == 0:
+        R_1 = 0
+    else:
+        R_1 = pearsonr(OMC_angle1_for_R_calc, IMU_angle1_for_R_calc)[0]
+    if len(np.union1d(np.where(~np.isnan(OMC_angle2)), np.where(~np.isnan(IMU_angle2)))) == 0:
+        R_2 = 0
+    else:
+        R_2 = pearsonr(OMC_angle2_for_R_calc, IMU_angle2_for_R_calc)[0]
+    if len(np.union1d(np.where(~np.isnan(OMC_angle3)), np.where(~np.isnan(IMU_angle3)))) == 0:
+        R_3 = 0
+    else:
+        R_3 = pearsonr(OMC_angle3_for_R_calc, IMU_angle3_for_R_calc)[0]
+
 
     # Calculate error arrays
     error_angle1_with_nans = abs(OMC_angle1 - IMU_angle1)
@@ -697,7 +721,9 @@ def plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humeru
 
     fig.savefig(figure_results_dir + r"\HT_Eulers.png")
 
-    return RMSE_angle1, RMSE_angle2, RMSE_angle3
+    fig.close()
+
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
 
 
 # Define a function to plot IMU vs OMC model body orientation errors (single angle quaternion difference)
@@ -804,6 +830,8 @@ def plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, hume
 
     fig.savefig(figure_results_dir + r"\Body_Orientation_Diff.png")
 
+    fig.close()
+
     return RMSE_angle1, RMSE_angle2, RMSE_angle3
 
 
@@ -833,6 +861,36 @@ def plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
     abduction_IMU, flexion_IMU, rotation_elbow_down_IMU, rotation_elbow_up_IMU = \
         trim_vec_prof_angles(abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU,
                              IMU_angle1_all, IMU_angle2_all)
+
+    # Remove rows from both arrays where there's a nan in either
+    abduction_OMC_for_R_calc = np.delete(abduction_OMC, np.union1d(np.where(np.isnan(abduction_OMC)), np.where(np.isnan(abduction_IMU))))
+    abduction_IMU_for_R_calc = np.delete(abduction_IMU, np.union1d(np.where(np.isnan(abduction_OMC)), np.where(np.isnan(abduction_IMU))))
+    flexion_OMC_for_R_calc = np.delete(flexion_OMC, np.union1d(np.where(np.isnan(flexion_OMC)), np.where(np.isnan(flexion_IMU))))
+    flexion_IMU_for_R_calc = np.delete(flexion_IMU, np.union1d(np.where(np.isnan(flexion_OMC)), np.where(np.isnan(flexion_IMU))))
+    rotation_elbow_down_OMC_for_R_calc = np.delete(rotation_elbow_down_OMC, np.union1d(np.where(np.isnan(rotation_elbow_down_OMC)), np.where(np.isnan(rotation_elbow_down_IMU))))
+    rotation_elbow_down_IMU_for_R_calc = np.delete(rotation_elbow_down_IMU, np.union1d(np.where(np.isnan(rotation_elbow_down_OMC)), np.where(np.isnan(rotation_elbow_down_IMU))))
+    rotation_elbow_up_OMC_for_R_calc = np.delete(rotation_elbow_up_OMC, np.union1d(np.where(np.isnan(rotation_elbow_up_OMC)), np.where(np.isnan(rotation_elbow_up_IMU))))
+    rotation_elbow_up_IMU_for_R_calc = np.delete(rotation_elbow_up_IMU, np.union1d(np.where(np.isnan(rotation_elbow_up_OMC)), np.where(np.isnan(rotation_elbow_up_IMU))))
+
+
+    # Calculate Pearson correlation coefficient
+    # Check if there is at least some data to compare
+    if len(np.union1d(np.where(~np.isnan(abduction_OMC)), np.where(~np.isnan(abduction_IMU)))) == 0:
+        R_1 = 0
+    else:
+        R_1 = pearsonr(abduction_OMC_for_R_calc, abduction_IMU_for_R_calc)[0]
+    if len(np.union1d(np.where(~np.isnan(flexion_OMC)), np.where(~np.isnan(flexion_IMU)))) == 0:
+        R_2 = 0
+    else:
+        R_2 = pearsonr(flexion_OMC_for_R_calc, flexion_IMU_for_R_calc)[0]
+    if len(np.union1d(np.where(~np.isnan(rotation_elbow_down_OMC)), np.where(~np.isnan(rotation_elbow_down_IMU)))) == 0:
+        R_3 = 0
+    else:
+        R_3 = pearsonr(rotation_elbow_down_OMC_for_R_calc, rotation_elbow_down_IMU_for_R_calc)[0]
+    if len(np.union1d(np.where(~np.isnan(rotation_elbow_up_OMC)), np.where(~np.isnan(rotation_elbow_up_IMU)))) == 0:
+        R_4 = 0
+    else:
+        R_4 = pearsonr(rotation_elbow_up_OMC_for_R_calc, rotation_elbow_up_IMU_for_R_calc)[0]
 
     # Calculate error arrays
     error_angle1_with_nans = abs(abduction_OMC - abduction_IMU)
@@ -954,7 +1012,9 @@ def plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
 
     fig.savefig(figure_results_dir + r"\HT_Vectors.png")
 
-    return RMSE_angle1, RMSE_angle2, RMSE_angle3
+    fig.close()
+
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
 
 
 # Define a function to plot the error between real IMUs and cluster orientations, representing 'perfect' IMUs

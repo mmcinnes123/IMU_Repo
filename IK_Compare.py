@@ -3,6 +3,9 @@
 # Outputs are: .png plots of each joint of interest
 
 import os
+
+import pandas as pd
+
 from functions import *
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool):
@@ -72,15 +75,18 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     # Plot IMU vs OMC joint angles based on OpenSim coordinates
     print('Plotting results...')
-    RMSE_thorax_forward_tilt, RMSE_thorax_lateral_tilt, RMSE_thorax_rotation = \
+    RMSE_thorax_forward_tilt, RMSE_thorax_lateral_tilt, RMSE_thorax_rotation, \
+        R_thorax_forward_tilt, R_thorax_lateral_tilt, R_thorax_rotation = \
         plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                          results_dir, labelA, labelB, joint_of_interest="Thorax")
 
-    RMSE_elbow_flexion, RMSE_elbow_pronation, RMSE_elbow_pronation_2 = \
+    RMSE_elbow_flexion, RMSE_elbow_pronation, RMSE_elbow_pronation_2, \
+        R_elbow_flexion, R_elbow_pronation, R_elbow_pronation_2 = \
         plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                      results_dir, labelA, labelB, joint_of_interest="Elbow")
 
-    RMSE_HT_Y_plane_of_elevation, RMSE_HT_Z_elevation, RMSE_HT_YY_rotation = \
+    RMSE_HT_Y_plane_of_elevation, RMSE_HT_Z_elevation, RMSE_HT_YY_rotation, \
+        R_HT_Y_plane_of_elevation, R_HT_Z_elevation, R_HT_YY_rotation = \
         plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
                                      time, start_time, end_time, results_dir, labelA, labelB)
 
@@ -88,26 +94,38 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
                            heading_offset, time, start_time, end_time, results_dir)
 
-    RMSE_HT_abd, RMSE_HT_flexion, RMSE_HT_rotation = plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
+    RMSE_HT_abd, RMSE_HT_flexion, RMSE_HT_rotation, R_HT_abd, R_HT_flexion, R_HT_rotation = \
+        plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
                           time, start_time, end_time, results_dir, labelA, labelB)
 
+    # "Trial Name:": str(compare_name)
 
+    final_RMSE_values_df = pd.DataFrame.from_dict(
+        {"thorax_ori": RMSE_thorax_ori, "humerus_ori": RMSE_humerus_ori,
+         "radius_ori": RMSE_radius_ori, "thorax_forward_tilt": RMSE_thorax_forward_tilt,
+         "thorax_lateral_tilt": RMSE_thorax_lateral_tilt, "thorax_rotation": RMSE_thorax_rotation,
+         "elbow_flexion": RMSE_elbow_flexion, "elbow_pronation": RMSE_elbow_pronation,
+         "HT_abd": RMSE_HT_abd, "HT_flexion": RMSE_HT_flexion,
+         "HT_rotation": RMSE_HT_rotation, "HT_Y_plane_of_elevation": RMSE_HT_Y_plane_of_elevation,
+         "HT_Z_elevation": RMSE_HT_Z_elevation, "HT_YY_rotation": RMSE_HT_YY_rotation},
+        orient='index', columns=["RMSE"])
 
+    final_R_values_df = pd.DataFrame.from_dict(
+        {"thorax_forward_tilt": R_thorax_forward_tilt,
+         "thorax_lateral_tilt": R_thorax_lateral_tilt, "thorax_rotation": R_thorax_rotation,
+         "elbow_flexion": R_elbow_flexion, "elbow_pronation": R_elbow_pronation,
+         "HT_abd": R_HT_abd, "HT_flexion": R_HT_flexion,
+         "HT_rotation": R_HT_rotation, "HT_Y_plane_of_elevation": R_HT_Y_plane_of_elevation,
+         "HT_Z_elevation": R_HT_Z_elevation, "HT_YY_rotation": R_HT_YY_rotation},
+        orient='index', columns=["R"])
+
+    all_data = pd.concat((final_RMSE_values_df, final_R_values_df), axis=1)
 
     # Write final RMSE values to a csv
     print('Writing results to .csv.')
-    final_RMSE_values_df = pd.DataFrame.from_dict(
-        {"Trial Name:": str(compare_name),
-         "RMSE_thorax_ori": RMSE_thorax_ori, "RMSE_humerus_ori": RMSE_humerus_ori,
-         "RMSE_radius_ori": RMSE_radius_ori, "RMSE_thorax_forward_tilt": RMSE_thorax_forward_tilt,
-         "RMSE_thorax_lateral_tilt": RMSE_thorax_lateral_tilt, "RMSE_thorax_rotation": RMSE_thorax_rotation,
-         "RMSE_elbow_flexion": RMSE_elbow_flexion, "RMSE_elbow_pronation": RMSE_elbow_pronation,
-         "RMSE_HT_abd": RMSE_HT_abd, "RMSE_HT_flexion": RMSE_HT_flexion,
-         "RMSE_HT_rotation": RMSE_HT_rotation, "RMSE_HT_Y_plane_of_elevation": RMSE_HT_Y_plane_of_elevation,
-         "RMSE_HT_Z_elevation": RMSE_HT_Z_elevation, "RMSE_HT_YY_rotation": RMSE_HT_YY_rotation},
-        orient='index')
 
 
-    final_RMSE_values_df.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
+
+    all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
                                 mode='w', encoding='utf-8', na_rep='nan')
 
