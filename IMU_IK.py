@@ -43,4 +43,3 @@ def run_IMU_IK(subject_code, trial_name, orientations_file, calibration_name, IK
     run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file_path, sensor_to_opensim_rotations,
                IK_results_dir, IK_trim_bool, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
 
-

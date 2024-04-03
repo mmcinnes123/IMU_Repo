@@ -8,11 +8,11 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P3'
-calibration_name = 'METHOD_2'     # Choose what you want this calibration to be called
-trial_name = 'CP'   # Specify which trial to use for calibration pose
+subject_code = 'P1'
+calibration_name = 'OSIM'     # Choose what you want this calibration to be called
+trial_name = 'JA_Slow'   # Specify which trial to use for calibration pose
 IMU_type = 'IMU'    # either Cluster or IMU
-pose_name = 'Alt_self'  # Same as used to save the .sto files
+pose_name = 'N_self'  # Same as used to save the .sto files
 
 # Calibration Method Options:
 # Pose-only (OpenSim): get_IMU_cal_POSE_BASED
@@ -58,17 +58,14 @@ pose_confirmation = input("\nIs the default pose of the model set to match the e
 if pose_confirmation == "No":
     quit()
 
-# Calibrate the model based on my own methods (method for each body is defined within get_IMU_offset function)
-thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-    get_IMU_offset(cal_method_dict, calibration_orientations_file_path, model_file, calibrated_model_dir, baseIMUHeading)
+# # Calibrate the model based on my own methods (method for each body is defined within get_IMU_offset function)
+# thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+#     get_IMU_offset(cal_method_dict, calibration_orientations_file_path, model_file, calibrated_model_dir, baseIMUHeading)
 
-# Using the IMU offsets calculated above, update the virtual IMUs in the model to create a calibrated model
-apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, calibrated_model_dir)
+# # Using the IMU offsets calculated above, update the virtual IMUs in the model to create a calibrated model
+# apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, calibrated_model_dir)
 
-
-
-
-# # Code to use OpenSim's built-in calibration method
-# run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
-#                     calibration_orientations_file_path, baseIMUName, baseIMUHeading,
-#                     visualize_calibration, calibrated_models_dir)
+# Code to use OpenSim's built-in calibration method
+run_calibrate_model(calibration_settings_file, model_file, sensor_to_opensim_rotations,
+                    calibration_orientations_file_path, baseIMUName, baseIMUHeading,
+                    visualize_calibration, calibrated_models_dir)
