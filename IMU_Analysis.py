@@ -1,9 +1,8 @@
-# This script takes the .mot file from an IK solve, and creates a .sto states file,
-# then a .csv file with the orientations of each body in the model
+# This script takes the .mot file from an IK solve, and creates an .sto file with the time-series
+# position and orientation of every body in the model
 # Input is .mot file
-# Output is .sto states file and .csv file
+# Output is .sto file
 
-from IMU_IK_functions import *
 import os
 from functions import *
 
@@ -21,12 +20,10 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
 
     # Analyze Settings
     analyze_settings_template_file = "Analyze_Settings.xml"
-    model_file_for_analysis = calibrated_model_file
 
     # Create opensim logger file
     osim.Logger.removeFileSink()
     osim.Logger.addFileSink(IK_results_dir + r'\Analysis.log')
-    # osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
 
     # Set end time by checking length of data
     if trim_bool == False:
