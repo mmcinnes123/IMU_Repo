@@ -8,10 +8,11 @@ directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 list_of_subjects = ['P1', 'P2', 'P3']
 trial_name = 'JA_Slow'
 calibration_name_dict = {'ALL_MANUAL': None,
-                         'ALL_POSE_BASED_N_self': None,
-                         'ALL_POSE_BASED_Alt_self': None,
+                         'Thorax_POSE_Rest_MANUAL': None,
                          'METHOD_1': None,
-                         'METHOD_2': None}
+                         'METHOD_2': None,
+                         'OSIM': None,
+                         'OSIM_Alt': None}
 
 # Function to read the results form csv
 def read_from_csv(file_path):

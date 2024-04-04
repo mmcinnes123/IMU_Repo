@@ -572,7 +572,7 @@ def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
 
     fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
 
-    fig.close()
+    plt.close()
 
     return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
 
@@ -721,7 +721,7 @@ def plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humeru
 
     fig.savefig(figure_results_dir + r"\HT_Eulers.png")
 
-    fig.close()
+    plt.close()
 
     return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
 
@@ -830,7 +830,7 @@ def plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, hume
 
     fig.savefig(figure_results_dir + r"\Body_Orientation_Diff.png")
 
-    fig.close()
+    plt.close()
 
     return RMSE_angle1, RMSE_angle2, RMSE_angle3
 
@@ -1012,7 +1012,7 @@ def plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
 
     fig.savefig(figure_results_dir + r"\HT_Vectors.png")
 
-    fig.close()
+    plt.close()
 
     return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
 
