@@ -6,7 +6,7 @@
 import os
 from functions import *
 
-def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool):
+def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
 
     """ SETTINGS """
 
@@ -14,9 +14,10 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
 
     # Define some file paths
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
-    IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
+    IMU_type_dir = os.path.join(parent_dir, IMU_type)
+    IK_results_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name, trial_name)
     coord_file_for_analysis = os.path.join(IK_results_dir, "IMU_IK_results.mot")
-    calibrated_model_file = os.path.join(parent_dir, 'Calibrated_Models', calibration_name, 'Calibrated_das3.osim')
+    calibrated_model_file = os.path.join(IMU_type_dir, 'Calibrated_Models', calibration_name, 'Calibrated_das3.osim')
 
     # Analyze Settings
     analyze_settings_template_file = "Analyze_Settings.xml"

@@ -10,7 +10,7 @@ from functions import *
 
 
 
-def run_IMU_IK(subject_code, trial_name, orientations_file, calibration_name, IK_start_time, IK_end_time, IK_trim_bool):
+def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end_time, IK_trim_bool, IMU_type):
 
 
     """ SETTINGS """
@@ -23,14 +23,16 @@ def run_IMU_IK(subject_code, trial_name, orientations_file, calibration_name, IK
 
     # Define some file paths
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
-    IK_results_parent_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name)
+    IMU_type_dir = os.path.join(parent_dir, IMU_type)
+    IK_results_parent_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name)
     if os.path.exists(IK_results_parent_dir) == False:
         os.mkdir(IK_results_parent_dir)
     IK_results_dir = os.path.join(IK_results_parent_dir, trial_name)
     if os.path.exists(IK_results_dir) == False:
         os.mkdir(IK_results_dir)
-    calibrated_model_file = os.path.join(parent_dir, 'Calibrated_Models', calibration_name, 'Calibrated_das3.osim')
-    orientations_file_path = os.path.join(parent_dir, 'Preprocessed_Data', trial_name, orientations_file)
+    calibrated_model_file = os.path.join(IMU_type_dir, 'Calibrated_Models', calibration_name, 'Calibrated_das3.osim')
+    orientations_file = IMU_type + '_Quats_all.sto'
+    orientations_file_path = os.path.join(IMU_type_dir.replace(IMU_type, ''), 'Preprocessed_Data', trial_name, orientations_file)
 
     # Create opensim logger file
     osim.Logger.removeFileSink()

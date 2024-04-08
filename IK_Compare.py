@@ -8,7 +8,7 @@ import pandas as pd
 
 from functions import *
 
-def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool):
+def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
 
     print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, calibration type: {calibration_name}')
 
@@ -20,7 +20,8 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     # Define some file names
     compare_name = subject_code + '_' + calibration_name + '_' + trial_name
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
-    IMU_IK_results_dir = os.path.join(parent_dir, 'IMU_IK_results_' + calibration_name, trial_name)
+    IMU_type_dir = os.path.join(parent_dir, IMU_type)
+    IMU_IK_results_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name, trial_name)
     OMC_IK_results_dir = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results')
     results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
     IMU_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
