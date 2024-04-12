@@ -8,8 +8,8 @@ import os
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P1'
-calibration_name = 'METHOD_2'     # Choose what you want this calibration to be called
+subject_code = 'P3'
+calibration_name = 'ALL_MANUAL'     # Choose what you want this calibration to be called
 trial_name = 'CP'   # Specify which trial to use for calibration pose
 IMU_type = 'Perfect'       # either 'Real' or 'Perfect'
 pose_name = 'Alt_self'  # Same as used to save the .sto files
@@ -33,7 +33,7 @@ elif calibration_name == 'METHOD_1':
     radius_method = 'get_IMU_cal_MANUAL'
     pose_name = 'Alt_self'  # Same as used to save the .sto files
 
-elif calibration_name == 'METHOD_2':
+elif calibration_name == 'METHOD_2_Alt_self':
     thorax_method = 'get_IMU_cal_POSE_BASED'
     humerus_method = 'get_IMU_cal_hum_method_3'
     radius_method = 'get_IMU_cal_MANUAL'
@@ -51,7 +51,6 @@ calibration_orientations_file = IMU_type + '_Quats_' + pose_name + '.sto'
 sto_files_dir = os.path.join(os.path.join(parent_dir, 'Preprocessed_Data'), trial_name)
 calibration_orientations_file_path = os.path.join(sto_files_dir, calibration_orientations_file)
 calibrated_models_dir = os.path.join(IMU_type_dir, 'Calibrated_Models')
-
 if os.path.exists(calibrated_models_dir) == False:
     os.mkdir(calibrated_models_dir)
 calibrated_model_dir = os.path.join(calibrated_models_dir, calibration_name)
