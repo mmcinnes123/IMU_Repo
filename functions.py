@@ -1036,13 +1036,19 @@ def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results
     fig, axs = plt.subplots(3, 1, figsize=(14, 9))
 
     # Plot error graphs
-    time = np.array(range(len(IMU1_diff)))*0.01
-    start_time = time[0]
-    end_time = time[-1]
+    time1 = np.array(range(len(IMU1_diff)))*0.01
+    time2 = np.array(range(len(IMU2_diff)))*0.01
+    time3 = np.array(range(len(IMU3_diff)))*0.01
+    start_time1 = time1[0]
+    end_time1 = time1[-1]
+    start_time2 = time2[0]
+    end_time2 = time2[-1]
+    start_time3 = time3[0]
+    end_time3 = time3[-1]
 
-    axs[0].scatter(time, IMU1_diff, s=0.4)
-    axs[1].scatter(time, IMU2_diff, s=0.4)
-    axs[2].scatter(time, IMU3_diff, s=0.4)
+    axs[0].scatter(time1, IMU1_diff, s=0.4)
+    axs[1].scatter(time2, IMU2_diff, s=0.4)
+    axs[2].scatter(time3, IMU3_diff, s=0.4)
 
     axs[0].set_title(label1)
     axs[1].set_title(label2)
@@ -1050,11 +1056,11 @@ def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results
 
     # Plot RMSE error lines and text
     axs[0].axhline(y=RMSE_angle1, linewidth=2, c="red")
-    axs[0].text(time[-1] + 0.1 * (end_time - start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1, 1)) + " deg")
+    axs[0].text(time1[-1] + 0.1 * (end_time1 - start_time1), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1, 1)) + " deg")
     axs[1].axhline(y=RMSE_angle2, linewidth=2, c="red")
-    axs[1].text(time[-1] + 0.1 * (end_time - start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2, 1)) + " deg")
+    axs[1].text(time2[-1] + 0.1 * (end_time2 - start_time2), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2, 1)) + " deg")
     axs[2].axhline(y=RMSE_angle3, linewidth=2, c="red")
-    axs[2].text(time[-1] + 0.1 * (end_time - start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3, 1)) + " deg")
+    axs[2].text(time3[-1] + 0.1 * (end_time3 - start_time3), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3, 1)) + " deg")
 
 
     # Functions to define placement of max error annotation
@@ -1088,17 +1094,19 @@ def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
     y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
     y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
-    axs[0].text(time[-1] + 0.1 * (end_time - start_time), y_max_text_placement_1,
+    axs[0].text(time1[-1] + 0.1 * (end_time1 - start_time1), y_max_text_placement_1,
                 "Max = " + str(round(max_error_angle1, 1)) + " deg")
-    axs[1].text(time[-1] + 0.1 * (end_time - start_time), y_max_text_placement_2,
+    axs[1].text(time2[-1] + 0.1 * (end_time2 - start_time2), y_max_text_placement_2,
                 "Max = " + str(round(max_error_angle2, 1)) + " deg")
-    axs[2].text(time[-1] + 0.1 * (end_time - start_time), y_max_text_placement_3,
+    axs[2].text(time3[-1] + 0.1 * (end_time3 - start_time3), y_max_text_placement_3,
                 "Max = " + str(round(max_error_angle3, 1)) + " deg")
 
     # Set a shared x axis
     y_lim_list = np.array([max_error_angle1, max_error_angle2, max_error_angle3])
+    start_time_list = [start_time1, start_time2, start_time3]
+    end_time_list = [end_time1, end_time2, end_time3]
     for i in range(0, 3):
-        axs[i].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0, 1.1 * y_lim_list[i]), xlim=(start_time, end_time))
+        axs[i].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0, 1.1 * y_lim_list[i]), xlim=(start_time_list[i], end_time_list[i]))
         axs[i].grid(color="lightgrey")
 
     fig.tight_layout(pad=2.0)
@@ -1106,6 +1114,124 @@ def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results
     fig.savefig(figure_results_dir + r"\IMU_Orientation_Diff.png")
 
     return RMSE_angle1, RMSE_angle2, RMSE_angle3
+
+
+
+
+# Define a function to plot the error between real IMUs and cluster orientations, representing 'perfect' IMUs
+def plot_compare_real_vs_perfect_eulers(IMU_euls, OMC_euls, figure_results_dir, file_name):
+
+    label1 = "Thorax IMU orientation error"
+    label2 = "Humerus IMU orientation error"
+    label3 = "Forearm IMU orientation error"
+
+    IMU1_eul = IMU_euls[:,0]
+    IMU2_eul = IMU_euls[:,1]
+    IMU3_eul = IMU_euls[:,2]
+    OMC1_eul = OMC_euls[:,0]
+    OMC2_eul = OMC_euls[:,1]
+    OMC3_eul = OMC_euls[:,2]
+
+    IMU1_diff = IMU1_eul - OMC1_eul
+    IMU2_diff = IMU2_eul - OMC2_eul
+    IMU3_diff = IMU3_eul - OMC3_eul
+
+    # Calculate RMSE
+    RMSE_angle1 = (sum(np.square(IMU1_diff[~np.isnan(IMU1_diff)])) / len(IMU1_diff[~np.isnan(IMU1_diff)])) ** 0.5
+    RMSE_angle2 = (sum(np.square(IMU2_diff[~np.isnan(IMU2_diff)])) / len(IMU2_diff[~np.isnan(IMU2_diff)])) ** 0.5
+    RMSE_angle3 = (sum(np.square(IMU3_diff[~np.isnan(IMU3_diff)])) / len(IMU3_diff[~np.isnan(IMU3_diff)])) ** 0.5
+    max_error_angle1 = np.nanmax(IMU1_diff)
+    max_error_angle2 = np.nanmax(IMU2_diff)
+    max_error_angle3 = np.nanmax(IMU3_diff)
+
+    # Create figure with three subplots
+    fig, axs = plt.subplots(3, 1, figsize=(14, 9))
+
+    # Plot error graphs
+    time1 = np.array(range(len(IMU1_eul)))*0.01
+    time2 = np.array(range(len(IMU2_eul)))*0.01
+    time3 = np.array(range(len(IMU3_eul)))*0.01
+    start_time1 = time1[0]
+    end_time1 = time1[-1]
+    start_time2 = time2[0]
+    end_time2 = time2[-1]
+    start_time3 = time3[0]
+    end_time3 = time3[-1]
+
+    axs[0].scatter(time1, IMU1_eul, s=0.4)
+    axs[1].scatter(time2, IMU2_eul, s=0.4)
+    axs[2].scatter(time3, IMU3_eul, s=0.4)
+    axs[0].scatter(time1, OMC1_eul, s=0.4)
+    axs[1].scatter(time2, OMC2_eul, s=0.4)
+    axs[2].scatter(time3, OMC3_eul, s=0.4)
+
+    axs[0].set_title(label1)
+    axs[1].set_title(label2)
+    axs[2].set_title(label3)
+
+    # Plot RMSE error lines and text
+    axs[0].axhline(y=RMSE_angle1, linewidth=2, c="red")
+    axs[0].text(time1[-1] + 0.1 * (end_time1 - start_time1), IMU1_diff[0], "RMSE = " + str(round(RMSE_angle1, 1)) + " deg")
+    axs[1].axhline(y=RMSE_angle2, linewidth=2, c="red")
+    axs[1].text(time2[-1] + 0.1 * (end_time2 - start_time2), IMU2_diff[0], "RMSE = " + str(round(RMSE_angle2, 1)) + " deg")
+    axs[2].axhline(y=RMSE_angle3, linewidth=2, c="red")
+    axs[2].text(time3[-1] + 0.1 * (end_time3 - start_time3), IMU3_diff[0], "RMSE = " + str(round(RMSE_angle3, 1)) + " deg")
+
+    #
+    # # Functions to define placement of max error annotation
+    # def y_max_line_placement(max_error):
+    #     if max_error > 40:
+    #         line_placement = 40
+    #     else:
+    #         line_placement = max_error
+    #     return line_placement
+    #
+    #
+    # def y_max_text_placement(max_error, RMSE):
+    #     if max_error > 40:
+    #         text_placement = 40
+    #     elif max_error < (RMSE + 3):
+    #         text_placement = RMSE * 1.1
+    #     else:
+    #         text_placement = max_error
+    #     return text_placement
+
+    #
+    # # Plot max error lines
+    # y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
+    # y_max_line_placement_2 = y_max_line_placement(max_error_angle2)
+    # y_max_line_placement_3 = y_max_line_placement(max_error_angle3)
+    # axs[0].axhline(y=y_max_line_placement_1, linewidth=1, c="red")
+    # axs[1].axhline(y=y_max_line_placement_2, linewidth=1, c="red")
+    # axs[2].axhline(y=y_max_line_placement_3, linewidth=1, c="red")
+    #
+    # # Plot max error text
+    # y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
+    # y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
+    # y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
+    # axs[0].text(time1[-1] + 0.1 * (end_time1 - start_time1), y_max_text_placement_1,
+    #             "Max = " + str(round(max_error_angle1, 1)) + " deg")
+    # axs[1].text(time2[-1] + 0.1 * (end_time2 - start_time2), y_max_text_placement_2,
+    #             "Max = " + str(round(max_error_angle2, 1)) + " deg")
+    # axs[2].text(time3[-1] + 0.1 * (end_time3 - start_time3), y_max_text_placement_3,
+    #             "Max = " + str(round(max_error_angle3, 1)) + " deg")
+
+    # # Set a shared x axis
+    # y_max_list = np.array([np.nanmax(IMU1_eul), np.nanmax(IMU2_eul), np.nanmax(IMU3_eul)])
+    # y_min_list = np.array([np.nanmin(IMU1_eul), np.nanmin(IMU2_eul), np.nanmin(IMU3_eul)])
+    # start_time_list = [start_time1, start_time2, start_time3]
+    # end_time_list = [end_time1, end_time2, end_time3]
+    # for i in range(0, 3):
+    #     axs[i].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0, 1.1 * y_lim_list[i]), xlim=(start_time_list[i], end_time_list[i]))
+    #     axs[i].grid(color="lightgrey")
+
+    fig.tight_layout(pad=2.0)
+
+    print(f"Writing figure to results: {file_name}")
+    fig.savefig(figure_results_dir + "\\" + file_name + "_IMU_Euler_Diff.png")
+
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3
+
 
 
 
