@@ -1121,9 +1121,9 @@ def plot_compare_real_vs_perfect(IMU1_diff, IMU2_diff, IMU3_diff, figure_results
 # Define a function to plot the error between real IMUs and cluster orientations, representing 'perfect' IMUs
 def plot_compare_real_vs_perfect_eulers(IMU_euls, OMC_euls, figure_results_dir, file_name):
 
-    label1 = "Thorax IMU orientation error"
-    label2 = "Humerus IMU orientation error"
-    label3 = "Forearm IMU orientation error"
+    label1 = "Euler 1"
+    label2 = "Euler 2"
+    label3 = "Euler 3"
 
     IMU1_eul = IMU_euls[:,0]
     IMU2_eul = IMU_euls[:,1]
@@ -1347,3 +1347,313 @@ def get_body_quats_from_analysis_sto(analysis_sto_path, start_time, end_time):
     radius_quats = radius_R.as_quat()[:,[1, 2, 3, 0]]
 
     return thorax_quats, humerus_quats, radius_quats
+
+
+
+""" IMU ACCURACY FUNCTIONS """
+
+# Read in IMU quaternion data from TMM report .txt file
+def get_scipyR_from_txt_file(input_file, trim_bool, start_time, end_time, sample_rate):
+
+    with open(input_file, 'r') as file:
+        df = pd.read_csv(file, header=5, sep="\t")
+    # Make seperate data_out frames
+    IMU1_df = df.filter(["IMU1_Q0", "IMU1_Q1", "IMU1_Q2", "IMU1_Q3"], axis=1)
+    IMU2_df = df.filter(["IMU2_Q0", "IMU2_Q1", "IMU2_Q2", "IMU2_Q3"], axis=1)
+    IMU3_df = df.filter(["IMU3_Q0", "IMU3_Q1", "IMU3_Q2", "IMU3_Q3"], axis=1)
+
+    # Trim the dataframes
+    if trim_bool == True:
+        start_index = start_time * sample_rate
+        end_index = end_time * sample_rate
+        IMU1_df = IMU1_df.iloc[start_index:end_index]
+        IMU2_df = IMU2_df.iloc[start_index:end_index]
+        IMU3_df = IMU3_df.iloc[start_index:end_index]
+
+    # Turn dataframes into Scipy arrays
+    IMU1_R = R.from_quat(np.array((IMU1_df.loc[:, ['IMU1_Q1', 'IMU1_Q2', 'IMU1_Q3', 'IMU1_Q0']])))
+    IMU2_R = R.from_quat(np.array((IMU2_df.loc[:, ['IMU2_Q1', 'IMU2_Q2', 'IMU2_Q3', 'IMU2_Q0']])))
+    IMU3_R = R.from_quat(np.array((IMU3_df.loc[:, ['IMU3_Q1', 'IMU3_Q2', 'IMU3_Q3', 'IMU3_Q0']])))
+
+    return IMU1_R, IMU2_R, IMU3_R
+
+# Get angle between two 2D vectors
+def angle_between_two_2D_vecs(vec1, vec2):
+    angle = np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))) * 180 / np.pi
+    return angle
+
+
+
+
+# Define a function to plot IMU vs OMC projected vetors, with extra plot of errors to see distribution
+def plot_compare_vectors(OMC_angle1, OMC_angle2, OMC_angle3, IMU_angle1, IMU_angle2, IMU_angle3,
+                         IMU_transverse_keep_conditions, IMU_frontal_keep_conditions, IMU_sagittal_keep_conditions,
+                         OMC_transverse_keep_conditions, OMC_frontal_keep_conditions, OMC_sagittal_keep_conditions,
+                         start_time, end_time, figure_results_dir, joint_of_interest):
+
+    label1 = 'Transverse - z relative to Z on XZ plane'
+    label2 = 'Frontal - y relative to -X on YX plane'
+    label3 = 'Sagittal - y relative to Z on YZ plane'
+    labelA = 'OMC'
+    labelB = 'IMU'
+
+    time = range(len(OMC_angle1))
+
+    # Trim the arrays wherever there will be instability when the vector is pointing out of the plane
+    transverse_keep_conditions = (IMU_transverse_keep_conditions == True) & (OMC_transverse_keep_conditions == True)
+    OMC_angle1_trimmed = np.where(transverse_keep_conditions, OMC_angle1, np.nan)
+    IMU_angle1_trimmed = np.where(transverse_keep_conditions, IMU_angle1, np.nan)
+    frontal_keep_conditions = (IMU_frontal_keep_conditions == True) & (OMC_frontal_keep_conditions == True)
+    OMC_angle2_trimmed = np.where(frontal_keep_conditions, OMC_angle2, np.nan)
+    IMU_angle2_trimmed = np.where(frontal_keep_conditions, IMU_angle2, np.nan)
+    sagittal_keep_conditions = (IMU_sagittal_keep_conditions == True) & (OMC_sagittal_keep_conditions == True)
+    OMC_angle3_trimmed = np.where(sagittal_keep_conditions, OMC_angle3, np.nan)
+    IMU_angle3_trimmed = np.where(sagittal_keep_conditions, IMU_angle3, np.nan)
+
+    # Calculate error arrays
+    error_angle1 = abs(OMC_angle1_trimmed - IMU_angle1_trimmed)
+    error_angle2 = abs(OMC_angle2_trimmed - IMU_angle2_trimmed)
+    error_angle3 = abs(OMC_angle3_trimmed - IMU_angle3_trimmed)
+
+    # Calculate RMSE and Pearson R
+    # Remove any rows where there's nan values (for RMSE calcs)
+    OMC_angle1_trimmed_no_nans = OMC_angle1_trimmed[~np.isnan(OMC_angle1_trimmed)]
+    OMC_angle2_trimmed_no_nans = OMC_angle2_trimmed[~np.isnan(OMC_angle2_trimmed)]
+    OMC_angle3_trimmed_no_nans = OMC_angle3_trimmed[~np.isnan(OMC_angle3_trimmed)]
+    IMU_angle1_trimmed_no_nans = IMU_angle1_trimmed[~np.isnan(IMU_angle1_trimmed)]
+    IMU_angle2_trimmed_no_nans = IMU_angle2_trimmed[~np.isnan(IMU_angle2_trimmed)]
+    IMU_angle3_trimmed_no_nans = IMU_angle3_trimmed[~np.isnan(IMU_angle3_trimmed)]
+
+    # Calculate Pearson correlation coefficient
+    R_1 = pearsonr(OMC_angle1_trimmed_no_nans, IMU_angle1_trimmed_no_nans)[0]
+    R_2 = pearsonr(OMC_angle2_trimmed_no_nans, IMU_angle2_trimmed_no_nans)[0]
+    R_3 = pearsonr(OMC_angle3_trimmed_no_nans, IMU_angle3_trimmed_no_nans)[0]
+
+    # Remove nans from error array for RMSE calculation
+    error_angle1_no_nans = error_angle1[~np.isnan(error_angle1)]
+    error_angle2_no_nans = error_angle2[~np.isnan(error_angle2)]
+    error_angle3_no_nans = error_angle3[~np.isnan(error_angle3)]
+
+    # Calculate RMSE
+    RMSE_angle1 = (sum(np.square(error_angle1_no_nans)) / len(error_angle1_no_nans)) ** 0.5
+    RMSE_angle2 = (sum(np.square(error_angle2_no_nans)) / len(error_angle2_no_nans)) ** 0.5
+    RMSE_angle3 = (sum(np.square(error_angle3_no_nans)) / len(error_angle3_no_nans)) ** 0.5
+    max_error_angle1 = np.amax(error_angle1_no_nans)
+    max_error_angle2 = np.amax(error_angle2_no_nans)
+    max_error_angle3 = np.amax(error_angle3_no_nans)
+
+    # Create figure with three subplots
+    fig, axs = plt.subplots(3, 2, figsize=(14,9), width_ratios=[9,1])
+
+
+    # Plot joint angles
+
+    line1, = axs[0,0].plot(time, OMC_angle1, linestyle='dotted', c='lightgrey')
+    line2, = axs[0,0].plot(time, IMU_angle1, linestyle='dotted', c='lightgrey')
+    line3, = axs[0,0].plot(time, OMC_angle1_trimmed)
+    line4, = axs[0,0].plot(time, IMU_angle1_trimmed)
+
+    line1, = axs[1,0].plot(time, OMC_angle2, linestyle='dotted', c='lightgrey')
+    line2, = axs[1,0].plot(time, IMU_angle2, linestyle='dotted', c='lightgrey')
+    line3, = axs[1,0].plot(time, OMC_angle2_trimmed)
+    line4, = axs[1,0].plot(time, IMU_angle2_trimmed)
+
+    line1, = axs[2,0].plot(time, OMC_angle3, linestyle='dotted', c='lightgrey')
+    line2, = axs[2,0].plot(time, IMU_angle3, linestyle='dotted', c='lightgrey')
+    line3, = axs[2,0].plot(time, OMC_angle3_trimmed)
+    line4, = axs[2,0].plot(time, IMU_angle3_trimmed)
+
+    axs[0,0].set_title(label1)
+    axs[1,0].set_title(label2)
+    axs[2,0].set_title(label3)
+
+    for i in range(0, 3):
+        axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
+        axs[i,0].legend([line3, line4], [labelA, labelB])
+        axs[i,0].grid(color="lightgrey")
+
+    # Plot error graphs
+
+    axs[0,1].scatter(time, error_angle1, s=0.4)
+    axs[1,1].scatter(time, error_angle2, s=0.4)
+    axs[2,1].scatter(time, error_angle3, s=0.4)
+
+    # Plot RMSE error lines and text
+    axs[0,1].axhline(y=RMSE_angle1, linewidth=2, c="red")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[1,1].axhline(y=RMSE_angle2, linewidth=2, c="red")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[2,1].axhline(y=RMSE_angle3, linewidth=2, c="red")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+
+    # Functions to define placement of max error annotation
+    def y_max_line_placement(max_error):
+        if max_error > 40:
+            line_placement = 40
+        else:
+            line_placement = max_error
+        return line_placement
+
+    def y_max_text_placement(max_error, RMSE):
+        if max_error > 40:
+            text_placement = 40
+        elif max_error < (RMSE*1.1):
+            text_placement = RMSE*1.1
+        else:
+            text_placement = max_error
+        return text_placement
+
+    # Plot max error lines
+    y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
+    y_max_line_placement_2 = y_max_line_placement(max_error_angle2)
+    y_max_line_placement_3 = y_max_line_placement(max_error_angle3)
+    axs[0,1].axhline(y=y_max_line_placement_1, linewidth=1, c="red")
+    axs[1,1].axhline(y=y_max_line_placement_2, linewidth=1, c="red")
+    axs[2,1].axhline(y=y_max_line_placement_3, linewidth=1, c="red")
+
+    # Plot max error text
+    y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
+    y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
+    y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+
+    # Set a shared x axis
+    for i in range(0, 3):
+        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*np.max([max_error_angle1, max_error_angle2, max_error_angle3])])))
+        axs[i,1].grid(color="lightgrey")
+
+    fig.tight_layout(pad=2.0)
+
+    fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
+
+    plt.close()
+
+    return RMSE_angle1, RMSE_angle2, RMSE_angle3, R_1, R_2, R_3
+
+
+# Define a function for plotting the changing projected vector angles, and the changing error
+def plot_vec_angles_error(plotting_dict, start_time, end_time, figure_results_dir, joint_of_interest):
+
+
+    label1 = 'Transverse - z relative to Z on XZ plane'
+    label2 = 'Frontal - z relative to Y on YX plane'
+    label3 = 'Sagittal - y relative to Z on YZ plane'
+    labelA = 'OMC'
+    labelB = 'IMU'
+
+    # Get the values from the dict
+    IMU_angle1 = plotting_dict['transverse']['IMU_angles'][0]
+    IMU_angle2 = plotting_dict['frontal']['IMU_angles'][0]
+    IMU_angle3 = plotting_dict['sagittal']['IMU_angles'][0]
+    IMU_angle1_filtered = plotting_dict['transverse']['IMU_angles_filtered'][0]
+    IMU_angle2_filtered = plotting_dict['frontal']['IMU_angles_filtered'][0]
+    IMU_angle3_filtered = plotting_dict['sagittal']['IMU_angles_filtered'][0]
+    OMC_angle1 = plotting_dict['transverse']['OMC_angles'][0]
+    OMC_angle2 = plotting_dict['frontal']['OMC_angles'][0]
+    OMC_angle3 = plotting_dict['sagittal']['OMC_angles'][0]
+    OMC_angle1_filtered = plotting_dict['transverse']['OMC_angles_filtered'][0]
+    OMC_angle2_filtered = plotting_dict['frontal']['OMC_angles_filtered'][0]
+    OMC_angle3_filtered = plotting_dict['sagittal']['OMC_angles_filtered'][0]
+    RMSE_angle1 = plotting_dict['transverse']['RMSE'][0]
+    RMSE_angle2 = plotting_dict['frontal']['RMSE'][0]
+    RMSE_angle3 = plotting_dict['sagittal']['RMSE'][0]
+    max_error_angle1 = plotting_dict['transverse']['max_error'][0]
+    max_error_angle2 = plotting_dict['frontal']['max_error'][0]
+    max_error_angle3 = plotting_dict['sagittal']['max_error'][0]
+    error_angle1 = plotting_dict['transverse']['error_arr'][0]
+    error_angle2 = plotting_dict['frontal']['error_arr'][0]
+    error_angle3 = plotting_dict['sagittal']['error_arr'][0]
+
+    # Create a time variable
+    time = np.linspace(0, len(OMC_angle1)*0.01, len(OMC_angle1))
+
+    # Create figure with three subplots
+    fig, axs = plt.subplots(3, 2, figsize=(14,9), width_ratios=[9,1])
+
+
+    # Plot joint angles
+
+    line1, = axs[0,0].plot(time, OMC_angle1, linestyle='dotted', c='lightgrey')
+    line2, = axs[0,0].plot(time, IMU_angle1, linestyle='dotted', c='lightgrey')
+    line3, = axs[0,0].plot(time, OMC_angle1_filtered)
+    line4, = axs[0,0].plot(time, IMU_angle1_filtered)
+
+    line1, = axs[1,0].plot(time, OMC_angle2, linestyle='dotted', c='lightgrey')
+    line2, = axs[1,0].plot(time, IMU_angle2, linestyle='dotted', c='lightgrey')
+    line3, = axs[1,0].plot(time, OMC_angle2_filtered)
+    line4, = axs[1,0].plot(time, IMU_angle2_filtered)
+
+    line1, = axs[2,0].plot(time, OMC_angle3, linestyle='dotted', c='lightgrey')
+    line2, = axs[2,0].plot(time, IMU_angle3, linestyle='dotted', c='lightgrey')
+    line3, = axs[2,0].plot(time, OMC_angle3_filtered)
+    line4, = axs[2,0].plot(time, IMU_angle3_filtered)
+
+    axs[0,0].set_title(label1)
+    axs[1,0].set_title(label2)
+    axs[2,0].set_title(label3)
+
+    for i in range(0, 3):
+        axs[i,0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
+        axs[i,0].legend([line3, line4], [labelA, labelB])
+        axs[i,0].grid(color="lightgrey")
+
+    # Plot error graphs
+
+    axs[0,1].scatter(time, error_angle1, s=0.4)
+    axs[1,1].scatter(time, error_angle2, s=0.4)
+    axs[2,1].scatter(time, error_angle3, s=0.4)
+
+    # Plot RMSE error lines and text
+    axs[0,1].axhline(y=RMSE_angle1, linewidth=2, c="red")
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[1,1].axhline(y=RMSE_angle2, linewidth=2, c="red")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle2, "RMSE = " + str(round(RMSE_angle2,1)) + " deg")
+    axs[2,1].axhline(y=RMSE_angle3, linewidth=2, c="red")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle3, "RMSE = " + str(round(RMSE_angle3,1)) + " deg")
+
+    # Functions to define placement of max error annotation
+    def y_max_line_placement(max_error):
+        if max_error > 40:
+            line_placement = 40
+        else:
+            line_placement = max_error
+        return line_placement
+
+    def y_max_text_placement(max_error, RMSE):
+        if max_error > 40:
+            text_placement = 40
+        elif max_error < (RMSE*1.1):
+            text_placement = RMSE*1.1
+        else:
+            text_placement = max_error
+        return text_placement
+
+    # Plot max error lines
+    y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
+    y_max_line_placement_2 = y_max_line_placement(max_error_angle2)
+    y_max_line_placement_3 = y_max_line_placement(max_error_angle3)
+    axs[0,1].axhline(y=y_max_line_placement_1, linewidth=1, c="red")
+    axs[1,1].axhline(y=y_max_line_placement_2, linewidth=1, c="red")
+    axs[2,1].axhline(y=y_max_line_placement_3, linewidth=1, c="red")
+
+    # Plot max error text
+    y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
+    y_max_text_placement_2 = y_max_text_placement(max_error_angle2, RMSE_angle2)
+    y_max_text_placement_3 = y_max_text_placement(max_error_angle3, RMSE_angle3)
+    axs[0,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    axs[1,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_2, "Max = " + str(round(max_error_angle2,1)) + " deg")
+    axs[2,1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_3, "Max = " + str(round(max_error_angle3,1)) + " deg")
+
+    # Set a shared x axis
+    for i in range(0, 3):
+        axs[i,1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*np.max([max_error_angle1, max_error_angle2, max_error_angle3])])))
+        axs[i,1].grid(color="lightgrey")
+
+    fig.tight_layout(pad=2.0)
+
+    fig.savefig(figure_results_dir + "\\" + joint_of_interest + "_angles.png")
+
+    plt.close()
+
