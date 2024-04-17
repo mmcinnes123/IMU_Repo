@@ -1,9 +1,6 @@
 
 import opensim as osim
-from scipy.spatial.transform import Rotation as R
-import numpy as np
-import pandas as pd
-from functions import *
+
 
 
 

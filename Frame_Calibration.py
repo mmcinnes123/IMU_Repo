@@ -67,8 +67,8 @@ def get_misalign_R_from_angvels(a, b):
 
     # Use scipy's 'align_vectors' to find the rotation which would best align the two sets of vectors
     rot, rssd, sens = R.align_vectors(a, b, return_sensitivity=True)
-    print(f"As Quat: {rot.as_quat()}")
-    print(f"As Euler (yxz) {rot.as_euler('yxz', degrees=True)}")
+    print(f"As Quat: {np.around(rot.as_quat(),decimals=4)}")
+    print(f"As Euler (yxz) {np.around(rot.as_euler('yxz', degrees=True), decimals=2)}")
     print(f"RSSD: {rssd}")
     # print(sens)
 
@@ -100,13 +100,13 @@ def preprocess_angvels(IMU_ang_vels_df, Cluster_ang_vels_df, start_time, end_tim
     return ang_vel_arr_real, ang_vel_arr_perfect
 
 
+""" GET GLOBAL MISALIGNMENT """
 
-
-# Use the functions above to calculate the global misalignment based on the angular velocity vectors
-
+# Read in global angular velocity data
 Thorax_IMU_df, Thorax_Cluster_df, Humerus_IMU_df, Humerus_Cluster_df, Forearm_IMU_df, Forearm_Cluster_df = \
     read_angvel_data_from_file(global_input_file_path)
 
+# Use the functions above to calculate the global misalignment based on the angular velocity vectors
 Thorax_IMU_arr, Thorax_cluster_arr = preprocess_angvels(Thorax_IMU_df, Thorax_Cluster_df, Thorax_start_time,
                                                         Thorax_end_time)
 Humerus_IMU_arr, Humerus_cluster_arr = preprocess_angvels(Humerus_IMU_df, Humerus_Cluster_df, Humerus_start_time,
@@ -122,22 +122,23 @@ global_misalignment_humerus_IMU = get_misalign_R_from_angvels(Humerus_cluster_ar
 print('\nGlobal Misalignment (Forearm IMU):')
 global_misalignment_forearm_IMU = get_misalign_R_from_angvels(Forearm_cluster_arr, Forearm_IMU_arr)
 
-
 # Using a concatenation of all three IMUs, solve for the average misalignment
 all_real_ang_vels = np.concatenate((Thorax_IMU_arr, Humerus_IMU_arr, Forearm_IMU_arr), axis=0)
 all_perfect_ang_vels = np.concatenate((Thorax_cluster_arr, Humerus_cluster_arr, Forearm_cluster_arr), axis=0)
 print('\nAverage Global Misalignment:')
-# global_misalignment = get_misalign_R_from_angvels(all_perfect_ang_vels, all_real_ang_vels)
+average_global_misalignment = get_misalign_R_from_angvels(all_perfect_ang_vels, all_real_ang_vels)
 
 # Let the global misalignment be defined by the thorax IMU
 global_misalignment = global_misalignment_thorax_IMU
 
 
-# Use the functions above to calculate the local misalignment based on the angular velocity vectors
+""" GET LOCAL MISALIGNMENT """
 
+# Read in local angular velocity data
 Thorax_IMU_df, Thorax_Cluster_df, Humerus_IMU_df, Humerus_Cluster_df, Forearm_IMU_df, Forearm_Cluster_df = \
     read_angvel_data_from_file(local_input_file_path)
 
+# Use the functions above to calculate the local misalignment based on the angular velocity vectors
 Thorax_IMU_arr, Thorax_cluster_arr = preprocess_angvels(Thorax_IMU_df, Thorax_Cluster_df, Thorax_start_time,
                                                                Thorax_end_time)
 Humerus_IMU_arr, Humerus_cluster_arr = preprocess_angvels(Humerus_IMU_df, Humerus_Cluster_df, Humerus_start_time,
@@ -145,12 +146,17 @@ Humerus_IMU_arr, Humerus_cluster_arr = preprocess_angvels(Humerus_IMU_df, Humeru
 Forearm_IMU_arr, Forearm_cluster_arr = preprocess_angvels(Forearm_IMU_df, Forearm_Cluster_df, Forearm_start_time,
                                                           Forearm_end_time)
 
+# Use scipy's 'align_vectors' to solve for misalignment between local frames, according to each IMU
 print('\nLocal Misalignment Thorax:')
 Thorax_local_misalignment = get_misalign_R_from_angvels(Thorax_IMU_arr, Thorax_cluster_arr)
 print('\nLocal Misalignment Humerus:')
 Humerus_local_misalignment = get_misalign_R_from_angvels(Humerus_cluster_arr, Humerus_IMU_arr)
 print('\nLocal Misalignment Forearm:')
 Forearm_local_misalignment = get_misalign_R_from_angvels(Forearm_cluster_arr, Forearm_IMU_arr)
+
+
+
+
 
 
 """ CALCULATING ORIENTATION ERROR """
@@ -167,13 +173,13 @@ Thorax_Cluster_quats, Humerus_Cluster_quats, Forearm_Cluster_quats = read_data_f
 # Humerus_Cluster_quats = fill_nan_gaps_in_quat_df(Humerus_Cluster_quats, max_gap*sample_rate)
 # Forearm_Cluster_quats = fill_nan_gaps_in_quat_df(Forearm_Cluster_quats, max_gap*sample_rate)
 
-# Trim the data frames based on time of interest (Use stationary time frame)
-thorax_start_time = 40
-thorax_end_time = 100
-humerus_start_time = 0
-humerus_end_time = 30
-forearm_start_time = 0
-forearm_end_time = 60
+# Trim the data frames based on time of interest
+thorax_start_time = 4
+thorax_end_time = 30
+humerus_start_time = 49
+humerus_end_time = 68
+forearm_start_time = 76
+forearm_end_time = 97
 Thorax_IMU_quats = trim_df(Thorax_IMU_quats, thorax_start_time, thorax_end_time, sample_rate)
 Thorax_Cluster_quats = trim_df(Thorax_Cluster_quats, thorax_start_time, thorax_end_time, sample_rate)
 Humerus_IMU_quats = trim_df(Humerus_IMU_quats, humerus_start_time, humerus_end_time, sample_rate)
@@ -195,7 +201,7 @@ Thorax_IMU_globally_aligned = global_misalignment * Thorax_IMU_R
 Humerus_IMU_globally_aligned = global_misalignment * Humerus_IMU_R
 Forearm_IMU_globally_aligned = global_misalignment * Forearm_IMU_R
 
-# Apply the local misalignments to each cluter orientation data to better align them with the IMU casings
+# Apply the local misalignments to each cluster orientation data to better align them with the IMU casings
 Thorax_Cluster_locally_aligned = Thorax_local_misalignment * Thorax_Cluster_R
 Humerus_Cluster_locally_aligned = Humerus_local_misalignment * Humerus_Cluster_R
 Forearm_Cluster_locally_aligned = Forearm_local_misalignment * Forearm_Cluster_R
@@ -210,39 +216,46 @@ figure_results_dir = parent_dir
 IMU1_single_angle_RMSE, IMU2_single_angle_RMSE, IMU3_single_angle_RMSE = \
     plot_compare_real_vs_perfect(Thorax_single_angle_diff, Humerus_single_angle_diff, Forearm_single_angle_diff, figure_results_dir)
 
-# Find extrinsic euler angles for both
-Thorax_Cluster_locally_aligned_extr_euls = Thorax_Cluster_locally_aligned.as_euler('yxz', degrees=True)
-Thorax_IMU_globally_aligned_extr_euls = Thorax_IMU_globally_aligned.as_euler('yxz', degrees=True)
-Humerus_Cluster_locally_aligned_extr_euls = Humerus_Cluster_locally_aligned.as_euler('yxz', degrees=True)
-Humerus_IMU_globally_aligned_extr_euls = Humerus_IMU_globally_aligned.as_euler('yxz', degrees=True)
-Forearm_Cluster_locally_aligned_extr_euls = Forearm_Cluster_locally_aligned.as_euler('yxz', degrees=True)
-Forearm_IMU_globally_aligned_extr_euls = Forearm_IMU_globally_aligned.as_euler('yxz', degrees=True)
 
-# Plot the extrinisic eulers angles of each assembly, comparing IMU and OMC values
-file_name = "Thorax"
-Thorax_eul1_RMSE, Thorax_eul2_RMSE, Thorax_eul3_RMSE = \
-    plot_compare_real_vs_perfect_eulers(Thorax_IMU_globally_aligned_extr_euls, Thorax_Cluster_locally_aligned_extr_euls, figure_results_dir, file_name)
-
-file_name = "Humerus"
-Humerus_eul1_RMSE, Humerus_eul2_RMSE, Humerus_eul3_RMSE = \
-    plot_compare_real_vs_perfect_eulers(Humerus_IMU_globally_aligned_extr_euls, Humerus_Cluster_locally_aligned_extr_euls, figure_results_dir, file_name)
-
-file_name = "Forearm"
-Forearm_eul1_RMSE, Forearm_eul2_RMSE, Forearm_eul3_RMSE = \
-    plot_compare_real_vs_perfect_eulers(Forearm_IMU_globally_aligned_extr_euls, Forearm_Cluster_locally_aligned_extr_euls, figure_results_dir, file_name)
+# Write final RMSE values to a csv
+final_RMSE_values_df = pd.DataFrame.from_dict(
+    {"Thorax IMU orientation error:": IMU1_single_angle_RMSE,
+     "Humerus IMU orientation error:": IMU2_single_angle_RMSE,
+     "Forearm IMU orientation error:": IMU3_single_angle_RMSE}, orient='index')
+final_RMSE_values_df.to_csv(parent_dir + "\\" + "Real_vs_Perfect_Ori_Errors.csv",
+                            mode='w', encoding='utf-8', na_rep='nan')
 
 
 
-# # Write final RMSE values to a csv
-# final_RMSE_values_df = pd.DataFrame.from_dict(
-#     {"Thorax IMU orientation error:": IMU1_single_angle_RMSE,
-#      "Humerus IMU orientation error:": IMU2_single_angle_RMSE,
-#      "Forearm IMU orientation error:": IMU3_single_angle_RMSE}, orient='index')
-# final_RMSE_values_df.to_csv(parent_dir + "\\" + "Real_vs_Perfect_Ori_Errors.csv",
-#                             mode='w', encoding='utf-8', na_rep='nan')
+
+
+
+
+
+
+""" OLD CODE USED TO CALCULATE EXTRINSIC EULERS """
 #
+# # Find extrinsic euler angles for both
+# Thorax_Cluster_locally_aligned_extr_euls = Thorax_Cluster_locally_aligned.as_euler('yxz', degrees=True)
+# Thorax_IMU_globally_aligned_extr_euls = Thorax_IMU_globally_aligned.as_euler('yxz', degrees=True)
+# Humerus_Cluster_locally_aligned_extr_euls = Humerus_Cluster_locally_aligned.as_euler('yxz', degrees=True)
+# Humerus_IMU_globally_aligned_extr_euls = Humerus_IMU_globally_aligned.as_euler('yxz', degrees=True)
+# Forearm_Cluster_locally_aligned_extr_euls = Forearm_Cluster_locally_aligned.as_euler('yxz', degrees=True)
+# Forearm_IMU_globally_aligned_extr_euls = Forearm_IMU_globally_aligned.as_euler('yxz', degrees=True)
 #
+# # Plot the extrinisic eulers angles of each assembly, comparing IMU and OMC values
+# file_name = "Thorax"
+# Thorax_eul1_RMSE, Thorax_eul2_RMSE, Thorax_eul3_RMSE = \
+#     plot_compare_real_vs_perfect_eulers(Thorax_IMU_globally_aligned_extr_euls, Thorax_Cluster_locally_aligned_extr_euls, figure_results_dir, file_name)
 #
+# file_name = "Humerus"
+# Humerus_eul1_RMSE, Humerus_eul2_RMSE, Humerus_eul3_RMSE = \
+#     plot_compare_real_vs_perfect_eulers(Humerus_IMU_globally_aligned_extr_euls, Humerus_Cluster_locally_aligned_extr_euls, figure_results_dir, file_name)
+#
+# file_name = "Forearm"
+# Forearm_eul1_RMSE, Forearm_eul2_RMSE, Forearm_eul3_RMSE = \
+#     plot_compare_real_vs_perfect_eulers(Forearm_IMU_globally_aligned_extr_euls, Forearm_Cluster_locally_aligned_extr_euls, figure_results_dir, file_name)
+
 
 
 

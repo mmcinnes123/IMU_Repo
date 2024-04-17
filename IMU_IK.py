@@ -4,9 +4,9 @@
 # Outputs .mot IK results
 
 
-from IMU_IK_functions import *
+from IMU_IK_functions import run_osim_IMU_IK
 import os
-from functions import *
+import opensim as osim
 
 
 
