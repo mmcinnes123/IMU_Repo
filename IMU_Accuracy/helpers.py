@@ -163,7 +163,6 @@ def run_IMU_Accuracy(subject_code, start_time, end_time, time_elevation_starts, 
 
 
 
-
 # Read in IMU quaternion data from TMM report .txt file
 def get_scipyR_from_txt_file(input_file, trim_bool, start_time, end_time, sample_rate):
 
@@ -199,7 +198,7 @@ def angle_between_two_2D_vecs(vec1, vec2):
 
 
 
-# Define a function for getting the projected vector of interest from the joint rotation matrix
+# Get the projected vector of interest (e.g. 'x' on 'XZ' plane) from the joint rotation matrix
 def get_proj_vec_from_joint_rot_mat(rot_mat_R, local_axis, global_plane):
 
     matrices = rot_mat_R.as_matrix()
@@ -217,7 +216,7 @@ def get_proj_vec_from_joint_rot_mat(rot_mat_R, local_axis, global_plane):
 
 
 
-# Define a function for calculating the angle between the local axis, and the chosen global axis
+# Get the angle between the local axis, and the chosen global axis
 def get_proj_vec_angle(proj_vec, global_axis, global_plane):
 
     if global_axis == global_plane[0]:
@@ -232,7 +231,7 @@ def get_proj_vec_angle(proj_vec, global_axis, global_plane):
 
 
 
-# Define a function for getting the error between IMU and OMC projected angles
+# Get the error between IMU and OMC projected angles
 def get_error_arrays_and_stats(IMU_proj_vecs, OMC_proj_vecs, IMU_angles, OMC_angles):
 
     # Filter out projected vector angles when vector is close to normal to plane (i.e. not stable projection)
@@ -264,6 +263,8 @@ def get_error_arrays_and_stats(IMU_proj_vecs, OMC_proj_vecs, IMU_angles, OMC_ang
     return RMSE, R, error_arr, max_error, IMU_angles_filtered, OMC_angles_filtered
 
 
+
+#  Get error metrics and all info needed for plotting
 def get_errors_and_plot_dict(axis_dict, IMU_joint_R, OMC_joint_R, error_start_time, error_end_time):
 
     # Trim the data so we only calculate errors for the time of interest
@@ -299,15 +300,21 @@ def get_errors_and_plot_dict(axis_dict, IMU_joint_R, OMC_joint_R, error_start_ti
                           'max_error': []},
                      }
 
+    # For each plane of interest
     for key in axis_dict.keys():
         local_axis = axis_dict[key]['local_axis']
         global_axis = axis_dict[key]['global_axis']
         global_plane = axis_dict[key]['global_plane']
 
+        # Get the projected vectors
         IMU_proj_vecs = get_proj_vec_from_joint_rot_mat(IMU_joint_R, local_axis, global_plane)
         OMC_proj_vecs = get_proj_vec_from_joint_rot_mat(OMC_joint_R, local_axis, global_plane)
+
+        # Get the angle of the projected vectors
         IMU_angles = get_proj_vec_angle(IMU_proj_vecs, global_axis, global_plane)
         OMC_angles = get_proj_vec_angle(OMC_proj_vecs, global_axis, global_plane)
+
+        # Get error metrics for the difference between IMU and OMC angles
         RMSE, R, error_arr, max_error, IMU_angles_filtered, OMC_angles_filtered = \
             get_error_arrays_and_stats(IMU_proj_vecs, OMC_proj_vecs, IMU_angles, OMC_angles)
 
@@ -319,7 +326,7 @@ def get_errors_and_plot_dict(axis_dict, IMU_joint_R, OMC_joint_R, error_start_ti
 
 
 
-# Define a function for plotting the changing projected vector angles, and the changing error
+# Plot the changing projected vector angles, and the changing error
 def plot_vec_angles_error(plotting_dict, start_time, end_time, figure_results_dir, joint_of_interest):
 
 
@@ -447,7 +454,7 @@ def plot_vec_angles_error(plotting_dict, start_time, end_time, figure_results_di
 
 
 
-
+# Get a rotation based on a heading offset between two 2D vectors
 def get_heading_rotation_using_2D_vecs(IMU_R, OMC_R):
     IMU_thorax_x_vector_on_XZ_plane = [IMU_R[0].as_matrix()[0, 0], IMU_R[0].as_matrix()[2, 0]]
     OMC_thorax_x_vector_on_XZ_plane = [OMC_R[0].as_matrix()[0, 0], OMC_R[0].as_matrix()[2, 0]]
@@ -457,6 +464,8 @@ def get_heading_rotation_using_2D_vecs(IMU_R, OMC_R):
     return heading_rotation
 
 
+
+# Write rotated quaternions to csv then sto for visualisation in OpenSim
 def write_rot_quats_to_sto(df1, df2, df3, trial_name, APDM_template_file, APDM_settings_file, results_folder, IMU_type):
 
     sto_file_tag = trial_name + '_RotatedQuats_' + IMU_type
@@ -469,6 +478,8 @@ def write_rot_quats_to_sto(df1, df2, df3, trial_name, APDM_template_file, APDM_s
                          output_file_name=results_folder + "\\" + sto_file_tag + ".sto")
 
 
+
+# Plot the time-series single angle 'geodesic' distance
 def plot_single_angle_diff(error1, error2, error3, start_time, end_time, figure_results_dir):
 
     label1 = 'Joint12: Thorax-Humerus'
