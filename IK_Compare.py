@@ -59,7 +59,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     # Account for discrepancies between trimming function/time values
     if OMC_table.getNumRows() == IMU_table.getNumRows() + 1:
-        OMC_table.removeRow((OMC_table.getNumRows() - 1) / 100)
+        OMC_table.removeRowAtIndex((OMC_table.getNumRows() - 1))
         thorax_OMC = np.delete(thorax_OMC, [-1], 0)
         humerus_OMC = np.delete(humerus_OMC, [-1], 0)
         radius_OMC = np.delete(radius_OMC, [-1], 0)

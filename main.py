@@ -6,8 +6,8 @@ from IMU_Analysis import run_analysis
 from IK_Compare import run_IK_compare
 
 # Quick Settings
-subject_list = ['P2']
-trial_name = 'JA_Slow'      # Choose which trial to run IK
+subject_list = ['P3']
+trial_name = 'JA_Fast'      # Choose which trial to run IK
 # calibration_list = ['METHOD_2_Alt_self', 'OSIM_N_self', 'OSIM_Alt_self', 'ALL_MANUAL']     # Used to find the calibrated model file
 calibration_list = ['METHOD_2_Alt_self']     # Used to find the calibrated model file
 IMU_type = 'Real'        # Options: 'Perfect' or 'Real'
