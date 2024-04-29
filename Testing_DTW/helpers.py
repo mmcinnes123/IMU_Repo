@@ -6,7 +6,11 @@ import pandas as pd
 from scipy.stats import pearsonr
 
 
-def compute_euclidean_distance_matrix(x, y) -> np.array:
+def my_dist_func(x_i, y_j):
+    dist = abs(x_i - y_j)
+    return dist
+
+def compute_distance_matrix(x, y) -> np.array:
     """Calculate distance matrix
     This method calcualtes the pairwise Euclidean distance between two sequences.
     The sequences can have different lengths.
@@ -14,14 +18,14 @@ def compute_euclidean_distance_matrix(x, y) -> np.array:
     dist = np.zeros((len(y), len(x)))
     for i in range(len(y)):
         for j in range(len(x)):
-            dist[i,j] = (x[j]-y[i])**2
+            dist[i,j] = abs(x[j]-y[i])
     return dist
 
 
 def compute_accumulated_cost_matrix(x, y) -> np.array:
     """Compute accumulated cost matrix for warp path using Euclidean distance
     """
-    distances = compute_euclidean_distance_matrix(x, y)
+    distances = compute_distance_matrix(x, y)
 
     # Initialization
     cost = np.zeros((len(y), len(x)))
