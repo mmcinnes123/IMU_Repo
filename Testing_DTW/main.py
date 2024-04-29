@@ -4,6 +4,7 @@ from helpers import read_in_mot_as_numpy
 from helpers import compute_distance_matrix
 from helpers import compute_accumulated_cost_matrix
 from helpers import my_dist_func
+from helpers import run_IK_compare_new_errors
 
 import pandas as pd
 import numpy as np
@@ -48,6 +49,7 @@ OMC_angle_np, IMU_angle_np = read_in_mot_as_numpy(subject_code, trial_name, cali
 x = OMC_angle_np
 y = IMU_angle_np
 
+# Example arrays for analysis
 # x = np.array([7, 1, 2, 5, 9])
 # y = np.array([1, 8, 0, 4, 4, 2, 0])
 
@@ -57,7 +59,7 @@ print(y[:10])
 
 
 """ PLOT ORIGINAL DATA """
-fig, ax = plt.subplots(figsize=(6, 4))
+fig, ax = plt.subplots(figsize=(10, 6))
 
 # Remove the border and axes ticks
 fig.patch.set_visible(False)
@@ -73,7 +75,7 @@ ax.plot(x, '-ro', label='x', linewidth=1, markersize=1, markerfacecolor='lightco
 ax.plot(y, '-bo', label='y', linewidth=1, markersize=1, markerfacecolor='skyblue', markeredgecolor='skyblue')
 ax.set_title("Euclidean Distance", fontsize=10, fontweight="bold")
 
-plt.show()
+# plt.show()
 fig.savefig(results_dir + "\\" + "Original_data_dist_plot.png")
 
 
@@ -112,9 +114,14 @@ print("Distance value equivalent to that returned by the fastdtw() function: ", 
 RMSE_eq = np.mean(np.square(distance_matrix_list))**0.5
 print("RMSE equivalent using the distance matrix values path: ", RMSE_eq)
 
+# Use my functions for printing time-series JAs and calculating RMSEs and Pearson's R
+run_IK_compare_new_errors(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type, distance_matrix_list)
+
+
 
 
 # """ PLOT THE COST MATRIX """
+    # note: too slow for big data (>5s)
 #
 # fig, ax = plt.subplots(figsize=(6, 4))
 # ax = sbn.heatmap(cost_matrix, annot=True, square=True, cmap="YlGnBu", ax=ax)
@@ -159,7 +166,8 @@ print("RMSE equivalent using the distance matrix values path: ", RMSE_eq)
 
 
 """ PLOT THE DATA AGAIN, BUT WITH THE NEW CONNECTING LINES SHOWING PAIRS """
-fig, ax = plt.subplots(figsize=(6, 4))
+
+fig, ax = plt.subplots(figsize=(10, 6))
 
 # Remove the border and axes ticks
 fig.patch.set_visible(False)
@@ -173,5 +181,5 @@ ax.plot(y, '-bo', label='y', linewidth=1, markersize=1, markerfacecolor='skyblue
 
 ax.set_title("DTW Distance", fontsize=10, fontweight="bold")
 
-plt.show()
+# plt.show()
 fig.savefig(results_dir + "\\" + "Data_dist_plot_new_connections.png")
