@@ -36,16 +36,11 @@ Forearm_end_time = 97
 # Define the file names you want to take the data from
 global_input_file = 'P3_CAL_copy2 - Report5 - Global_Ang_Vels.txt'
 local_input_file = 'P3_CAL_copy2 - Report6 - Local_Ang_Vels.txt'
-IMU_quats_file = 'P3_CAL_copy2 - Report2 - IMU_Quats.txt'
-Cluster_quats_file = 'P3_CAL_copy2 - Report3 - Cluster_Quats.txt'
 
 # Define file paths
 raw_data_dir = os.path.join(parent_dir, 'RawData')
 global_input_file_path = os.path.join(raw_data_dir, global_input_file)
 local_input_file_path = os.path.join(raw_data_dir, local_input_file)
-IMU_quats_file_path = os.path.join(raw_data_dir, IMU_quats_file)
-Cluster_quats_file_path = os.path.join(raw_data_dir, Cluster_quats_file)
-
 
 
 """ GET GLOBAL MISALIGNMENT """
