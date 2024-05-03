@@ -440,6 +440,16 @@ def convert_scipy_to_scalar_first_np_quat(scipy):
 """ Plotting Functions"""
 
 
+def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
+                         figure_results_dir, joint_name):
+
+    label = joint_name.replace('_', ' ')
+
+
+
+
+
+
 # Define a function to plot IMU vs OMC, with extra plot of errors to see distribution, using OpenSim coords
 def plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
                      figure_results_dir, labelA, labelB, joint_of_interest):
@@ -1350,3 +1360,32 @@ def get_body_quats_from_analysis_sto(analysis_sto_path, start_time, end_time):
 
     return thorax_quats, humerus_quats, radius_quats
 
+
+# Function used in IK_compare to trim data tables to same length
+def trim_tables_if_diff_lengths(n, OMC_table, IMU_table):
+
+    if n > 0:  # If OMC data is longer than IMU data
+        for i in range(n):
+            OMC_table.removeRowAtIndex((OMC_table.getNumRows() - 1))  # Remove n rows from the OMC table
+        print(f'Removed last {n} rows from OMC data')
+
+    if n < 0:  # If IMU data is longer than OMC data
+        for i in range(n):
+            IMU_table.removeRowAtIndex((IMU_table.getNumRows() - 1))  # Remove n rows from the IMU table
+        print(f'Removed last {n} rows from IMU data')
+
+    return OMC_table, IMU_table
+
+# Function used in IK_compare to trim data tables to same length
+def trim_body_ori_data_to_same_length(n, thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC):
+
+    # Remove n rows from the body ori data (trim to same length for easier plotting)
+    for i in range(n):
+        thorax_OMC = np.delete(thorax_OMC, [-1], 0)
+        humerus_OMC = np.delete(humerus_OMC, [-1], 0)
+        radius_OMC = np.delete(radius_OMC, [-1], 0)
+        thorax_IMU = np.delete(thorax_IMU, [-1], 0)
+        humerus_IMU = np.delete(humerus_IMU, [-1], 0)
+        radius_IMU = np.delete(radius_IMU, [-1], 0)
+
+    return thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC

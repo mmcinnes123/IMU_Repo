@@ -41,6 +41,12 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
 
     """ MAIN """
 
+    # Check that the calibrated model has been created
+    if os.path.exists(calibrated_model_file) == False:
+        print(f"You haven't created the calibrated model for IMU_type: {IMU_type}, calibration_name: {calibration_name} yet")
+        print("Quitting.")
+        quit()
+
     # Run the IMU IK based on settings inputs above
     run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file_path, sensor_to_opensim_rotations,
                IK_results_dir, IK_trim_bool, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
