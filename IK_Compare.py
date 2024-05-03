@@ -31,8 +31,8 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     if os.path.exists(results_dir) == False:
         os.mkdir(results_dir)
-    osim.Logger.removeFileSink()
-    osim.Logger.addFileSink(results_dir + r"\opensim.log")
+    # osim.Logger.removeFileSink()
+    # osim.Logger.addFileSink(results_dir + r"\opensim.log")
 
 
     """ READ IN DATA """
@@ -66,84 +66,92 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     time = OMC_table.getIndependentColumn()  # Get the time data
 
-    """ GET TIME SERIES JOINT ANGLES """
-
-    # Define a dict with labels:keys, for reading in all the coordinates of interest from the states table
-    joint_ref_dict = {'TH_x': 'Forward_Tilt', 'TH_z': 'Lateral_Tilt', 'TH_y': 'Trunk_Rotation',
-                              'EL_x': 'Elbow_Flexion', 'PS_y': 'Pronation'}
+    """ ANALYSE ELBOW AND THORAX COORDS """
 
     # Plot and calculate errors for all the coordinates in the states file
-    for key in joint_ref_dict.keys():
+
+    # Instantiate error dicts to write results into
+    RMSE_results_dict = {'thorax_ori': None, 'humerus_ori': None, 'radius_ori': None,
+                         'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
+                         'elbow_flexion': None, 'elbow_pronation': None,
+                         'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
+    R_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
+                      'elbow_flexion': None, 'elbow_pronation': None,
+                      'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
+
+    # Define a dict with labels:keys, for reading in all the coordinates of interest from the states table
+    OSim_coords_joint_ref_dict = {'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
+                                  'TH_y': 'thorax_rotation', 'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
+
+    # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
+    print('Plotting results...')
+    for key, value in OSim_coords_joint_ref_dict.items():
 
         # Extract coordinates from states table
         OMC_angle = OMC_table.getDependentColumn(key).to_numpy()
         IMU_angle = IMU_table.getDependentColumn(key).to_numpy()
 
-        plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, joint_name=joint_ref_dict[key])
+        # Calcualte error metrics and plot
+        RMSE, R = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, joint_name=value)
+
+        # Add RMSE and R values into the results dicts
+        RMSE_results_dict[value] = RMSE
+        R_results_dict[value] = R
 
 
-    """ PLOT """
+    """ ANALYSE HT ANGLES """
 
-    # Plot IMU vs OMC joint angles based on OpenSim coordinates
-    # print('Plotting results...')
+    # Plot and calculate errors for all the HT angles, calculated from relative body oris
+
+    # Calculate the projected vector angles based on the body orientations of thorax and humerus
+    abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC = \
+        get_vec_angles_from_two_CFs(thorax_OMC, humerus_OMC)
+    abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU = \
+        get_vec_angles_from_two_CFs(thorax_IMU, humerus_IMU)
+
+    OMC_angle_dict = {'HT_abd': abduction_all_OMC, 'HT_flexion': flexion_all_OMC, 'HT_rotation': rotation_elbow_down_all_OMC}
+    IMU_angle_dict = {'HT_abd': abduction_all_IMU, 'HT_flexion': flexion_all_IMU, 'HT_rotation': rotation_elbow_down_all_IMU}
+    HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
+
+    # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
+    for key, value in HT_joint_ref_dict.items():
+
+        OMC_angle = OMC_angle_dict[key]
+        IMU_angle = IMU_angle_dict[key]
+
+        # Calcualte error metrics and plot
+        RMSE, R = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir,
+                                   joint_name=key)
+
+        # Add RMSE and R values into the results dicts
+        RMSE_results_dict[key] = RMSE
+        R_results_dict[key] = R
+
+    """ ANALYSE MODEL BODY ORIENTATIONS """
+
+    RMSE_thorax_ori, RMSE_humerus_ori, RMSE_radius_ori = \
+        plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
+                           heading_offset, time, start_time, end_time, results_dir)
+
+    RMSE_results_dict['thorax_ori'] = RMSE_thorax_ori
+    RMSE_results_dict['humerus_ori'] = RMSE_humerus_ori
+    RMSE_results_dict['radius_ori'] = RMSE_radius_ori
 
 
-    # RMSE_thorax_forward_tilt, RMSE_thorax_lateral_tilt, RMSE_thorax_rotation, \
-    #     R_thorax_forward_tilt, R_thorax_lateral_tilt, R_thorax_rotation = \
-    #     plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
-    #                      results_dir, labelA, labelB, joint_of_interest="Thorax")
-    #
-    # RMSE_elbow_flexion, RMSE_elbow_pronation, RMSE_elbow_pronation_2, \
-    #     R_elbow_flexion, R_elbow_pronation, R_elbow_pronation_2 = \
-    #     plot_compare_JAs(OMC_table, IMU_table, time, start_time, end_time,
-    #                  results_dir, labelA, labelB, joint_of_interest="Elbow")
-    #
-    # RMSE_HT_Y_plane_of_elevation, RMSE_HT_Z_elevation, RMSE_HT_YY_rotation, \
-    #     R_HT_Y_plane_of_elevation, R_HT_Z_elevation, R_HT_YY_rotation = \
-    #     plot_compare_JAs_shoulder_eulers(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
-    #                                  time, start_time, end_time, results_dir, labelA, labelB)
-    #
-    # RMSE_thorax_ori, RMSE_humerus_ori, RMSE_radius_ori = \
-    #     plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
-    #                        heading_offset, time, start_time, end_time, results_dir)
-    #
-    # RMSE_HT_abd, RMSE_HT_flexion, RMSE_HT_rotation, R_HT_abd, R_HT_flexion, R_HT_rotation = \
-    #     plot_vector_HT_angles(thorax_OMC, humerus_OMC, thorax_IMU, humerus_IMU,
-    #                       time, start_time, end_time, results_dir, labelA, labelB)
-    #
-    # # "Trial Name:": str(compare_name)
-    #
-    # final_RMSE_values_df = pd.DataFrame.from_dict(
-    #     {"thorax_ori": RMSE_thorax_ori, "humerus_ori": RMSE_humerus_ori,
-    #      "radius_ori": RMSE_radius_ori, "thorax_forward_tilt": RMSE_thorax_forward_tilt,
-    #      "thorax_lateral_tilt": RMSE_thorax_lateral_tilt, "thorax_rotation": RMSE_thorax_rotation,
-    #      "elbow_flexion": RMSE_elbow_flexion, "elbow_pronation": RMSE_elbow_pronation,
-    #      "HT_abd": RMSE_HT_abd, "HT_flexion": RMSE_HT_flexion,
-    #      "HT_rotation": RMSE_HT_rotation, "HT_Y_plane_of_elevation": RMSE_HT_Y_plane_of_elevation,
-    #      "HT_Z_elevation": RMSE_HT_Z_elevation, "HT_YY_rotation": RMSE_HT_YY_rotation},
-    #     orient='index', columns=["RMSE"])
-    #
-    # final_R_values_df = pd.DataFrame.from_dict(
-    #     {"thorax_forward_tilt": R_thorax_forward_tilt,
-    #      "thorax_lateral_tilt": R_thorax_lateral_tilt, "thorax_rotation": R_thorax_rotation,
-    #      "elbow_flexion": R_elbow_flexion, "elbow_pronation": R_elbow_pronation,
-    #      "HT_abd": R_HT_abd, "HT_flexion": R_HT_flexion,
-    #      "HT_rotation": R_HT_rotation, "HT_Y_plane_of_elevation": R_HT_Y_plane_of_elevation,
-    #      "HT_Z_elevation": R_HT_Z_elevation, "HT_YY_rotation": R_HT_YY_rotation},
-    #     orient='index', columns=["R"])
-    #
-    # all_data = pd.concat((final_RMSE_values_df, final_R_values_df), axis=1)
-    #
-    # # Write final RMSE values to a csv
-    # print('Writing results to .csv.')
-    #
-    #
-    #
-    # all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
-    #                             mode='w', encoding='utf-8', na_rep='nan')
+
+    """ WRITE RESULTS """
+
+    final_RMSE_values_df = pd.DataFrame.from_dict(RMSE_results_dict, orient='index', columns=["RMSE"])
+    final_R_values_df = pd.DataFrame.from_dict(R_results_dict, orient='index', columns=["R"])
+    all_data = pd.concat((final_RMSE_values_df, final_R_values_df), axis=1)
+
+    # Write final RMSE values to a csv
+    print('Writing results to .csv.')
+    all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
+                    mode='w', encoding='utf-8', na_rep='nan')
 
 
 
 if __name__ == '__main__':
-    run_IK_compare('P3', 'JA_Slow', 'METHOD_2_Alt_self', 10, 30, True, 'Real')
+    run_IK_compare('P3', 'JA_Slow', 'METHOD_2_Alt_self', 0, 90, False, 'Real')
 

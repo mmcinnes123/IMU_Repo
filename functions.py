@@ -7,7 +7,8 @@ import pandas as pd
 from quat_functions import *
 import opensim as osim
 from scipy.spatial.transform import Slerp
-from scipy.stats.stats import pearsonr
+from scipy.stats import pearsonr
+from scipy import signal
 from IMU_IK_functions import APDM_2_sto_Converter
 
 
@@ -341,6 +342,7 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
     x_rel2_X_on_XZ = np.zeros((n_rows))
     z_rel2_Z_on_ZY = np.zeros((n_rows))
     y_rel2_Y_on_XY = np.zeros((n_rows))
+
     for row in range(n_rows):
         joint_rot = quat_mul(quat_conj(CF1[row]), CF2[row])  # Calculate joint rotation quaternion
         joint_scipyR = R.from_quat([joint_rot[1], joint_rot[2], joint_rot[3], joint_rot[0]])  # In scalar last format
@@ -364,11 +366,29 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         Z_on_ZY = [1, 0]
         vec_y_on_XY = [mat_y_X, mat_y_Y]
         Y_on_XY = [0, 1]
+
         # Calculate the angle of certain CF2 vectors on certain CF1 planes
-        x_rel2_X_on_XY[row] = angle_between_two_2D_vecs(vec_x_on_XY, X_on_XY)
-        x_rel2_X_on_XZ[row] = angle_between_two_2D_vecs(vec_x_on_XZ, X_on_XZ)
-        z_rel2_Z_on_ZY[row] = angle_between_two_2D_vecs(vec_z_on_ZY, Z_on_ZY)
-        y_rel2_Y_on_XY[row] = angle_between_two_2D_vecs(vec_y_on_XY, Y_on_XY)
+        if np.linalg.norm(vec_x_on_XY) > 0.5:
+            x_rel2_X_on_XY[row] = angle_between_two_2D_vecs(vec_x_on_XY, X_on_XY)
+        else:
+            # If the magnitude of the vector gets close to 1, its normal to plane and so angle is unstable
+            x_rel2_X_on_XY[row] = np.nan
+
+        if np.linalg.norm(vec_x_on_XZ) > 0.5:
+            x_rel2_X_on_XZ[row] = angle_between_two_2D_vecs(vec_x_on_XZ, X_on_XZ)
+        else:
+            # If the magnitude of the vector gets close to 1, its normal to plane and so angle is unstable
+            x_rel2_X_on_XZ[row] = np.nan
+
+        if np.linalg.norm(vec_z_on_ZY) > 0.5:
+            z_rel2_Z_on_ZY[row] = angle_between_two_2D_vecs(vec_z_on_ZY, Z_on_ZY)
+        else:
+            z_rel2_Z_on_ZY[row] = np.nan
+
+        if np.linalg.norm(vec_y_on_XY) > 0.5:
+            y_rel2_Y_on_XY[row] = angle_between_two_2D_vecs(vec_y_on_XY, Y_on_XY)
+        else:
+            y_rel2_Y_on_XY[row] = np.nan
 
     # Assign to clinically relevant joint angles
     abduction_all = y_rel2_Y_on_XY
@@ -443,9 +463,91 @@ def convert_scipy_to_scalar_first_np_quat(scipy):
 def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
                          figure_results_dir, joint_name):
 
-    label = joint_name.replace('_', ' ')
+    label = joint_name.replace('_', ' ').title()
+
+    # For thorax rotation (heading), compare change in value from initial ref point
+    if joint_name == 'thorax_rotation':
+        OMC_angle = OMC_angle - OMC_angle[0]
+        IMU_angle = IMU_angle - IMU_angle[0]
+
+    # Calculate cross-correlation lag and shift IMU data
+    lag = get_cross_cor_lag(OMC_angle, IMU_angle)
+    if lag < 0:
+        IMU_angle = IMU_angle[-lag:]    # Remove first n values from IMU data
+        OMC_angle = OMC_angle[:lag]     # Remove last n values from OMC data
+        time = time[:lag]               # Remove last n values from time array
+    print(f" Applied a shift of {lag} to {joint_name} IMU data")
+
+    # Calculate error array
+    error_angle1 = abs(OMC_angle - IMU_angle)
+
+    # Calculate Pearson correlation coefficient
+    R = get_pearsonr(OMC_angle, IMU_angle)
+
+    # Calculate RMSE
+    RMSE_angle1 = get_RMSE(error_angle1)
+
+    # Calculate max error
+    max_error_angle1 = np.nanmax(error_angle1)
+
+    # Create figure
+    fig, axs = plt.subplots(2, 1, figsize=(12, 6), height_ratios=[6, 4])
+
+    # Plot joint angles
+
+    axs[0].plot(time, OMC_angle)
+    axs[0].plot(time, IMU_angle)
+
+    axs[0].set_title(label)
+    axs[0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
+    axs[0].legend(['OMC', 'IMU'])
+    axs[0].grid(color="lightgrey")
+
+    # Plot error graphs
+
+    axs[1].scatter(time, error_angle1, s=0.4)
 
 
+    # Plot RMSE error lines and text
+    axs[1].axhline(y=RMSE_angle1, linewidth=2, c="red")
+    axs[1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+
+    # Functions to define placement of max error annotation
+    def y_max_line_placement(max_error):
+        if max_error > 40:
+            line_placement = 40
+        else:
+            line_placement = max_error
+        return line_placement
+
+    def y_max_text_placement(max_error, RMSE):
+        if max_error > 40:
+            text_placement = 40
+        elif max_error < (RMSE*1.1):
+            text_placement = RMSE*1.1
+        else:
+            text_placement = max_error
+        return text_placement
+
+    # Plot max error lines
+    y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
+    axs[1].axhline(y=y_max_line_placement_1, linewidth=1, c="red")
+
+    # Plot max error text
+    y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
+    axs[1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+
+
+    axs[1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*max_error_angle1])))
+    axs[1].grid(color="lightgrey")
+
+    fig.tight_layout(pad=2.0)
+
+    fig.savefig(figure_results_dir + "\\" + joint_name + "_angles.png")
+
+    plt.close()
+
+    return RMSE_angle1, R
 
 
 
@@ -1389,3 +1491,45 @@ def trim_body_ori_data_to_same_length(n, thorax_IMU, humerus_IMU, radius_IMU, th
         radius_IMU = np.delete(radius_IMU, [-1], 0)
 
     return thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC
+
+
+# Function to calculate RMSE from an error array, dealing with any nans
+def get_RMSE(error_arr):
+    error_arr = error_arr[~np.isnan(error_arr)]
+    RMSE = (sum(np.square(error_arr)) / len(error_arr)) ** 0.5
+    return RMSE
+
+# Function to calculate Pearson Corr Coeff, from two series, dealing with any nans
+def get_pearsonr(OMC_angle, IMU_angle):
+    # Remove any nans values present
+    OMC_angle_no_nans = np.delete(OMC_angle, np.union1d(np.where(np.isnan(OMC_angle)), np.where(np.isnan(IMU_angle))))
+    IMU_angle_no_nans = np.delete(IMU_angle, np.union1d(np.where(np.isnan(OMC_angle)), np.where(np.isnan(IMU_angle))))
+    R = pearsonr(OMC_angle_no_nans, IMU_angle_no_nans)[0]
+    return R
+
+# Function to calculate the cross-correlation lag between two series, accounting for nans
+def get_cross_cor_lag(x, y):
+
+    # Remove elements from both arrays where either array is a nan
+    x_nonans = np.delete(x, np.union1d(np.where(np.isnan(x)), np.where(np.isnan(y))))
+    y_nonans = np.delete(y, np.union1d(np.where(np.isnan(x)), np.where(np.isnan(y))))
+
+    # Run the cross correlation
+    correlation = signal.correlate(x_nonans, y_nonans, mode="full")
+    lags = signal.correlation_lags(x_nonans.size, y_nonans.size, mode="full")
+    lag = lags[np.argmax(correlation)]  # Get the lag value at the index where correlation is largest
+
+    # # Diagnosis/investigation code:
+    # print(lags)
+    # print(correlation)
+    # # Get middle results around where lag = 0
+    # indices_within_range = [index for index, lag in enumerate(lags) if -20 <= lag <= 20]
+    # print(lags[indices_within_range])
+    # print(correlation[indices_within_range])
+    # fig, axs = plt.subplots(1, 1, figsize=(14,9))
+    # axs.plot(lags, correlation)
+    # axs.plot(x_nonans)
+    # axs.plot(y_nonans)
+    # plt.show()
+
+    return lag

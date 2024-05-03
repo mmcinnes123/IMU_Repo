@@ -5,6 +5,5 @@ from scipy.spatial.transform import Rotation as R
 import numpy as np
 import pandas as pd
 
-n = 1
-for i in range(0, n+1):
-    print(i)
+angle = [1,2,3,4,5]
+print(angle[:-2])
