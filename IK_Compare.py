@@ -3,9 +3,6 @@
 # Outputs are: .png plots of each joint of interest
 
 import os
-
-import pandas as pd
-
 from functions import *
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
@@ -14,8 +11,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     """ SETTINGS """
     sample_rate = 100
-    labelA = "OMC"  # This is the label linked to all the variables with "OMC" in the title
-    labelB = "IMU"  # This is the label linked to all the variables with "IMU" in the title
 
     # Define some file names
     compare_name = subject_code + '_' + calibration_name + '_' + trial_name
@@ -31,8 +26,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     if os.path.exists(results_dir) == False:
         os.mkdir(results_dir)
-    # osim.Logger.removeFileSink()
-    # osim.Logger.addFileSink(results_dir + r"\opensim.log")
 
 
     """ READ IN DATA """
@@ -60,6 +53,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     # Account for discrepancies between trimming function/time values#
     n = OMC_table.getNumRows() - IMU_table.getNumRows()     # Check if tables are different lengths
     trim_tables_if_diff_lengths(n, OMC_table, IMU_table)    # Trim the tables to the same length
+
     # Trim the body ori data to same length for ease of plotting
     thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC = \
         trim_body_ori_data_to_same_length(n, thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC)
@@ -80,8 +74,9 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
                       'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
 
     # Define a dict with labels:keys, for reading in all the coordinates of interest from the states table
-    OSim_coords_joint_ref_dict = {'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
-                                  'TH_y': 'thorax_rotation', 'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
+    # OSim_coords_joint_ref_dict = {'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
+    #                               'TH_y': 'thorax_rotation', 'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
+    OSim_coords_joint_ref_dict = {'EL_x': 'elbow_flexion'}
 
     # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
     print('Plotting results...')
@@ -111,7 +106,8 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     OMC_angle_dict = {'HT_abd': abduction_all_OMC, 'HT_flexion': flexion_all_OMC, 'HT_rotation': rotation_elbow_down_all_OMC}
     IMU_angle_dict = {'HT_abd': abduction_all_IMU, 'HT_flexion': flexion_all_IMU, 'HT_rotation': rotation_elbow_down_all_IMU}
-    HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
+    # HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
+    HT_joint_ref_dict = {}
 
     # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
     for key, value in HT_joint_ref_dict.items():
@@ -153,5 +149,5 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
 
 if __name__ == '__main__':
-    run_IK_compare('P3', 'JA_Slow', 'METHOD_2_Alt_self', 0, 90, False, 'Real')
+    run_IK_compare('P3', 'JA_Slow', 'METHOD_2_Alt_self', 0, 90, True, 'Real')
 

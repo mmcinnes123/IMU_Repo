@@ -478,17 +478,12 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
         time = time[:lag]               # Remove last n values from time array
     print(f" Applied a shift of {lag} to {joint_name} IMU data")
 
-    # Calculate error array
-    error_angle1 = abs(OMC_angle - IMU_angle)
 
-    # Calculate Pearson correlation coefficient
-    R = get_pearsonr(OMC_angle, IMU_angle)
-
-    # Calculate RMSE
-    RMSE_angle1 = get_RMSE(error_angle1)
-
-    # Calculate max error
-    max_error_angle1 = np.nanmax(error_angle1)
+    # Get error metrics
+    error_angle1 = abs(OMC_angle - IMU_angle)       # Calculate error array
+    R = get_pearsonr(OMC_angle, IMU_angle)          # Calculate Pearson correlation coefficient
+    RMSE_angle1 = get_RMSE(error_angle1)            # Calculate RMSE
+    max_error_angle1 = np.nanmax(error_angle1)      # Calculate max error
 
     # Create figure
     fig, axs = plt.subplots(2, 1, figsize=(12, 6), height_ratios=[6, 4])
