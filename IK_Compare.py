@@ -58,7 +58,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC = \
         trim_body_ori_data_to_same_length(n, thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC)
 
-    time = OMC_table.getIndependentColumn()  # Get the time data
+    time = np.array(OMC_table.getIndependentColumn())  # Get the time data
 
     """ ANALYSE ELBOW AND THORAX COORDS """
 
@@ -72,11 +72,16 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     R_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
                       'elbow_flexion': None, 'elbow_pronation': None,
                       'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
+    peakROM_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
+                      'elbow_flexion': None, 'elbow_pronation': None,
+                      'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
+    troughROM_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
+                      'elbow_flexion': None, 'elbow_pronation': None,
+                      'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
 
     # Define a dict with labels:keys, for reading in all the coordinates of interest from the states table
-    # OSim_coords_joint_ref_dict = {'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
-    #                               'TH_y': 'thorax_rotation', 'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
-    OSim_coords_joint_ref_dict = {'EL_x': 'elbow_flexion'}
+    OSim_coords_joint_ref_dict = {'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
+                                  'TH_y': 'thorax_rotation', 'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
 
     # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
     print('Plotting results...')
@@ -87,11 +92,13 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         IMU_angle = IMU_table.getDependentColumn(key).to_numpy()
 
         # Calcualte error metrics and plot
-        RMSE, R = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, joint_name=value)
+        RMSE, R, mean_peak_error, mean_trough_error = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, joint_name=value)
 
         # Add RMSE and R values into the results dicts
         RMSE_results_dict[value] = RMSE
         R_results_dict[value] = R
+        peakROM_results_dict[value] = mean_peak_error
+        troughROM_results_dict[value] = mean_trough_error
 
 
     """ ANALYSE HT ANGLES """
@@ -106,8 +113,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     OMC_angle_dict = {'HT_abd': abduction_all_OMC, 'HT_flexion': flexion_all_OMC, 'HT_rotation': rotation_elbow_down_all_OMC}
     IMU_angle_dict = {'HT_abd': abduction_all_IMU, 'HT_flexion': flexion_all_IMU, 'HT_rotation': rotation_elbow_down_all_IMU}
-    # HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
-    HT_joint_ref_dict = {}
+    HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
 
     # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
     for key, value in HT_joint_ref_dict.items():
@@ -116,12 +122,14 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         IMU_angle = IMU_angle_dict[key]
 
         # Calcualte error metrics and plot
-        RMSE, R = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir,
+        RMSE, R, mean_peak_error, mean_trough_error = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir,
                                    joint_name=key)
 
         # Add RMSE and R values into the results dicts
         RMSE_results_dict[key] = RMSE
         R_results_dict[key] = R
+        peakROM_results_dict[key] = mean_peak_error
+        troughROM_results_dict[key] = mean_trough_error
 
     """ ANALYSE MODEL BODY ORIENTATIONS """
 
@@ -139,7 +147,9 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     final_RMSE_values_df = pd.DataFrame.from_dict(RMSE_results_dict, orient='index', columns=["RMSE"])
     final_R_values_df = pd.DataFrame.from_dict(R_results_dict, orient='index', columns=["R"])
-    all_data = pd.concat((final_RMSE_values_df, final_R_values_df), axis=1)
+    final_peakROM_values_df = pd.DataFrame.from_dict(peakROM_results_dict, orient='index', columns=["peakROM"])
+    final_troughROM_values_df = pd.DataFrame.from_dict(troughROM_results_dict, orient='index', columns=["troughROM"])
+    all_data = pd.concat((final_RMSE_values_df, final_R_values_df, final_peakROM_values_df, final_troughROM_values_df), axis=1)
 
     # Write final RMSE values to a csv
     print('Writing results to .csv.')

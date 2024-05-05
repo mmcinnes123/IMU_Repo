@@ -7,6 +7,7 @@ import pandas as pd
 from quat_functions import *
 import opensim as osim
 from scipy.spatial.transform import Slerp
+from scipy.signal import find_peaks
 from scipy.stats import pearsonr
 from scipy import signal
 from IMU_IK_functions import APDM_2_sto_Converter
@@ -478,6 +479,27 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
         time = time[:lag]               # Remove last n values from time array
     print(f" Applied a shift of {lag} to {joint_name} IMU data")
 
+    # Get the peaks and troughs
+    OMC_peaks, OMC_peak_inds = get_peaks_or_troughs(OMC_angle, peak_or_trough='peak', data_type='OMC')
+    IMU_peaks, IMU_peak_inds = get_peaks_or_troughs(IMU_angle, peak_or_trough='peak', data_type='IMU')
+    OMC_troughs, OMC_trough_inds = get_peaks_or_troughs(OMC_angle, peak_or_trough='trough', data_type='OMC')
+    IMU_troughs, IMU_trough_inds = get_peaks_or_troughs(IMU_angle, peak_or_trough='trough', data_type='IMU')
+
+    # Get the mean peak/trough error
+    if joint_name not in ('thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation'):
+        plot_peaks = True
+        mean_peak_error = get_peak_and_trough_errors(OMC_peaks, IMU_peaks)
+        mean_trough_error = get_peak_and_trough_errors(OMC_troughs, IMU_troughs)
+        # Check we have enough peaks/troughs, then calculate mean
+        if any(len(var) < 4 for var in [OMC_peaks, IMU_peaks, OMC_troughs, IMU_troughs]):
+            print(f"WARNING: No/not enough peaks found for {joint_name} (less than 4)")
+
+    # Don't bother plotting/getting peak values for thorax angles
+    else:
+        plot_peaks = False
+        mean_peak_error = 0     # Sub in value for plotting
+        mean_trough_error = 0   # Sub in value for plotting
+
 
     # Get error metrics
     error_angle1 = abs(OMC_angle - IMU_angle)       # Calculate error array
@@ -485,44 +507,52 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
     RMSE_angle1 = get_RMSE(error_angle1)            # Calculate RMSE
     max_error_angle1 = np.nanmax(error_angle1)      # Calculate max error
 
+
     # Create figure
-    fig, axs = plt.subplots(2, 1, figsize=(12, 6), height_ratios=[6, 4])
+    fig, axs = plt.subplots(2, 1, figsize=(16,8), height_ratios=[7,3])
 
-    # Plot joint angles
 
-    axs[0].plot(time, OMC_angle)
-    axs[0].plot(time, IMU_angle)
+    """ Plot joint angles """
 
+    # Axs 0 settings
     axs[0].set_title(label)
     axs[0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
     axs[0].legend(['OMC', 'IMU'])
     axs[0].grid(color="lightgrey")
 
-    # Plot error graphs
+    # Plot the joint angles
+    axs[0].plot(time, OMC_angle)
+    axs[0].plot(time, IMU_angle)
 
+    # Plot the peaks and troughs
+    if plot_peaks == True:
+        axs[0].plot(time[OMC_trough_inds], OMC_troughs, "x", c='blue')
+        axs[0].plot(time[OMC_peak_inds], OMC_peaks, "x", c='blue')
+        axs[0].plot(time[IMU_trough_inds], IMU_troughs, "x", c='orange')
+        axs[0].plot(time[IMU_peak_inds], IMU_peaks, "x", c='orange')
+
+    # Annotate with mean peak/trough error
+    y_min, y_max = axs[0].get_ylim()
+    y_mid = (y_min + y_max) / 2
+    if plot_peaks == True:
+        axs[0].text(time[-1]+0.1*(end_time-start_time), y_mid+10,
+                    "Mean peak\nerror = " + str(round(mean_peak_error,1)) + " deg")
+        axs[0].text(time[-1]+0.1*(end_time-start_time), y_mid-10,
+                    "Mean trough\nerror = " + str(round(mean_trough_error,1)) + " deg")
+
+
+    """ Plot error graphs """
+
+    # Axs 1 settings
+    axs[1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*max_error_angle1])))
+    axs[1].grid(color="lightgrey")
+
+    # Plot to time-series error
     axs[1].scatter(time, error_angle1, s=0.4)
-
 
     # Plot RMSE error lines and text
     axs[1].axhline(y=RMSE_angle1, linewidth=2, c="red")
     axs[1].text(time[-1]+0.1*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
-
-    # Functions to define placement of max error annotation
-    def y_max_line_placement(max_error):
-        if max_error > 40:
-            line_placement = 40
-        else:
-            line_placement = max_error
-        return line_placement
-
-    def y_max_text_placement(max_error, RMSE):
-        if max_error > 40:
-            text_placement = 40
-        elif max_error < (RMSE*1.1):
-            text_placement = RMSE*1.1
-        else:
-            text_placement = max_error
-        return text_placement
 
     # Plot max error lines
     y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
@@ -532,17 +562,12 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
     axs[1].text(time[-1]+0.1*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
 
-
-    axs[1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,np.min([40,1.1*max_error_angle1])))
-    axs[1].grid(color="lightgrey")
-
     fig.tight_layout(pad=2.0)
 
     fig.savefig(figure_results_dir + "\\" + joint_name + "_angles.png")
-
     plt.close()
 
-    return RMSE_angle1, R
+    return RMSE_angle1, R, mean_peak_error, mean_trough_error
 
 
 
@@ -1528,3 +1553,58 @@ def get_cross_cor_lag(x, y):
     # plt.show()
 
     return lag
+
+
+# Function for getting the peaks or troughs from an array
+def get_peaks_or_troughs(angle_arr, peak_or_trough, data_type):
+
+    prominence = 50
+
+    if peak_or_trough == 'peak':
+        x = angle_arr
+    elif peak_or_trough == 'trough':
+        x = -angle_arr
+    else:
+        print('peak/trough not written correctly')
+
+    peak_inds, _ = find_peaks(x, prominence=prominence)
+    peaks = angle_arr[peak_inds]
+
+    # # For diagnostic
+    # print(f'For {data_type}, looking at {peak_or_trough}s:')
+    # for i in range(len(peaks)):
+    #     print(f"At index = {peak_inds[i]}, angle = {peaks[i]}")
+
+    return peaks, peak_inds
+
+
+# Function for getting the average error between OMC values and IMU values
+def get_peak_and_trough_errors(OMC_peaks, IMU_peaks):
+
+    if len(OMC_peaks) == len(IMU_peaks):  # Check the same number of peaks has been found
+        errors = abs(OMC_peaks - IMU_peaks)
+    else:
+        print("Number of OMC peaks/troughs found did not match IMU peaks/troughs found.")
+        quit()
+
+    mean_error = np.mean(errors)
+
+    return mean_error
+
+
+# Functions to define placement of max error annotation
+def y_max_line_placement(max_error):
+    if max_error > 40:
+        line_placement = 40
+    else:
+        line_placement = max_error
+    return line_placement
+
+def y_max_text_placement(max_error, RMSE):
+    if max_error > 40:
+        text_placement = 40
+    elif max_error < (RMSE*1.1):
+        text_placement = RMSE*1.1
+    else:
+        text_placement = max_error
+    return text_placement
