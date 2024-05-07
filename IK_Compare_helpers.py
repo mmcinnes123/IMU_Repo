@@ -217,12 +217,14 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
 
     def angle_between_two_2D_vecs(vec1, vec2):
         angle = np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))) * 180 / np.pi
+        if vec1[0] < 0:
+            angle = -angle
         return angle
 
     n_rows = len(CF1)
     x_rel2_X_on_XY = np.zeros((n_rows))
-    x_rel2_X_on_XZ = np.zeros((n_rows))
-    z_rel2_Z_on_ZY = np.zeros((n_rows))
+    x_rel2_X_on_ZX = np.zeros((n_rows))
+    z_rel2_Z_on_YZ = np.zeros((n_rows))
     y_rel2_Y_on_XY = np.zeros((n_rows))
 
     for row in range(n_rows):
@@ -242,10 +244,10 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         # Make these values up into vectors projected on certain planes
         vec_x_on_XY = [mat_x_X, mat_x_Y]
         X_on_XY = [1, 0]
-        vec_x_on_XZ = [mat_x_X, mat_x_Z]
-        X_on_XZ = [1, 0]
-        vec_z_on_ZY = [mat_z_Z, mat_z_Y]
-        Z_on_ZY = [1, 0]
+        vec_x_on_ZX = [mat_x_X, mat_x_Z]
+        X_on_ZX = [0, 1]
+        vec_z_on_YZ = [mat_z_Y, mat_z_Z]
+        Z_on_YZ = [0, 1]
         vec_y_on_XY = [mat_y_X, mat_y_Y]
         Y_on_XY = [0, 1]
 
@@ -258,15 +260,15 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         else:
             x_rel2_X_on_XY[row] = np.nan
 
-        if np.linalg.norm(vec_x_on_XZ) > threshold:
-            x_rel2_X_on_XZ[row] = angle_between_two_2D_vecs(vec_x_on_XZ, X_on_XZ)
+        if np.linalg.norm(vec_x_on_ZX) > threshold:
+            x_rel2_X_on_ZX[row] = angle_between_two_2D_vecs(vec_x_on_ZX, X_on_ZX)
         else:
-            x_rel2_X_on_XZ[row] = np.nan
+            x_rel2_X_on_ZX[row] = np.nan
 
-        if np.linalg.norm(vec_z_on_ZY) > threshold:
-            z_rel2_Z_on_ZY[row] = angle_between_two_2D_vecs(vec_z_on_ZY, Z_on_ZY)
+        if np.linalg.norm(vec_z_on_YZ) > threshold:
+            z_rel2_Z_on_YZ[row] = angle_between_two_2D_vecs(vec_z_on_YZ, Z_on_YZ)
         else:
-            z_rel2_Z_on_ZY[row] = np.nan
+            z_rel2_Z_on_YZ[row] = np.nan
 
         if np.linalg.norm(vec_y_on_XY) > threshold:
             y_rel2_Y_on_XY[row] = angle_between_two_2D_vecs(vec_y_on_XY, Y_on_XY)
@@ -274,12 +276,12 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
             y_rel2_Y_on_XY[row] = np.nan
 
     # Assign to clinically relevant joint angles
-    abduction_all = y_rel2_Y_on_XY
-    flexion_all = -z_rel2_Z_on_ZY
-    rotation_elbow_down_all = x_rel2_X_on_XZ
-    rotation_elbow_up_all = -z_rel2_Z_on_ZY
+    abduction = -y_rel2_Y_on_XY
+    flexion = z_rel2_Z_on_YZ
+    rotation_elbow_down = x_rel2_X_on_ZX
+    rotation_elbow_up = z_rel2_Z_on_YZ
 
-    return abduction_all, flexion_all, rotation_elbow_down_all, rotation_elbow_up_all
+    return abduction, flexion, rotation_elbow_down, rotation_elbow_up
 
 
 # Function to run interactive span selector - with mouse, select specific area on plot - returns the range (min, max)
