@@ -1567,13 +1567,16 @@ def get_peaks_or_troughs(angle_arr, peak_or_trough, data_type):
     else:
         print('peak/trough not written correctly')
 
-    peak_inds, _ = find_peaks(x, prominence=prominence)
+    peak_inds, _ = find_peaks(x, prominence=prominence, wlen=1000)
     peaks = angle_arr[peak_inds]
 
-    # # For diagnostic
-    # print(f'For {data_type}, looking at {peak_or_trough}s:')
-    # for i in range(len(peaks)):
-    #     print(f"At index = {peak_inds[i]}, angle = {peaks[i]}")
+    # For diagnostic
+    print(f'For {data_type}, looking at {peak_or_trough}s:')
+    for i in range(len(peaks)):
+        print(f"At index = {peak_inds[i]}, angle = {peaks[i]}")
+    plt.plot(angle_arr)
+    plt.plot(peak_inds, peaks, 'x')
+    plt.show()
 
     return peaks, peak_inds
 

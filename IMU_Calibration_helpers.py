@@ -47,12 +47,6 @@ def get_calibration_inputs(subject_code, trial_name, IMU_type, calibration_name,
     # Get the orientations data to be used for the calibration
     cal_oris_file_path = get_oris_file(IMU_type, pose_name, sto_files_dir)
 
-    # Check we've set the default pose of the template model correctly
-    pose_confirmation = input(
-        f"\nIs the default pose of the model set to match the expected subject pose ({pose_name})?: ")
-    if pose_confirmation == "No":
-        quit()
-
     # Read in the template model
     model_file = 'das3.osim'
 
