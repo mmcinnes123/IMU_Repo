@@ -6,13 +6,14 @@ import os
 # Quick Settings
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 list_of_subjects = ['P1', 'P2', 'P3']
-IMU_type_list = ['Perfect', 'Real']
+IMU_type_list = ['Perfect']
 trial_name = 'JA_Slow'
-calibration_name_dict = {'ALL_MANUAL': None,
+calibration_name_dict = {'OSIM_N_self': None,
+                         'OSIM_Alt_self': None,
+                         'ALL_MANUAL': None,
                          'METHOD_1_Alt_self': None,
                          'METHOD_2_Alt_self': None,
-                         'OSIM_N_self': None,
-                         'OSIM_Alt_self': None}
+                         }
 
 # Function to read the results form csv
 def read_from_csv(file_path):
@@ -24,7 +25,7 @@ def read_from_csv(file_path):
 
 """ CREATING DATAFRAME FOR R"""
 
-all_data = pd.DataFrame(columns=['Subject', 'Trial', 'CalibrationName', 'JA', 'RMSE', 'R'])
+all_data = pd.DataFrame(columns=['Subject', 'Trial', 'CalibrationName', 'JA', 'RMSE', 'R', 'peakROM', 'troughROM'])
 
 
 # Get the results for each calibration method

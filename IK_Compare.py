@@ -89,13 +89,13 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     """ GET HT ANGLES """
 
     # Calculate the projected vector angles based on the body orientations of thorax and humerus
-    abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC = \
+    abduction_OMC, flexion_OMC, rotation_elbow_down_OMC, rotation_elbow_up_OMC = \
         get_vec_angles_from_two_CFs(thorax_OMC, humerus_OMC)
-    abduction_all_IMU, flexion_all_IMU, rotation_elbow_down_all_IMU, rotation_elbow_up_all_IMU = \
+    abduction_IMU, flexion_IMU, rotation_elbow_down_IMU, rotation_elbow_up_IMU = \
         get_vec_angles_from_two_CFs(thorax_IMU, humerus_IMU)
 
-    OMC_angle_dict = {'HT_abd': abduction_all_OMC, 'HT_flexion': flexion_all_OMC, 'HT_rotation': rotation_elbow_down_all_OMC}
-    IMU_angle_dict = {'HT_abd': abduction_all_IMU, 'HT_flexion': flexion_all_IMU, 'HT_rotation': rotation_elbow_down_all_IMU}
+    OMC_angle_dict = {'HT_abd': abduction_OMC, 'HT_flexion': flexion_OMC, 'HT_rotation': rotation_elbow_down_OMC}
+    IMU_angle_dict = {'HT_abd': abduction_IMU, 'HT_flexion': flexion_IMU, 'HT_rotation': rotation_elbow_down_IMU}
     HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
 
 
