@@ -8,6 +8,7 @@ from scipy import signal
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr
 from matplotlib.widgets import SpanSelector
+import os
 
 from quat_functions import quat_mul
 from quat_functions import quat_conj
@@ -166,8 +167,12 @@ def get_peaks_or_troughs(angle_arr, indmin, indmax, peak_or_trough, data_type):
 
 # Function for getting the average error between OMC values and IMU values
 def get_peak_and_trough_errors(OMC_peaks, IMU_peaks):
-    errors = abs(OMC_peaks - IMU_peaks)
-    mean_error = np.mean(errors)
+    if len(OMC_peaks) == len(IMU_peaks):
+        errors = abs(OMC_peaks - IMU_peaks)
+        mean_error = np.mean(errors)
+    else:
+        print('Warning: number of OMC peaks/troughs does not equal number of IMU peaks/troughs found')
+        mean_error = 0      # Fill in number for plotting
     return mean_error
 
 
@@ -212,8 +217,6 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
 
     def angle_between_two_2D_vecs(vec1, vec2):
         angle = np.arccos(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))) * 180 / np.pi
-        if vec1[1] < 0:
-            angle = -angle
         return angle
 
     n_rows = len(CF1)
@@ -314,8 +317,49 @@ def run_span_selector(OMC_angle, IMU_angle, time, joint_name):
 
     return indmin, indmax
 
+
+def get_range_dict(JA_range_dict_file, OSim_coords_joint_ref_dict, HT_joint_ref_dict, OMC_table, IMU_table,
+                   OMC_angle_dict, IMU_angle_dict, time):
+
+    if os.path.exists(JA_range_dict_file) == False:
+
+        range_dict_coords = {'elbow_flexion': [], 'elbow_pronation': []}
+        range_dict_HTs = {'HT_abd': [], 'HT_flexion': [], 'HT_rotation': []}
+
+        # Iterate through the osim coords
+        for key in range_dict_coords.keys():
+            ref = OSim_coords_joint_ref_dict[key]
+            OMC_angle = OMC_table.getDependentColumn(ref).to_numpy()  # Extract coordinates from states table
+            IMU_angle = IMU_table.getDependentColumn(ref).to_numpy()  # Extract coordinates from states table
+            indmin, indmax = run_span_selector(OMC_angle, IMU_angle, time, joint_name=key)
+            range_dict_coords[key] = [indmin, indmax]
+
+        # Iterate through the HT angles
+        for key in HT_joint_ref_dict.keys():
+            OMC_angle = OMC_angle_dict[key]
+            IMU_angle = IMU_angle_dict[key]
+            indmin, indmax = run_span_selector(OMC_angle, IMU_angle, time, joint_name=key)
+            range_dict_HTs[key] = [indmin, indmax]
+
+        # Merge the two dicts
+        range_dict = {**range_dict_coords, **range_dict_HTs}
+
+        # Save dict to .txt
+        file_obj = open(JA_range_dict_file, 'w')
+        file_obj.write(str(range_dict))
+        file_obj.close()
+
+    else:
+        file_obj = open(JA_range_dict_file, 'r')
+        range_dict_str = file_obj.read()
+        file_obj.close()
+        range_dict = eval(range_dict_str)
+
+    return range_dict
+
+
 def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
-                         figure_results_dir, joint_name):
+                         figure_results_dir, range_dict, joint_name):
 
     label = joint_name.replace('_', ' ').title()
 
@@ -335,18 +379,20 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
     # Get the peaks and troughs
     if joint_name not in ('thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation'):
         plot_peaks = True   # Don't bother calculating or plotting thorax peaks
-        indmin, indmax = run_span_selector(OMC_angle, IMU_angle, time, joint_name)  # Use interactive span selector to choose range
+        indmin, indmax = range_dict[joint_name][0], range_dict[joint_name][1]
         OMC_peaks, OMC_peak_inds = get_peaks_or_troughs(OMC_angle, indmin, indmax, peak_or_trough='peak', data_type='OMC')
         IMU_peaks, IMU_peak_inds = get_peaks_or_troughs(IMU_angle, indmin, indmax, peak_or_trough='peak', data_type='IMU')
         OMC_troughs, OMC_trough_inds = get_peaks_or_troughs(OMC_angle, indmin, indmax, peak_or_trough='trough', data_type='OMC')
         IMU_troughs, IMU_trough_inds = get_peaks_or_troughs(IMU_angle, indmin, indmax, peak_or_trough='trough', data_type='IMU')
 
+        # Check we have found enough peaks/troughs
+        if any(len(var) < 4 for var in [OMC_peaks, IMU_peaks, OMC_troughs, IMU_troughs]):
+            print(f"WARNING: No/not enough peaks found for {joint_name} (less than 4)")
+
         # Get the mean peak/trough error
         mean_peak_error = get_peak_and_trough_errors(OMC_peaks, IMU_peaks)
         mean_trough_error = get_peak_and_trough_errors(OMC_troughs, IMU_troughs)
-        # Check we have enough peaks/troughs, then calculate mean
-        if any(len(var) < 4 for var in [OMC_peaks, IMU_peaks, OMC_troughs, IMU_troughs]):
-            print(f"WARNING: No/not enough peaks found for {joint_name} (less than 4)")
+
     else:
         plot_peaks = False
         mean_peak_error = 0     # Sub in value for plotting

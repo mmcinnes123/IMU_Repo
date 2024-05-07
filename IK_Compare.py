@@ -25,6 +25,8 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     OMC_analysis_sto_path = os.path.join(OMC_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
     IMU_mot_file = os.path.join(IMU_IK_results_dir, 'IMU_IK_results.mot')
     OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
+    JA_range_dict_file = os.path.join(parent_dir, subject_code + '_JA_range_dict.txt')
+
 
     if os.path.exists(results_dir) == False:
         os.mkdir(results_dir)
@@ -64,7 +66,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     """ ANALYSE ELBOW AND THORAX COORDS """
 
-    # Plot and calculate errors for all the coordinates in the states file
 
     # Instantiate error dicts to write results into
     RMSE_results_dict = {'thorax_ori': None, 'humerus_ori': None, 'radius_ori': None,
@@ -81,31 +82,11 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
                       'elbow_flexion': None, 'elbow_pronation': None,
                       'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
 
-    # Define a dict with labels:keys, for reading in all the coordinates of interest from the states table
-    OSim_coords_joint_ref_dict = {'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
-                                  'TH_y': 'thorax_rotation', 'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
+    # Define a dict with keys and values used to read sto columns, for reading in all osim cordinates
+    OSim_coords_joint_ref_dict = {'thorax_forward_tilt': 'TH_x', 'thorax_lateral_tilt': 'TH_z', 'thorax_rotation': 'TH_y',
+                                  'elbow_flexion': 'EL_x', 'elbow_pronation': 'PS_y'}
 
-    # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
-    print('Plotting results...')
-    for key, value in OSim_coords_joint_ref_dict.items():
-
-        # Extract coordinates from states table
-        OMC_angle = OMC_table.getDependentColumn(key).to_numpy()
-        IMU_angle = IMU_table.getDependentColumn(key).to_numpy()
-
-        # Calcualte error metrics and plot
-        RMSE, R, mean_peak_error, mean_trough_error = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, joint_name=value)
-
-        # Add RMSE and R values into the results dicts
-        RMSE_results_dict[value] = RMSE
-        R_results_dict[value] = R
-        peakROM_results_dict[value] = mean_peak_error
-        troughROM_results_dict[value] = mean_trough_error
-
-
-    """ ANALYSE HT ANGLES """
-
-    # Plot and calculate errors for all the HT angles, calculated from relative body oris
+    """ GET HT ANGLES """
 
     # Calculate the projected vector angles based on the body orientations of thorax and humerus
     abduction_all_OMC, flexion_all_OMC, rotation_elbow_down_all_OMC, rotation_elbow_up_all_OMC = \
@@ -117,6 +98,40 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     IMU_angle_dict = {'HT_abd': abduction_all_IMU, 'HT_flexion': flexion_all_IMU, 'HT_rotation': rotation_elbow_down_all_IMU}
     HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
 
+
+    """ MAKE JA TIME RANGE DICT """
+
+    # Use interactive span selector to choose time range for each JA movement period
+
+    range_dict = get_range_dict(JA_range_dict_file, OSim_coords_joint_ref_dict, HT_joint_ref_dict,
+                                OMC_table, IMU_table, OMC_angle_dict, IMU_angle_dict, time)
+
+
+    """ ANALYSE ELBOW AND THORAX COORDS """
+
+    # Plot and calculate errors for all the coordinates in the states file
+    # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
+    print('Plotting results...')
+    for key, value in OSim_coords_joint_ref_dict.items():
+
+        # Extract coordinates from states table
+        OMC_angle = OMC_table.getDependentColumn(value).to_numpy()
+        IMU_angle = IMU_table.getDependentColumn(value).to_numpy()
+
+        # Calcualte error metrics and plot
+        RMSE, R, mean_peak_error, mean_trough_error = \
+            plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, range_dict, joint_name=key)
+
+        # Add RMSE and R values into the results dicts
+        RMSE_results_dict[key] = RMSE
+        R_results_dict[key] = R
+        peakROM_results_dict[key] = mean_peak_error
+        troughROM_results_dict[key] = mean_trough_error
+
+
+    """ ANALYSE HT ANGLES """
+
+    # Plot and calculate errors for all the HT angles, calculated from relative body oris
     # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
     for key, value in HT_joint_ref_dict.items():
 
@@ -124,14 +139,15 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         IMU_angle = IMU_angle_dict[key]
 
         # Calcualte error metrics and plot
-        RMSE, R, mean_peak_error, mean_trough_error = plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir,
-                                   joint_name=key)
+        RMSE, R, mean_peak_error, mean_trough_error = \
+            plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, range_dict, joint_name=key)
 
         # Add RMSE and R values into the results dicts
         RMSE_results_dict[key] = RMSE
         R_results_dict[key] = R
         peakROM_results_dict[key] = mean_peak_error
         troughROM_results_dict[key] = mean_trough_error
+
 
     """ ANALYSE MODEL BODY ORIENTATIONS """
 
