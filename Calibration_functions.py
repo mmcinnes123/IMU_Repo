@@ -164,7 +164,7 @@ def get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori, body_ori):
 
 # This funtion calculates an IMU offset for the humerus, where the long axis of the humerus is defined by the long axis
 # of the IMU, and the z-axis of the humerus is defined by the long axis of the forearm IMU
-def get_humerus_IMU_cal_MANUAL_Ys(humerus_IMU_ori, radius_IMU_ori):
+def get_IMU_cal_hum_method_2(humerus_IMU_ori, radius_IMU_ori):
 
     # Define the y axis of the humerus to be aligned with the negative y axis of the humerus IMU
     body_y = [0, -1, 0]
@@ -194,7 +194,7 @@ def get_humerus_IMU_cal_MANUAL_Ys(humerus_IMU_ori, radius_IMU_ori):
 
 
 # This method starts with a pose-based humerus calibration, then adjusts the calibration in the
-# abduction plane usign hte humerus IMU long axis, then adjust int/ext using forearm IMU long axis.
+# abduction plane using the humerus IMU long axis, then adjust int/ext using forearm IMU long axis.
 def get_IMU_cal_hum_method_3(humerus_IMU_ori, radius_IMU_ori, body_ori):
 
     # Get pose-based offset:
@@ -246,8 +246,8 @@ def apply_chosen_method(which_body, IMU_ori_rotated, body_ori, second_IMU_ori_ro
         virtual_IMU = get_IMU_cal_MANUAL(which_body)
     elif method_name == "get_IMU_cal_POSE_and_MANUAL_Y":
         virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori_rotated, body_ori)
-    elif method_name == "get_humerus_IMU_cal_MANUAL_Ys":
-        virtual_IMU = get_humerus_IMU_cal_MANUAL_Ys(IMU_ori_rotated, second_IMU_ori_rotated)
+    elif method_name == "get_IMU_cal_hum_method_2":
+        virtual_IMU = get_IMU_cal_hum_method_2(IMU_ori_rotated, second_IMU_ori_rotated)
     elif method_name == "get_IMU_cal_hum_method_3":
         virtual_IMU = get_IMU_cal_hum_method_3(IMU_ori_rotated, second_IMU_ori_rotated, body_ori)
     else:

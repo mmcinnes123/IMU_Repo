@@ -21,9 +21,8 @@ def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
     osim.STOFileAdapterQuaternion.write(quatTable, output_file_name)
 
 
-def run_calibrate_model(calibration_settings_file, modelFileName, sensor_to_opensim_rotations,
-                        calibration_orientations_file, baseIMUName, baseIMUHeading,
-                        visulize_calibration, output_dir):
+def run_osim_calibrate_model(calibration_settings_file, modelFileName, sensor_to_opensim_rotations,
+                        calibration_orientations_file, baseIMUName, baseIMUHeading, output_dir):
 
     # Instantiate an IMUPlacer object
     imuPlacer = osim.IMUPlacer(calibration_settings_file)
@@ -39,7 +38,8 @@ def run_calibrate_model(calibration_settings_file, modelFileName, sensor_to_open
     imuPlacer.printToXML(output_dir + "\\" + calibration_settings_file)
 
     # Run the IMUPlacer
-    imuPlacer.run(visulize_calibration)
+    visualize_calibration = False
+    imuPlacer.run(visualize_calibration)
 
     # Get the model with the calibrated IMU
     model = imuPlacer.getCalibratedModel()
