@@ -3,7 +3,9 @@
 # Outputs are: .png plots of each joint of interest
 
 import os
-from functions import *
+import pandas as pd
+from IK_Compare_helpers import *
+
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
 
@@ -50,9 +52,9 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     OMC_table.trim(start_time, end_time)
     IMU_table.trim(start_time, end_time)
 
-    # Account for discrepancies between trimming function/time values#
+    # Account for discrepancies between trimming function/time values
     n = OMC_table.getNumRows() - IMU_table.getNumRows()     # Check if tables are different lengths
-    trim_tables_if_diff_lengths(n, OMC_table, IMU_table)    # Trim the tables to the same length
+    OMC_table, IMU_table = trim_tables_if_diff_lengths(n, OMC_table, IMU_table)    # Trim the tables to the same length
 
     # Trim the body ori data to same length for ease of plotting
     thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC = \
