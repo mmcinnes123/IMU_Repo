@@ -8,13 +8,8 @@ directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 list_of_subjects = ['P1', 'P2', 'P3']
 IMU_type_list = ['Perfect', 'Real']
 trial_name = 'JA_Slow'
-# calibration_name_dict = {'ALL_MANUAL': None,
-#                          'Thorax_POSE_Rest_MANUAL': None,
-#                          'METHOD_1': None,
-#                          'METHOD_2_Alt_self': None,
-#                          'OSIM': None,
-#                          'OSIM_Alt_self': None}
 calibration_name_dict = {'ALL_MANUAL': None,
+                         'METHOD_1_Alt_self': None,
                          'METHOD_2_Alt_self': None,
                          'OSIM_N_self': None,
                          'OSIM_Alt_self': None}
@@ -23,7 +18,6 @@ calibration_name_dict = {'ALL_MANUAL': None,
 def read_from_csv(file_path):
     with open(file_path, 'r') as file:
         df = pd.read_csv(file, index_col=0, header=0, sep=',', dtype={1: np.float64, 2: np.float64})
-
     return df
 
 
@@ -55,7 +49,9 @@ for IMU_type in IMU_type_list:
                                         'CalibrationName': [calibration_name], 'IMU_type': [IMU_type],
                                         'JA': Results_df.index[row],
                                         'RMSE': Results_df.loc[Results_df.index[row], 'RMSE'],
-                                        'R':Results_df.loc[Results_df.index[row], 'R']})
+                                        'R': Results_df.loc[Results_df.index[row], 'R'],
+                                        'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
+                                        'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
                 all_data = pd.concat([all_data, new_row], ignore_index=True)
 
 all_data.to_csv(os.path.join(directory, 'R Analysis', 'AllResults_forR.csv'))
