@@ -234,6 +234,50 @@ def get_IMU_cal_hum_method_3(humerus_IMU_ori, radius_IMU_ori, body_ori):
 
 
 
+# This method builds on get_IMU_cal_hum_method_3(), but uses a different pose (in 90deg forward flexion, with elbow bent)
+# to calibrate the int/ext rotation.
+# This method starts with a pose-based humerus calibration, then adjusts the calibration in the
+# abduction plane using the humerus IMU long axis, then adjust int/ext using forearm IMU long axis, but with body ori
+# data from a different pose/moment in time.
+def get_IMU_cal_hum_method_4(humerus_IMU_ori_at_t1, humerus_ori_at_t1,
+                             humerus_IMU_ori_at_t2, radius_IMU_ori_at_t2):
+
+    # Get pose-based offset, based on time1, when arm is at side:
+    pose_based_body_inIMU = humerus_IMU_ori_at_t1.inv() * humerus_ori_at_t1   # Find the body frame, expressed in IMU frame
+    pose_based_body_z = pose_based_body_inIMU.as_matrix()[:, 2]
+
+    # Calculate the body's x-axis as cross product of IMUs y-axis and body's z-axis
+    # i.e. humeral abduction is defined by IMU long axis
+    int_body_x = np.cross(pose_based_body_z, [0, 1, 0])
+
+    # Lock in the newly created body y-axis, based on this new x-axis
+    body_y = np.cross(pose_based_body_z, int_body_x)
+    # This new y is a combination of the abduction defined by the pose, and the flexion defined by the humerus IMU
+
+    # Get the orientation of the radius IMU, expressed in the humerus IMU frame, at time 2
+    radius_IMU_inHumIMU = humerus_IMU_ori_at_t2.inv() * radius_IMU_ori_at_t2
+    rad_y_inHumIMU = radius_IMU_inHumIMU.as_matrix()[:, 1]  # Get the direction of the radius IMUs y-axis
+
+    # Now, define the int/ext rotation by defining new body x-axis as cross prod between new body y and the forearm y
+    body_x = np.cross(rad_y_inHumIMU, body_y)
+
+    # Lastly:
+    body_z = np.cross(body_x, body_y)
+
+    # Finish the orthogonal CF from these vectors
+    body_matrix = np.array([body_x, body_y, body_z]).T
+    body_in_IMU = R.from_matrix(body_matrix)
+
+    # Check how non-orthogonal the matrix was
+    print("Non-orthogonality has been accounted for (determinant was: " + str(
+        round(np.linalg.det(body_matrix), 4)) + ")")
+
+    # Express the virtual IMU frame in the model's body frame
+    virtual_IMU = body_in_IMU.inv()
+
+    return virtual_IMU
+
+
 
 
 """ Functions to calculate and apply IMU offset depending on the method defined """
