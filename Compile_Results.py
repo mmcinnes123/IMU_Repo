@@ -6,7 +6,7 @@ import os
 # Quick Settings
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 list_of_subjects = ['P1', 'P2', 'P3']
-IMU_type_list = ['Perfect']
+IMU_type_list = ['Perfect', 'Real']
 trial_name = 'JA_Slow'
 calibration_name_dict = {'OSIM_N_self': None,
                          'OSIM_Alt_self': None,

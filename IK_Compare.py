@@ -177,5 +177,5 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
 
 if __name__ == '__main__':
-    run_IK_compare('P3', 'JA_Slow', 'METHOD_2_Alt_self', 0, 90, True, 'Real')
+    run_IK_compare('P1', 'JA_Slow', 'METHOD_2_Alt_self', 0, 90, False, 'Perfect')
 
