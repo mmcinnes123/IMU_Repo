@@ -131,3 +131,26 @@ for calibration_name, pose_names in calibration_name_dict.items():
                 apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
                                    calibrated_model_dir)
 
+
+
+
+
+""" STAND ALONE FUNCTION FOR RUNNING NEW CALIBRATION """
+
+def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_name2):
+
+    # Check we've set the default pose of the template model correctly
+    pose_confirmation = \
+        input(f"\nIs the default pose of the model set to match the expected subject pose ({pose_name1})?: ")
+    if pose_confirmation == "No":
+        quit()
+
+    # Get/make the directory to store the newly calibrated model
+    calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
+
+    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+    get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2,
+                             pose_name1, pose_name2, IMU_type, calibrated_model_dir)
+
+    apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
+                   calibrated_model_dir)
