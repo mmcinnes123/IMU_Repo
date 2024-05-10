@@ -5,12 +5,12 @@
 
 from IMU_Calibration_helpers import get_calibrated_model_dir
 from IMU_Calibration_helpers import osim_calibrate_model
-from Custom_Calibration_helpers import get_IMU_offsets_ALL_MANUAL
-from Custom_Calibration_helpers import get_IMU_offsets_METHOD_1
-from Custom_Calibration_helpers import get_IMU_offsets_METHOD_2
-from Custom_Calibration_helpers import get_IMU_offsets_METHOD_3
-from Custom_Calibration_helpers import get_cal_ori_file_path
-from Custom_Calibration_helpers import apply_cal_to_model
+from IMU_Calibration_helpers import get_IMU_offsets_ALL_MANUAL
+from IMU_Calibration_helpers import get_IMU_offsets_METHOD_1
+from IMU_Calibration_helpers import get_IMU_offsets_METHOD_2
+from IMU_Calibration_helpers import get_IMU_offsets_METHOD_3
+from IMU_Calibration_helpers import get_cal_ori_file_path
+from IMU_Calibration_helpers import apply_cal_to_model
 
 
 # Specify in the template model
@@ -27,15 +27,15 @@ template_model_file = 'das3.osim'
 """ QUICK SETTINGS """
 
 # Define which subjects/IMU types/trial name you want to run the calibration for
-subject_code_list = ['P1']
-IMU_type_list = ['Perfect']
+
 trial_name1 = 'CP'   # Specify which trial to use for calibration pose
 trial_name2 = 'JA_Slow'   # For methods which use two poses, specify the trial in which to find the pose data
-    # TODO: When different participants use a different trial for pose 2, this code will need updated
-
-""" RUN THE CUSTOM CALIBRATIONS """
-
+    # When different participants use a different trial for pose 2, this code will need updated
+subject_code_list = ['P1']
+IMU_type_list = ['Perfect']
 calibration_name_dict = {'METHOD_3': ['Alt_self', 'Alt2_self']}
+
+""" MAIN """
 
 for calibration_name, pose_names in calibration_name_dict.items():
 

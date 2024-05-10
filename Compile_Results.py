@@ -13,6 +13,7 @@ calibration_name_dict = {'OSIM_N_self': None,
                          'ALL_MANUAL': None,
                          'METHOD_1_Alt_self': None,
                          'METHOD_2_Alt_self': None,
+                         'METHOD_3': None,
                          }
 
 # Function to read the results form csv
