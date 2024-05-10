@@ -1,10 +1,78 @@
 from scipy.spatial.transform import Rotation as R
+import os
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
+from IMU_Calibration_helpers import get_calibrated_model_dir
 
 
-""" Preliminary functions for getting heading offset, rotated IMU orientations, and reading/writing data"""
+# Calibration settings
+sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
+baseIMUName = 'thorax_imu'
+baseIMUHeading = '-x'  # Which axis of the thorax IMU points in same direction as the model's thorax x-axis?
+calibration_settings_template_file = "IMU_Calibration_Settings.xml"
+# Read in the template model
+template_model_file = 'das3.osim'
 
+
+
+""" CUSTOM FUNCTIONS SPECIFIC TO EACH CALIBRATION METHOD"""
+
+
+# Function to apply METHOD_3
+def get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2, pose_name1, pose_name2, IMU_type, calibrated_model_dir):
+
+    # Get the IMU orientation data at calibration pose time 1
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
+    thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
+
+    # Get the IMU orientation data at calibration pose time 2
+    cal_oris_file_path_2 = get_cal_ori_file_path(subject_code, trial_name2, pose_name2, IMU_type)
+    thorax_IMU_ori2, humerus_IMU_ori2, radius_IMU_ori2 = read_sto_quaternion_file(cal_oris_file_path_2)
+
+    # Get model body orientations in ground during default pose
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+
+    # Get heading offset between IMU heading and model heading
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated1 = heading_offset_ori * thorax_IMU_ori1
+    humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
+    radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
+    thorax_IMU_ori_rotated2 = heading_offset_ori * thorax_IMU_ori2
+    humerus_IMU_ori_rotated2 = heading_offset_ori * humerus_IMU_ori2
+    radius_IMU_ori_rotated2 = heading_offset_ori * radius_IMU_ori2
+
+    # Write the rotated IMU orientations to sto file for visualisation
+    write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated1, humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, calibrated_model_dir)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_4(humerus_IMU_ori_rotated1, humerus_ori, humerus_IMU_ori_rotated2, radius_IMU_ori_rotated2)
+    radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
+
+
+
+
+
+
+""" AUXILIARY FUNCTIONS USED IN CALIBRATION PROCESS """
+
+
+# Get the file path for the sto file containing the IMU orientation data during the specified pose
+def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
+    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
+    sto_files_dir = os.path.join(os.path.join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
+    cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
+    cal_oris_file_path = os.path.join(sto_files_dir, cal_oris_file)
+    return cal_oris_file_path
+
+
+# Read the IMU orientation data from an sto file and return a list of scipy Rs
 def read_sto_quaternion_file(IMU_orientations_file):
 
     # Read sto file
@@ -27,6 +95,7 @@ def read_sto_quaternion_file(IMU_orientations_file):
     return thorax_IMU_ori, humerus_IMU_ori, radius_IMU_ori
 
 
+# Get the orientation of each model body, relative to the ground frame, during the default pose
 def get_model_body_oris_during_default_pose(model_file):
 
     """ Get model body orientations in ground during default pose """
@@ -52,6 +121,7 @@ def get_model_body_oris_during_default_pose(model_file):
     return thorax_ori, humerus_ori, radius_ori
 
 
+# Get the heading offset between the thorax IMU heading and the heading of the model in its default state
 def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label):
 
     # Calculate the heading offset
@@ -79,6 +149,7 @@ def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label):
     return heading_offset
 
 
+# Write the rotated IMU data to file so that they can be visualised alongside the model in the default pose
 def write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotated, radius_IMU_ori_rotated, results_dir):
 
     # # Write transformed IMU quaternions to .sto file (write to APDM .csv first, then convert)
@@ -93,7 +164,8 @@ def write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotat
 
 
 
-""" Functions which apply different methods of calibration """
+
+""" SENSOR-2-SEGMENT OFFSET CALCULATION FUNCTIONS (applied seperately to each body-IMU pair) """
 
 
 # This method uses the default pose of the model to calculate and initial orientation offset between body and IMU.
@@ -107,7 +179,6 @@ def get_IMU_cal_POSE_BASED(IMU_ori, body_ori):
     virtual_IMU = body_inIMU.inv()
 
     return virtual_IMU
-
 
 
 # This function calculates the IMU offset required which is equivalent to relying on 'manual alignment'
@@ -128,7 +199,6 @@ def get_IMU_cal_MANUAL(which_body):
         print("Which_body input wasn't 'Thorax', 'Humerus', or 'Radius'")
 
     return virtual_IMU
-
 
 
 # This function calculates an IMU offset defined by the pose of the body,
@@ -159,7 +229,6 @@ def get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori, body_ori):
     virtual_IMU = body_in_IMU.inv()
 
     return virtual_IMU
-
 
 
 # This funtion calculates an IMU offset for the humerus, where the long axis of the humerus is defined by the long axis
@@ -233,7 +302,6 @@ def get_IMU_cal_hum_method_3(humerus_IMU_ori, radius_IMU_ori, body_ori):
     return virtual_IMU
 
 
-
 # This method builds on get_IMU_cal_hum_method_3(), but uses a different pose (in 90deg forward flexion, with elbow bent)
 # to calibrate the int/ext rotation.
 # This method starts with a pose-based humerus calibration, then adjusts the calibration in the
@@ -279,69 +347,7 @@ def get_IMU_cal_hum_method_4(humerus_IMU_ori_at_t1, humerus_ori_at_t1,
 
 
 
-
-""" Functions to calculate and apply IMU offset depending on the method defined """
-
-# This function applies one of the calibration method functions above, depending on the method name specified
-def apply_chosen_method(which_body, IMU_ori_rotated, body_ori, second_IMU_ori_rotated, method_name):
-    if method_name == "get_IMU_cal_POSE_BASED":
-        virtual_IMU = get_IMU_cal_POSE_BASED(IMU_ori_rotated, body_ori)
-    elif method_name == "get_IMU_cal_MANUAL":
-        virtual_IMU = get_IMU_cal_MANUAL(which_body)
-    elif method_name == "get_IMU_cal_POSE_and_MANUAL_Y":
-        virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori_rotated, body_ori)
-    elif method_name == "get_IMU_cal_hum_method_2":
-        virtual_IMU = get_IMU_cal_hum_method_2(IMU_ori_rotated, second_IMU_ori_rotated)
-    elif method_name == "get_IMU_cal_hum_method_3":
-        virtual_IMU = get_IMU_cal_hum_method_3(IMU_ori_rotated, second_IMU_ori_rotated, body_ori)
-    else:
-        print("Method not defined")
-
-    print(which_body + " virtual IMU eulers: " + str(virtual_IMU.as_euler('XYZ')))
-
-    return virtual_IMU
-
-
-# A function which calls several other functions to calculate a virtual IMU offset for the thorax, humerus and radius
-# Within this function, the type of calibration method for each IMU can be specified
-def get_IMU_offset(cal_method_dict, calibration_orientations_file, model_file, results_dir, base_IMU_axis_label):
-
-    """ Get IMU orientations at pose time """
-
-    thorax_IMU_ori, humerus_IMU_ori, radius_IMU_ori = read_sto_quaternion_file(calibration_orientations_file)
-
-
-    """ Get model body orientations in ground during default pose """
-
-    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(model_file)
-
-    """ Get heading offset between IMU heading and model heading """
-
-    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori, base_IMU_axis_label)
-
-    # Apply the heading offset to the IMU orientations
-    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
-    thorax_IMU_ori_rotated = heading_offset_ori * thorax_IMU_ori
-    humerus_IMU_ori_rotated = heading_offset_ori * humerus_IMU_ori
-    radius_IMU_ori_rotated = heading_offset_ori * radius_IMU_ori
-
-    # Write the rotated IMU orientations to sto file for visualisation
-    write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotated, radius_IMU_ori_rotated, results_dir)
-
-    """ Get the IMU offset """
-
-    # Get the chosen settings to decide which method you want to apply
-    thorax_cal_method = cal_method_dict['Thorax']
-    humerus_cal_method = cal_method_dict['Humerus']
-    radius_cal_method = cal_method_dict['Radius']
-
-    # Apply the chosen calibration method:
-    thorax_virtual_IMU = apply_chosen_method("Thorax", thorax_IMU_ori_rotated, thorax_ori, humerus_IMU_ori_rotated, thorax_cal_method)
-    humerus_virtual_IMU = apply_chosen_method("Humerus", humerus_IMU_ori_rotated, humerus_ori, radius_IMU_ori_rotated, humerus_cal_method)
-    radius_virtual_IMU = apply_chosen_method("Radius", radius_IMU_ori_rotated, radius_ori, radius_IMU_ori_rotated, radius_cal_method)
-
-
-    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+""" FUNCTION TO APPLY THE CALCULATED OFFSETS TO THE MODEL """
 
 
 # A function which takes an uncalibrated model (with IMUs already associated with each body)
@@ -370,3 +376,133 @@ def apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_I
 
     model.setName("IMU_Calibrated_das")
     model.printToXML(results_dir + r"\Calibrated_" + model_file)
+
+
+
+
+
+
+
+""" ARCHIVED FUNCTIONS """
+
+
+# OLD SYSTEM OF APPLYING EACH METHOD
+def custom_calibrate_model(calibration_name, cal_oris_file_path, cal_oris2_file_path, calibrated_model_dir, model_file):
+
+    # Get the dict which specifies which type of calibration should be applied to each body/IMU pair
+    cal_method_dict = get_cal_method_dict(calibration_name)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+        get_IMU_offset(cal_method_dict, cal_oris_file_path, cal_oris2_file_path, model_file, calibrated_model_dir,
+                       baseIMUHeading)
+
+    # Using the IMU offsets calculated above, update the virtual IMUs in the model to create a calibrated model
+    apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, model_file, calibrated_model_dir)
+
+def get_cal_method_dict(calibration_name):
+    """ DEFINING CUSTOM CALIBRATION METHODS """
+    # Calibration Method Options:
+    # Pose-only (OpenSim): get_IMU_cal_POSE_BASED
+    # Manual alignment: get_IMU_cal_MANUAL
+    # Combined: Pose-based, but then correct with manual Y: get_IMU_cal_POSE_and_MANUAL_Y
+    # Manual: Humerus-specific, using humerus IMU y-axis and radius IMU y-axis: get_IMU_cal_hum_method_2
+    # Humerus method 3: pose defines flexion, humerus IMU defines adb, forearm IMU defines int/ext: get_IMU_cal_hum_method_3
+    # humerus method 4: based on humerus method 3, but uses alternative pose to get radius IMU projection on humerus IMU
+
+    if calibration_name == 'ALL_MANUAL':
+        thorax_method = 'get_IMU_cal_MANUAL'
+        humerus_method = 'get_IMU_cal_MANUAL'
+        radius_method = 'get_IMU_cal_MANUAL'
+
+    elif calibration_name == 'METHOD_1_Alt_self':
+        thorax_method = 'get_IMU_cal_POSE_BASED'
+        humerus_method = 'get_IMU_cal_hum_method_2'
+        radius_method = 'get_IMU_cal_MANUAL'
+
+    elif calibration_name == 'METHOD_2_Alt_self':
+        thorax_method = 'get_IMU_cal_POSE_BASED'
+        humerus_method = 'get_IMU_cal_hum_method_3'
+        radius_method = 'get_IMU_cal_MANUAL'
+
+    elif calibration_name == 'METHOD_3':
+        thorax_method = 'get_IMU_cal_POSE_BASED'
+        humerus_method = 'get_IMU_cal_hum_method_4'
+        radius_method = 'get_IMU_cal_MANUAL'
+
+    # Set the cal_method_dict for each body based on the method chosen above
+    cal_method_dict = {'Thorax': thorax_method,
+                       'Humerus': humerus_method,
+                       'Radius': radius_method}
+
+    return cal_method_dict
+
+
+# This function applies one of the calibration method functions above, depending on the method name specified
+def apply_chosen_method(which_body, IMU_ori_rotated, body_ori, second_IMU_ori_rotated, method_name, humerus_IMU_ori2_rotated, radius_IMU_ori2_rotated):
+    if method_name == "get_IMU_cal_POSE_BASED":
+        virtual_IMU = get_IMU_cal_POSE_BASED(IMU_ori_rotated, body_ori)
+    elif method_name == "get_IMU_cal_MANUAL":
+        virtual_IMU = get_IMU_cal_MANUAL(which_body)
+    elif method_name == "get_IMU_cal_POSE_and_MANUAL_Y":
+        virtual_IMU = get_IMU_cal_POSE_and_MANUAL_Y(IMU_ori_rotated, body_ori)
+    elif method_name == "get_IMU_cal_hum_method_2":
+        virtual_IMU = get_IMU_cal_hum_method_2(IMU_ori_rotated, second_IMU_ori_rotated)
+    elif method_name == "get_IMU_cal_hum_method_3":
+        virtual_IMU = get_IMU_cal_hum_method_3(IMU_ori_rotated, second_IMU_ori_rotated, body_ori)
+    elif method_name == "get_IMU_cal_hum_method_4":
+        virtual_IMU = get_IMU_cal_hum_method_4(IMU_ori_rotated, body_ori, humerus_IMU_ori2_rotated, radius_IMU_ori2_rotated)
+    else:
+        print("Method not defined")
+
+    print(which_body + " virtual IMU eulers: " + str(virtual_IMU.as_euler('XYZ')))
+
+    return virtual_IMU
+
+
+# A function which calls several other functions to calculate a virtual IMU offset for the thorax, humerus and radius
+# Within this function, the type of calibration method for each IMU can be specified
+def get_IMU_offset(cal_method_dict, calibration_orientations_file, cal_oris2_file, model_file, results_dir, base_IMU_axis_label):
+
+    """ Get IMU orientations at pose time """
+
+    thorax_IMU_ori, humerus_IMU_ori, radius_IMU_ori = read_sto_quaternion_file(calibration_orientations_file)
+
+    thorax_IMU_ori2, humerus_IMU_ori2, radius_IMU_ori2 = read_sto_quaternion_file(cal_oris2_file)
+
+
+    """ Get model body orientations in ground during default pose """
+
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(model_file)
+
+    """ Get heading offset between IMU heading and model heading """
+
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori, base_IMU_axis_label)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated = heading_offset_ori * thorax_IMU_ori
+    humerus_IMU_ori_rotated = heading_offset_ori * humerus_IMU_ori
+    radius_IMU_ori_rotated = heading_offset_ori * radius_IMU_ori
+    thorax_IMU_ori2_rotated = heading_offset_ori * thorax_IMU_ori2
+    humerus_IMU_ori2_rotated = heading_offset_ori * humerus_IMU_ori2
+    radius_IMU_ori2_rotated = heading_offset_ori * radius_IMU_ori2
+
+    # Write the rotated IMU orientations to sto file for visualisation
+    write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotated, radius_IMU_ori_rotated, results_dir)
+
+    """ Get the IMU offset """
+
+    # Get the chosen settings to decide which method you want to apply
+    thorax_cal_method = cal_method_dict['Thorax']
+    humerus_cal_method = cal_method_dict['Humerus']
+    radius_cal_method = cal_method_dict['Radius']
+
+    # Apply the chosen calibration method:
+    thorax_virtual_IMU = apply_chosen_method("Thorax", thorax_IMU_ori_rotated, thorax_ori, humerus_IMU_ori_rotated, thorax_cal_method, humerus_IMU_ori2, radius_IMU_ori2)
+    humerus_virtual_IMU = apply_chosen_method("Humerus", humerus_IMU_ori_rotated, humerus_ori, radius_IMU_ori_rotated, humerus_cal_method, humerus_IMU_ori2_rotated, radius_IMU_ori2_rotated)
+    radius_virtual_IMU = apply_chosen_method("Radius", radius_IMU_ori_rotated, radius_ori, radius_IMU_ori_rotated, radius_cal_method, humerus_IMU_ori2, radius_IMU_ori2)
+
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
