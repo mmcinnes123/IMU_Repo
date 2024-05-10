@@ -18,6 +18,80 @@ template_model_file = 'das3.osim'
 """ CUSTOM FUNCTIONS SPECIFIC TO EACH CALIBRATION METHOD"""
 
 
+# Function to apply ALL_MANUAL method
+def get_IMU_offsets_ALL_MANUAL():
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_MANUAL('Thorax')
+    humerus_virtual_IMU = get_IMU_cal_MANUAL('Humerus')
+    radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
+
+
+
+# Function to apply METHOD_1
+def get_IMU_offsets_METHOD_1(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir):
+
+    # Get the IMU orientation data at calibration pose time 1
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
+    thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
+
+    # Get model body orientations in ground during default pose
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+
+    # Get heading offset between IMU heading and model heading
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated1 = heading_offset_ori * thorax_IMU_ori1
+    humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
+    radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
+
+    # Write the rotated IMU orientations to sto file for visualisation
+    write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated1, humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, calibrated_model_dir)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_2(humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1)
+    radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
+
+# Function to apply METHOD_2
+def get_IMU_offsets_METHOD_2(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir):
+
+    # Get the IMU orientation data at calibration pose time 1
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
+    thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
+
+    # Get model body orientations in ground during default pose
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+
+    # Get heading offset between IMU heading and model heading
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated1 = heading_offset_ori * thorax_IMU_ori1
+    humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
+    radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
+
+    # Write the rotated IMU orientations to sto file for visualisation
+    write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated1, humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, calibrated_model_dir)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_3(humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, humerus_ori)
+    radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
+
+
 # Function to apply METHOD_3
 def get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2, pose_name1, pose_name2, IMU_type, calibrated_model_dir):
 
