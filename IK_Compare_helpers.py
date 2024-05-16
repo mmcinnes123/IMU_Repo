@@ -113,7 +113,7 @@ def get_cross_cor_lag(x, y):
     # Run the cross correlation
     correlation = signal.correlate(x_nonans, y_nonans, mode="full")
     lags = signal.correlation_lags(x_nonans.size, y_nonans.size, mode="full")
-    lag = lags[np.argmax(correlation)]  # Get the lag value at the index where correlation is largest
+    lag = lags[np.argmax(abs(correlation))]  # Get the lag value at the index where correlation is largest
 
     # # Diagnosis/investigation code:
     # print(lags)
@@ -124,8 +124,8 @@ def get_cross_cor_lag(x, y):
     # print(correlation[indices_within_range])
     # fig, axs = plt.subplots(1, 1, figsize=(14,9))
     # axs.plot(lags, correlation)
-    # axs.plot(x_nonans)
-    # axs.plot(y_nonans)
+    # # axs.plot(x_nonans)
+    # # axs.plot(y_nonans)
     # plt.show()
 
     return lag
@@ -144,6 +144,7 @@ def get_peaks_or_troughs(angle_arr, indmin, indmax, peak_or_trough, data_type):
         x = -angle_arr
     else:
         print('peak/trough not written correctly')
+        x = None
 
     #  Run the find_peaks function on the range selected by the span selector
     peak_inds_in_selected_range, _ = find_peaks(x[indmin:indmax], prominence=prominence)
@@ -372,11 +373,13 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
 
     # Calculate cross-correlation lag and shift IMU data
     lag = get_cross_cor_lag(OMC_angle, IMU_angle)
-    if lag < 0:
+    if -20 < lag < 0:   # Only apply the shift if lag is in a sensible range
         IMU_angle = IMU_angle[-lag:]    # Remove first n values from IMU data
         OMC_angle = OMC_angle[:lag]     # Remove last n values from OMC data
         time = time[:lag]               # Remove last n values from time array
-    print(f" Applied a shift of {lag} to {joint_name} IMU data")
+        print(f' CROSS-COR: For {joint_name}, lag = {lag} => APPLIED')
+    else:
+        print(f' CROSS-COR: For {joint_name}, lag = {lag} => NOT APPLIED')
 
     # Get the peaks and troughs
     if joint_name not in ('thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation'):

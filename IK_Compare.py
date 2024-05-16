@@ -102,7 +102,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     """ MAKE JA TIME RANGE DICT """
 
     # Use interactive span selector to choose time range for each JA movement period
-
     range_dict = get_range_dict(JA_range_dict_file, OSim_coords_joint_ref_dict, HT_joint_ref_dict,
                                 OMC_table, IMU_table, OMC_angle_dict, IMU_angle_dict, time)
 
@@ -177,5 +176,5 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
 
 if __name__ == '__main__':
-    run_IK_compare('P1', 'JA_Slow', 'METHOD_2_Alt_self', 0, 90, False, 'Perfect')
+    run_IK_compare('P4', 'JA_Slow', 'ALL_MANUAL', 0, 90, False, 'Real')
 
