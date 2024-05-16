@@ -8,14 +8,16 @@
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
 import os
+import ast
 
 
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P1'
+subject_code = 'P4'
 # Looking at OMC data, input time values next to each type of pose
-trial_name_dict = {'CP': {'N_self': 6, 'Alt_self': 10, 'N_asst': 18, 'Alt_asst': 25}, 'JA_Slow': {'N_self': 7, 'Alt_self': 14, 'Alt2_self': 90}, 'JA_Fast': {'N_self': 3, 'Alt_self': 6}, 'ROM': {'N_self': 6, 'Alt_self': 10}, 'ADL': {'N_self': 8, 'Alt_self': 10}}
+new_trial_name_dict = {'CP': {'N_self': 8, 'Alt_self': 21, 'N_asst': 13, 'Alt_asst': 21, 'Alt2_self': 29}, 'JA_Slow': {'N_self': 10, 'Alt_self': 14, 'Alt2_self': 106}, 'JA_Fast': {'N_self': 7, 'Alt_self': 10}, 'ROM': {'N_self': 5, 'Alt_self': 8}, 'ADL': {'N_self': 5, 'Alt_self': 10}}
+save_new_dict = False    # Whether to write trial_name_dict above into the text file
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 sample_rate = 100
 
@@ -37,10 +39,20 @@ osim.Logger.setLevelString("Off")
 
 """ MAIN """
 
-# # Save trial name and times dict to .txt
-file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'w')
-file_obj.write(str(trial_name_dict))
-file_obj.close()
+
+# Save trial name and times dict to .txt
+if save_new_dict == True:
+    file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'w')
+    file_obj.write(str(new_trial_name_dict))
+    file_obj.close()
+    trial_name_dict = new_trial_name_dict
+else:
+    # Read the existing txt file to get the dict
+    file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'r')
+    content = file_obj.read()
+    trial_name_dict = ast.literal_eval(content)
+    file_obj.close()
+
 
 # Function to extract quaternion orientation data from .txt file and save as .sto file
 def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type, trial_results_dir):

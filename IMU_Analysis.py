@@ -43,3 +43,5 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
 
 
 
+if __name__ == '__main__':
+    run_analysis(subject_code='P4', trial_name='JA_Slow', calibration_name='ALL_MANUAL', start_time=0, end_time=20, trim_bool=False, IMU_type='Real')

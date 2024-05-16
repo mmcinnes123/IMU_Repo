@@ -96,6 +96,7 @@ def intial_IMU_transform_alt(IMU_df):
 
 # Write new data_out to APDM file template
 def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
+
     # Make columns of zeros
     N = len(df_1)
     zeros_25_df = pd.DataFrame(np.zeros((N, 25)))

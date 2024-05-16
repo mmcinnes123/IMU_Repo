@@ -13,7 +13,7 @@ from IMU_Calibration_helpers import get_cal_ori_file_path
 from IMU_Calibration_helpers import apply_cal_to_model
 
 
-# Specify in the template model
+# Specify the template model
 template_model_file = 'das3.osim'
 
 # Template for running all iterations
@@ -28,11 +28,12 @@ template_model_file = 'das3.osim'
 
 # Define which subjects/IMU types/trial name you want to run the calibration for
 
+subject_code_list = ['P4']
+IMU_type_list = ['Perfect', 'Real']
 trial_name1 = 'CP'   # Specify which trial to use for calibration pose
-trial_name2 = 'JA_Slow'   # For methods which use two poses, specify the trial in which to find the pose data
-    # When different participants use a different trial for pose 2, this code will need updated
-subject_code_list = ['P1']
-IMU_type_list = ['Perfect']
+trial_name2 = 'CP'   # For methods which use two poses, specify the trial in which to find the pose data
+    # For P1, P2, P3, this should be JA_Slow, since Alt2 pose wasn't captured during CP
+    # For all others, this should be CP
 calibration_name_dict = {'METHOD_3': ['Alt_self', 'Alt2_self']}
 
 """ MAIN """
@@ -73,8 +74,7 @@ for calibration_name, pose_names in calibration_name_dict.items():
                 # If there is more than 1 pose defined in the method's pose name dict:
                 if len(pose_names) > 1:
                     pose_name1 = pose_names[0]  # First pose used to do the pose-based calibration part
-                    pose_name2 = pose_names[
-                        1]  # This is the pose/time used in METHOD_3 to get the radius IMU projected on the humerus IMU
+                    pose_name2 = pose_names[1]  # This is the pose/time used in METHOD_3 to get the radius IMU projected on the humerus IMU
                 else:
                     pose_name1 = pose_names[0]
                     pose_name2 = None
