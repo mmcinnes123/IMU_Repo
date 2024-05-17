@@ -19,23 +19,23 @@ import numpy as np
 
 # Quick Settings
 # subject_code = 'P3'
-parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P3\FrameCalibrationTestsNew'
+parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\Frame Calibration Verification'
 sample_rate = 100
 max_gap = 0.5     # In [s], the maximum allowable gap in data to be filled with SLERP
 cut_off = 20       # Minimum angular velocity magnitude used to calculate misalignment
 delay = 8           # Shift used to better match IMU and cluster ang vel data
 
 # Timings - input start and end time of when each assembly started and stopped rotating
-Thorax_start_time = 4
-Thorax_end_time = 30
-Humerus_start_time = 49
-Humerus_end_time = 68
-Forearm_start_time = 76
-Forearm_end_time = 97
+Thorax_start_time = 79
+Thorax_end_time = 107
+Humerus_start_time = 46
+Humerus_end_time = 71
+Forearm_start_time = 10
+Forearm_end_time = 37
 
 # Define the file names you want to take the data from
-global_input_file = 'P3_CAL_copy2 - Report5 - Global_Ang_Vels.txt'
-local_input_file = 'P3_CAL_copy2 - Report6 - Local_Ang_Vels.txt'
+global_input_file = 'CAL_offset_test - Report5 - Global_Ang_Vels.txt'
+local_input_file = 'CAL_offset_test - Report6 - Local_Ang_Vels.txt'
 
 # Define file paths
 raw_data_dir = os.path.join(parent_dir, 'RawData')
@@ -91,7 +91,7 @@ Forearm_IMU_arr, Forearm_cluster_arr = preprocess_angvels(Forearm_IMU_df, Forear
 
 # Use scipy's 'align_vectors' to solve for misalignment between local frames, according to each IMU
 print('\nLocal Misalignment Thorax:')
-Thorax_local_misalignment = get_misalign_R_from_angvels(Thorax_IMU_arr, Thorax_cluster_arr)
+Thorax_local_misalignment = get_misalign_R_from_angvels(Thorax_cluster_arr, Thorax_IMU_arr)
 print('\nLocal Misalignment Humerus:')
 Humerus_local_misalignment = get_misalign_R_from_angvels(Humerus_cluster_arr, Humerus_IMU_arr)
 print('\nLocal Misalignment Forearm:')
