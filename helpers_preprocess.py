@@ -1,5 +1,7 @@
 # Functions used to run 1_preprocess.py
 
+from constants import APDM_settings_file, APDM_template_file, sample_rate
+
 import opensim as osim
 import numpy as np
 import pandas as pd
@@ -65,3 +67,42 @@ def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
 
     # Write to file
     osim.STOFileAdapterQuaternion.write(quatTable, output_file_name)
+
+
+# Function to extract quaternion orientation data from .txt file and save as .sto file
+def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type, trial_results_dir):
+
+    # Read data from TMM .txt report
+    IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(file_path)
+
+
+    """ Write full trial to .sto """
+
+    # Write data to APDM format .csv
+    file_tag = IMU_type + '_Quats_all'
+    write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, APDM_template_file, trial_results_dir, file_tag)
+
+    # Write data to .sto using OpenSim APDM converter tool
+    APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
+                         output_file_name=trial_results_dir + "\\" + file_tag + ".sto")
+
+
+    """ Write each pose to .sto, based on time_stamp """
+
+    # Iterate through list of calibration poses and associated times to create separate .sto files
+    for pose_name in cal_pose_time_dict:
+
+        cal_pose_time = cal_pose_time_dict[pose_name]   # The time at which to extract the data
+
+        # Extract one row based on time of calibration pose
+        IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
+        IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
+        IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
+
+        # Write data to APDM format .csv
+        file_tag = IMU_type + '_Quats_' + str(pose_name)
+        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, APDM_template_file, trial_results_dir, file_tag)
+
+        # Write data to .sto using OpenSim APDM converter tool
+        APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
+                             output_file_name=trial_results_dir + "\\" + file_tag + ".sto")
