@@ -4,16 +4,12 @@
 # It also uses a dictionary of specified times to create .sto files for each moment a calibration pose was performed
 # It also creates these outputs for multiple verions of the IMU data (e.g. 'real' and 'perfect' IMUs)
 
-from constants import APDM_settings_file, APDM_template_file, sample_rate
-from helpers_preprocess import read_data_frame_from_file
-from helpers_preprocess import write_to_APDM
-from helpers_preprocess import APDM_2_sto_Converter
-from helpers_preprocess import extract_cal_row
 from helpers_preprocess import write_movements_and_calibration_stos
 
 import os
 import ast
 import opensim as osim
+from tkinter.filedialog import askopenfilename, askdirectory
 
 
 """ SETTINGS """
@@ -21,11 +17,11 @@ import opensim as osim
 # Quick Settings
 subject_code = 'P5'
 # Looking at OMC data, input time values next to each type of pose
-new_trial_name_dict = {'CP': {'N_self': 8, 'Alt_self': 21, 'N_asst': 13, 'Alt_asst': 21, 'Alt2_self': 29},
-                       'JA_Slow': {'N_self': 10, 'Alt_self': 14, 'Alt2_self': 106},
-                       'JA_Fast': {'N_self': 7, 'Alt_self': 10},
-                       'ROM': {'N_self': 5, 'Alt_self': 8},
-                       'ADL': {'N_self': 5, 'Alt_self': 10}}
+new_trial_name_dict = {'CP': {'N_self': 11, 'N_asst': 16, 'Alt_self': 33, 'Alt_asst': 36, 'Alt2_self': 48},
+                       'JA_Slow': {'N_self': 13, 'Alt_self': 16},
+                       'JA_Fast': {'N_self': 8, 'Alt_self': 12},
+                       'ROM': {'N_self': 9, 'Alt_self': 13},
+                       'ADL': {'N_self': 5, 'Alt_self': 9}}
 save_new_dict = True    # Whether to write trial_name_dict above into the text file
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 
@@ -42,7 +38,6 @@ osim.Logger.setLevelString("Off")
 
 
 """ MAIN """
-
 
 # Save trial name and times dict to .txt
 if save_new_dict == True:
@@ -76,4 +71,13 @@ for trial_name in trial_name_dict:
         write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)
 
 
+""" TEST """
 
+run_test = False
+if run_test:
+
+    IMU_key = 'Real'
+    cal_pose_time_dict = {'N_self': 13, 'Alt_self': 16}
+    raw_data_file_path = str(askopenfilename(title=' Choose the raw data .txt file with IMU/quat data ... '))
+    trial_results_dir = str(askdirectory(title=' Choose the folder where you want to save the results ... '))
+    write_movements_and_calibration_stos(raw_data_file_path, cal_pose_time_dict, IMU_key, trial_results_dir)

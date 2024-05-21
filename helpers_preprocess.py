@@ -70,10 +70,10 @@ def APDM_2_sto_Converter(APDM_settings_file, input_file_name, output_file_name):
 
 
 # Function to extract quaternion orientation data from .txt file and save as .sto file
-def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type, trial_results_dir):
+def write_movements_and_calibration_stos(input_file_path, cal_pose_time_dict, IMU_type, trial_results_dir):
 
     # Read data from TMM .txt report
-    IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(file_path)
+    IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(input_file_path)
 
 
     """ Write full trial to .sto """
