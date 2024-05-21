@@ -3,14 +3,14 @@
 # Template model file
 # Calibration settings template xml file
 
-from IMU_Calibration_helpers import get_calibrated_model_dir
-from IMU_Calibration_helpers import osim_calibrate_model
-from IMU_Calibration_helpers import get_IMU_offsets_ALL_MANUAL
-from IMU_Calibration_helpers import get_IMU_offsets_METHOD_1
-from IMU_Calibration_helpers import get_IMU_offsets_METHOD_2
-from IMU_Calibration_helpers import get_IMU_offsets_METHOD_3
-from IMU_Calibration_helpers import get_cal_ori_file_path
-from IMU_Calibration_helpers import apply_cal_to_model
+from helpers_calibration import get_calibrated_model_dir
+from helpers_calibration import osim_calibrate_model
+from helpers_calibration import get_IMU_offsets_ALL_MANUAL
+from helpers_calibration import get_IMU_offsets_METHOD_1
+from helpers_calibration import get_IMU_offsets_METHOD_2
+from helpers_calibration import get_IMU_offsets_METHOD_3
+from helpers_calibration import get_cal_ori_file_path
+from helpers_calibration import apply_cal_to_model
 
 
 # Specify the template model

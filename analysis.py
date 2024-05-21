@@ -3,9 +3,11 @@
 # Input is .mot file
 # Output is .sto file
 
-import os
-from functions import *
+from helpers_analysis import run_analyze_tool
 from constants import analyze_settings_template_file
+
+import opensim as osim
+import os
 
 def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
 

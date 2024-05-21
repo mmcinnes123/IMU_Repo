@@ -1,4 +1,4 @@
-### A mix of funtions for use in 1_Preprocess.py and Compare.py
+### A mix of funtions for use in 1_preprocess.py and compare.py
 
 
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ from scipy.spatial.transform import Slerp
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr
 from scipy import signal
-from IMU_IK_functions import APDM_2_sto_Converter
+from helpers_inverse_k import APDM_2_sto_Converter
 
 
 """ FUNCTIONS FOR READING IN DATA"""
@@ -1435,19 +1435,7 @@ def fill_nan_gaps_in_quat_df(IMU_df, max_gap):
     return IMU_df
 
 
-def run_analyze_tool(analyze_settings_template_file, results_dir, model_file_path, mot_file_path, start_time, end_time):
 
-    analyze_Tool = osim.AnalyzeTool(analyze_settings_template_file)
-    analyze_Tool.updAnalysisSet().cloneAndAppend(osim.BodyKinematics())
-    analyze_Tool.setModelFilename(model_file_path)
-    analyze_Tool.setName("analyze")
-    analyze_Tool.setCoordinatesFileName(mot_file_path)
-    analyze_Tool.setStartTime(start_time)
-    analyze_Tool.setFinalTime(end_time)
-    analyze_Tool.setResultsDir(results_dir)
-    print('Running Analyze Tool...')
-    analyze_Tool.run()
-    print('Analyze Tool run finished.')
 
 
 def get_body_quats_from_analysis_sto(analysis_sto_path, start_time, end_time):
@@ -1611,4 +1599,19 @@ def y_max_text_placement(max_error, RMSE):
         text_placement = RMSE*1.1
     else:
         text_placement = max_error
-    return text_placement
+    return
+
+
+
+def create_states_file_from_coordinates_file(analyze_settings_template_file, model_file, coord_file,
+                                             results_path, start_time, end_time, trial_name):
+
+    # Instantiate a Analyze Tool
+    analyze_tool = osim.AnalyzeTool(analyze_settings_template_file)
+    analyze_tool.setModelFilename(model_file)
+    analyze_tool.setResultsDir(results_path)
+    analyze_tool.setCoordinatesFileName(coord_file)
+    analyze_tool.setInitialTime(start_time)
+    analyze_tool.setFinalTime(end_time)
+    analyze_tool.setName(trial_name)
+    analyze_tool.run()

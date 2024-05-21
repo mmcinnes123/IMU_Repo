@@ -2,7 +2,7 @@
 
 from constants import calibration_settings_template_file
 from functions import *
-from IMU_IK_functions import APDM_2_sto_Converter
+from helpers_preprocess import APDM_2_sto_Converter
 
 import os
 

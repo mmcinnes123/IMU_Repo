@@ -4,7 +4,7 @@
 
 import os
 import pandas as pd
-from IK_Compare_helpers import *
+from helpers_compare import *
 
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):

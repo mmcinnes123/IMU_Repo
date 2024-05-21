@@ -1,17 +1,19 @@
-# Functions used in Compare.py
+# Functions used in compare.py
 
+from quat_functions import quat_mul
+from quat_functions import quat_conj
+
+import os
 import opensim as osim
-from scipy.spatial.transform import Rotation as R
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr
+from scipy.spatial.transform import Rotation as R
 from matplotlib.widgets import SpanSelector
-import os
 
-from quat_functions import quat_mul
-from quat_functions import quat_conj
+
 
 
 

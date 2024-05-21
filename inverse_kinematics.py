@@ -1,10 +1,11 @@
 # This script runs IMU IK with the OpenSense API
-# Input is .sto files create in 1_Preprocess.py, one with calibration pose, one with movements of interest
+# Input is .sto files create in 1_preprocess.py, one with calibration pose, one with movements of interest
 # Calibrates an .osim model by assigning IMUs to segments
 # Outputs .mot IK results
 
 from constants import IMU_IK_settings_file
-from IMU_IK_functions import run_osim_IMU_IK
+from helpers_inverse_k import run_osim_IMU_IK
+
 import os
 import opensim as osim
 

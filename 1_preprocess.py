@@ -5,11 +5,14 @@
 # It also creates these outputs for multiple verions of the IMU data (e.g. 'real' and 'perfect' IMUs)
 
 from constants import APDM_settings_file, APDM_template_file, sample_rate
-from functions import *
-from IMU_IK_functions import APDM_2_sto_Converter
+from helpers_preprocess import read_data_frame_from_file
+from helpers_preprocess import write_to_APDM
+from helpers_preprocess import APDM_2_sto_Converter
+from helpers_preprocess import extract_cal_row
 
 import os
 import ast
+import opensim as osim
 
 
 """ SETTINGS """
