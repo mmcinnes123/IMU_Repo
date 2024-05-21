@@ -27,9 +27,9 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
     JA_range_dict_file = os.path.join(parent_dir, subject_code + '_JA_range_dict.txt')
 
+    # Make results folder if it doesn't exist yet
+    os.makedirs(results_dir, exist_ok=True)
 
-    if os.path.exists(results_dir) == False:
-        os.mkdir(results_dir)
 
 
     """ READ IN DATA """

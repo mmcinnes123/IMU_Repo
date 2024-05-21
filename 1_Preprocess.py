@@ -21,17 +21,15 @@ new_trial_name_dict = {'CP': {'N_self': 8, 'Alt_self': 21, 'N_asst': 13, 'Alt_as
 save_new_dict = False    # Whether to write trial_name_dict above into the text file
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 
-# Required Files in Folder
-
 # Specify some file paths
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
 raw_data_dir = os.path.join(parent_dir, 'RawData')
 
 # Create a new results directory
 sto_files_dir = os.path.join(parent_dir, 'Preprocessed_Data')
-if os.path.exists(sto_files_dir) == False:
-    os.mkdir(sto_files_dir)
+os.makedirs(sto_files_dir, exist_ok=True)
 
+# Repress opensim logging
 osim.Logger.setLevelString("Off")
 
 
@@ -94,8 +92,7 @@ for trial_name in trial_name_dict:
 
     # Create a new results directory
     trial_results_dir = os.path.join(sto_files_dir, trial_name)
-    if os.path.exists(trial_results_dir) == False:
-        os.mkdir(trial_results_dir)
+    os.makedirs(trial_results_dir, exist_ok=True)
 
     for IMU_key in IMU_type_dict:
 
