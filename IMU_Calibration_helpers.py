@@ -1,15 +1,15 @@
 # Functions used to run IMU_Calibration
 
-import os
+from constants import calibration_settings_template_file
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
 
+import os
 
 # Calibration settings
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
 baseIMUName = 'thorax_imu'
 baseIMUHeading = '-x'  # Which axis of the thorax IMU points in same direction as the model's thorax x-axis?
-calibration_settings_template_file = "IMU_Calibration_Settings.xml"
 template_model_file = 'das3.osim'
 
 

@@ -1,9 +1,9 @@
 # Used to iterate through files
 
 
-from IMU_IK import run_IMU_IK
-from IMU_Analysis import run_analysis
-from IK_Compare import run_IK_compare
+from Inverse_Kinematics import run_IMU_IK
+from Analysis import run_analysis
+from Compare import run_IK_compare
 
 # Quick Settings
 subject_list = ['P4']

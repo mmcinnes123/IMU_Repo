@@ -1,4 +1,4 @@
-# Functions used in IK_Compare.py
+# Functions used in Compare.py
 
 import opensim as osim
 from scipy.spatial.transform import Rotation as R

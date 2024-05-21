@@ -4,9 +4,10 @@
 # It also uses a dictionary of specified times to create .sto files for each moment a calibration pose was performed
 # It also creates these outputs for multiple verions of the IMU data (e.g. 'real' and 'perfect' IMUs)
 
-
+from constants import APDM_settings_file, APDM_template_file, sample_rate
 from functions import *
 from IMU_IK_functions import APDM_2_sto_Converter
+
 import os
 import ast
 
@@ -19,11 +20,8 @@ subject_code = 'P4'
 new_trial_name_dict = {'CP': {'N_self': 8, 'Alt_self': 21, 'N_asst': 13, 'Alt_asst': 21, 'Alt2_self': 29}, 'JA_Slow': {'N_self': 10, 'Alt_self': 14, 'Alt2_self': 106}, 'JA_Fast': {'N_self': 7, 'Alt_self': 10}, 'ROM': {'N_self': 5, 'Alt_self': 8}, 'ADL': {'N_self': 5, 'Alt_self': 10}}
 save_new_dict = False    # Whether to write trial_name_dict above into the text file
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
-sample_rate = 100
 
 # Required Files in Folder
-template_file = "APDM_template_4S.csv"
-APDM_settings_file = "APDMDataConverter_Settings.xml"
 
 # Specify some file paths
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
@@ -62,7 +60,7 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
 
     # Write data to APDM format .csv
     file_tag = IMU_type + '_Quats_all'
-    write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, template_file, trial_results_dir, file_tag)
+    write_to_APDM(IMU1_df, IMU2_df, IMU3_df, IMU3_df, APDM_template_file, trial_results_dir, file_tag)
     # Write data to .sto using OpenSim APDM converter tool
     APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
                          output_file_name=trial_results_dir + "\\" + file_tag + ".sto")
@@ -79,7 +77,7 @@ def write_movements_and_calibration_stos(file_path, cal_pose_time_dict, IMU_type
 
         # Write data to APDM format .csv
         file_tag = IMU_type + '_Quats_' + str(pose_name)
-        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, template_file, trial_results_dir, file_tag)
+        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, APDM_template_file, trial_results_dir, file_tag)
         # Write data to .sto using OpenSim APDM converter tool
         APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
                              output_file_name=trial_results_dir + "\\" + file_tag + ".sto")

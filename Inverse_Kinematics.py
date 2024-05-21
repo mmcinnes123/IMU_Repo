@@ -1,9 +1,9 @@
 # This script runs IMU IK with the OpenSense API
-# Input is .sto files create in IMU_preprocess.py, one with calibration pose, one with movements of interest
+# Input is .sto files create in 1_Preprocess.py, one with calibration pose, one with movements of interest
 # Calibrates an .osim model by assigning IMUs to segments
 # Outputs .mot IK results
 
-
+from constants import IMU_IK_settings_file
 from IMU_IK_functions import run_osim_IMU_IK
 import os
 import opensim as osim
@@ -16,7 +16,6 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
     """ SETTINGS """
 
     # IMU IK Settings
-    IMU_IK_settings_file = 'IMU_IK_Settings.xml'
     IK_output_file_name = "IMU_IK_results.mot"
     visualize_tracking = False
     sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)

@@ -5,6 +5,7 @@
 
 import os
 from functions import *
+from constants import analyze_settings_template_file
 
 def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
 
@@ -20,7 +21,6 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
     calibrated_model_file = os.path.join(IMU_type_dir, 'Calibrated_Models', calibration_name, 'Calibrated_das3.osim')
 
     # Analyze Settings
-    analyze_settings_template_file = "Analyze_Settings.xml"
 
     # Create opensim logger file
     osim.Logger.removeFileSink()

@@ -1,4 +1,4 @@
-### A mix of funtions for use in IMU_preprocess.py and IK_Compare.py
+### A mix of funtions for use in 1_Preprocess.py and Compare.py
 
 
 import matplotlib.pyplot as plt
