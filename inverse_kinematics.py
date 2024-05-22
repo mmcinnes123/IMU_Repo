@@ -51,8 +51,10 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
                IK_results_dir, IK_trim_bool, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
 
 
+""" TEST """
 
-if __name__ == '__main__':
+run_test = False
+if run_test:
     subject_code = 'P1'
     trial_name = 'JA_Slow'
     calibration_name = 'METHOD_2_Alt_self'

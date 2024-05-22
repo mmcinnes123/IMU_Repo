@@ -16,24 +16,29 @@ from helpers_calibration import apply_cal_to_model
 
 
 
-# Template for running all iterations
-calibration_name_dict = {'OSIM_N_self': ['N_self'], 'OSIM_Alt_self': ['Alt_self'],
-                         'ALL_MANUAL': [''], 'METHOD_1_Alt_self': ['Alt_self'],
-                         'METHOD_2_Alt_self': ['Alt_self'], 'METHOD_3': ['Alt_self', 'Alt2_self']}
-# subject_code_list = ['P1', 'P2', 'P3']
-# IMU_type_list = ['Real', 'Perfect']
+
 
 
 """ SETTINGS """
 
 # Define which subjects/IMU types/trial name you want to run the calibration for
-
 subject_code_list = ['P5']
 IMU_type_list = ['Perfect', 'Real']
+calibration_name_dict = {'OSIM_N_self': ['N_self'], 'OSIM_Alt_self': ['Alt_self'],
+                         'ALL_MANUAL': [''], 'METHOD_1_Alt_self': ['Alt_self'],
+                         'METHOD_2_Alt_self': ['Alt_self'], 'METHOD_3': ['Alt_self', 'Alt2_self']}
 trial_name1 = 'CP'   # Specify which trial to use for calibration pose
 trial_name2 = 'CP'   # For methods which use two poses, specify the trial in which to find the pose data
-    # For P1, P2, P3, this should be JA_Slow, since Alt2 pose wasn't captured during CP
+    # For P1, P2, P3, trial_name2 should be JA_Slow, since Alt2 pose wasn't captured during CP
     # For all others, this should be CP
+
+
+## Template for running all iterations
+# calibration_name_dict = {'OSIM_N_self': ['N_self'], 'OSIM_Alt_self': ['Alt_self'],
+#                          'ALL_MANUAL': [''], 'METHOD_1_Alt_self': ['Alt_self'],
+#                          'METHOD_2_Alt_self': ['Alt_self'], 'METHOD_3': ['Alt_self', 'Alt2_self']}
+# subject_code_list = ['P1', 'P2', 'P3', 'P4', 'P5']
+# IMU_type_list = ['Real', 'Perfect']
 
 
 """ MAIN """
