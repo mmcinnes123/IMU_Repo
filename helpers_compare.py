@@ -137,7 +137,7 @@ def get_cross_cor_lag(x, y):
 def get_peaks_or_troughs(angle_arr, indmin, indmax, peak_or_trough, data_type):
 
     # Define the minimum prominence when searching for the peaks
-    prominence = 40
+    prominence = 30
 
     # Fli pthe data to find the troughs
     if peak_or_trough == 'peak':
@@ -169,12 +169,12 @@ def get_peaks_or_troughs(angle_arr, indmin, indmax, peak_or_trough, data_type):
 
 
 # Function for getting the average error between OMC values and IMU values
-def get_peak_and_trough_errors(OMC_peaks, IMU_peaks):
+def get_peak_and_trough_errors(OMC_peaks, IMU_peaks, joint_name):
     if len(OMC_peaks) == len(IMU_peaks):
         errors = abs(OMC_peaks - IMU_peaks)
         mean_error = np.mean(errors)
     else:
-        print('Warning: number of OMC peaks/troughs does not equal number of IMU peaks/troughs found')
+        print(f'Warning: number of OMC peaks/troughs does not equal number of IMU peaks/troughs found for joint: {joint_name}')
         mean_error = 0      # Fill in number for plotting
     return mean_error
 
@@ -255,9 +255,9 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         Y_on_XY = [0, 1]
 
         # Calculate the angle of certain CF2 vectors on certain CF1 planes
-        # Discount measures of vector angle unless then 2D vector is a good/stable projection on the plane
+        # Discount measures of vector angle unless the 2D vector is a good/stable projection on the plane
         # i.e. If the magnitude of the vector gets close to 0, its normal to plane and so angle is unstable
-        threshold = 0.7
+        threshold = 0.5
         if np.linalg.norm(vec_x_on_XY) > threshold:
             x_rel2_X_on_XY[row] = angle_between_two_2D_vecs(vec_x_on_XY, X_on_XY)
         else:
@@ -397,8 +397,8 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
             print(f"WARNING: No/not enough peaks found for {joint_name} (less than 4)")
 
         # Get the mean peak/trough error
-        mean_peak_error = get_peak_and_trough_errors(OMC_peaks, IMU_peaks)
-        mean_trough_error = get_peak_and_trough_errors(OMC_troughs, IMU_troughs)
+        mean_peak_error = get_peak_and_trough_errors(OMC_peaks, IMU_peaks, joint_name)
+        mean_trough_error = get_peak_and_trough_errors(OMC_troughs, IMU_troughs, joint_name)
 
     else:
         plot_peaks = False
@@ -471,7 +471,7 @@ def plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time,
     # Throw warning and quit if not equal number of peaks/troughs was found
     if plot_peaks == True:
         if len(OMC_peaks) != len(IMU_peaks) or len(OMC_troughs) != len(IMU_troughs):
-            print("Number of OMC peaks/troughs found did not match IMU peaks/troughs found.")
+            print("Quit because number of OMC peaks/troughs found did not match IMU peaks/troughs found.")
             quit()
 
     return RMSE_angle1, R, mean_peak_error, mean_trough_error
