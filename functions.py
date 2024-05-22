@@ -10,7 +10,6 @@ from scipy.spatial.transform import Slerp
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr
 from scipy import signal
-from helpers_inverse_k import APDM_2_sto_Converter
 
 
 """ FUNCTIONS FOR READING IN DATA"""

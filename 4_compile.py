@@ -1,3 +1,7 @@
+# Script to compile results from .csv files
+# Input: all the labels etc used to find each trail's results csv file
+# Output: a single csv called 'AllResults_forR.csv'
+
 import numpy as np
 import pandas as pd
 import os

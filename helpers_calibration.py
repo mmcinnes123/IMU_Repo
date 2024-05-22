@@ -1,10 +1,13 @@
 # Functions used to run IMU_Calibration
 
 from constants import calibration_settings_template_file
-from functions import *
 from helpers_preprocess import APDM_2_sto_Converter
 
 import os
+import opensim as osim
+import numpy as np
+import pandas as pd
+from scipy.spatial.transform import Rotation as R
 
 # Calibration settings
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
@@ -189,6 +192,11 @@ def get_model_body_oris_during_default_pose(model_file):
 
     return thorax_ori, humerus_ori, radius_ori
 
+def get_scipyR_of_body_in_ground(body, state):
+    Rot = body.getTransformInGround(state).R()
+    quat = Rot.convertRotationToQuaternion()
+    scipyR = R.from_quat([quat.get(1), quat.get(2), quat.get(3), quat.get(0)])
+    return scipyR
 
 # Get the heading offset between the thorax IMU heading and the heading of the model in its default state
 def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label):
@@ -230,6 +238,38 @@ def write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated, humerus_IMU_ori_rotat
     write_to_APDM(df1, df2, df3, df3, template_file, results_dir, tag="APDM_RotatedCalibration")
     APDM_2_sto_Converter(APDM_settings_file, input_file_name=results_dir + r"\APDM_RotatedCalibration.csv",
                          output_file_name=results_dir + r"\APDM_RotatedCalibration.sto")
+
+
+# Function which takes an array of scipy Rs (orientation) and converts it to a numpy array of quats (scalar first)
+def convert_scipy_to_scalar_first_np_quat(scipy):
+    arr = np.array([[scipy.as_quat()[3], scipy.as_quat()[0], scipy.as_quat()[1], scipy.as_quat()[2]]])
+    return arr
+
+
+# Function to write dataframes containing quats into an APDM template csv file
+def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
+
+    # Make columns of zeros
+    N = len(df_1)
+    zeros_25_df = pd.DataFrame(np.zeros((N, 25)))
+    zeros_11_df = pd.DataFrame(np.zeros((N, 11)))
+    zeros_2_df = pd.DataFrame(np.zeros((N, 2)))
+
+    # Make a dataframe with zeros columns inbetween the data_out
+    IMU_and_zeros_df = pd.concat([zeros_25_df, df_1, zeros_11_df, df_2, zeros_11_df, df_3, zeros_11_df, df_4, zeros_2_df], axis=1)
+
+    # Read in the APDM template and save as an array
+    with open(template_file, 'r') as file:
+        template_df = pd.read_csv(file, header=0)
+        template_array = template_df.to_numpy()
+
+    # Concatenate the IMU_and_zeros and the APDM template headings
+    IMU_and_zeros_array = IMU_and_zeros_df.to_numpy()
+    new_array = np.concatenate((template_array, IMU_and_zeros_array), axis=0)
+    new_df = pd.DataFrame(new_array)
+
+    # Add the new dataframe into the template
+    new_df.to_csv(output_dir + "\\" + tag + ".csv", mode='w', index=False, header=False, encoding='utf-8', na_rep='nan')
 
 
 # Get/make the folder for saving the calibrated model, defined by the calibration name

@@ -2,6 +2,9 @@
 
 sample_rate = 100
 
+# Specify the template model
+template_model_file = 'das3.osim'
+
 # Files
 APDM_template_file = "APDM_template_4S.csv"
 
