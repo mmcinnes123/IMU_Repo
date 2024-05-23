@@ -15,13 +15,17 @@ from tkinter.filedialog import askopenfilename, askdirectory
 """ SETTINGS """
 
 # Quick Settings
-subject_code = 'P5'
+subject_code = 'P6'
 # Looking at OMC data, input time values next to each type of pose
-new_trial_name_dict = {'CP': {'N_self': 11, 'N_asst': 16, 'Alt_self': 33, 'Alt_asst': 36, 'Alt2_self': 48},
-                       'JA_Slow': {'N_self': 13, 'Alt_self': 16},
-                       'JA_Fast': {'N_self': 8, 'Alt_self': 12},
-                       'ROM': {'N_self': 9, 'Alt_self': 13},
-                       'ADL': {'N_self': 5, 'Alt_self': 9}}
+# new_trial_name_dict = {'CP': {'N_self': , 'N_asst': , 'Alt_self': , 'Alt_asst': , 'Alt2_self': },
+#                        'JA_Slow': {'N_self': , 'Alt_self': },
+#                        'JA_Fast': {'N_self': , 'Alt_self': },
+#                        'ROM': {'N_self': , 'Alt_self': },
+#                        'ADL': {'N_self': , 'Alt_self': }}
+new_trial_name_dict = {'CP': {'N_self': 10, 'N_asst': 19, 'Alt_self': 25, 'Alt_asst': 36, 'Alt2_self': 45},
+                       'JA_Slow': {'N_self': 12, 'Alt_self': 18},
+                       'JA_Fast': {'N_self': 6, 'Alt_self': 10},
+                       'ROM': {'N_self': 8, 'Alt_self': 15}}
 save_new_dict = True    # Whether to write trial_name_dict above into the text file
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 
