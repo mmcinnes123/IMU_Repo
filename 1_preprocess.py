@@ -17,12 +17,12 @@ from tkinter.filedialog import askopenfilename, askdirectory
 # Quick Settings
 subject_code = 'P6'
 # Looking at OMC data, input time values next to each type of pose
-# new_trial_name_dict = {'CP': {'N_self': , 'N_asst': , 'Alt_self': , 'Alt_asst': , 'Alt2_self': },
+# trial_pose_time_dict = {'CP': {'N_self': , 'N_asst': , 'Alt_self': , 'Alt_asst': , 'Alt2_self': },
 #                        'JA_Slow': {'N_self': , 'Alt_self': },
 #                        'JA_Fast': {'N_self': , 'Alt_self': },
 #                        'ROM': {'N_self': , 'Alt_self': },
 #                        'ADL': {'N_self': , 'Alt_self': }}
-new_trial_name_dict = {'CP': {'N_self': 10, 'N_asst': 19, 'Alt_self': 25, 'Alt_asst': 36, 'Alt2_self': 45},
+trial_pose_time_dict = {'CP': {'N_self': 10, 'N_asst': 19, 'Alt_self': 25, 'Alt_asst': 36, 'Alt2_self': 45},
                        'JA_Slow': {'N_self': 12, 'Alt_self': 18},
                        'JA_Fast': {'N_self': 6, 'Alt_self': 10},
                        'ROM': {'N_self': 8, 'Alt_self': 15}}
@@ -46,9 +46,9 @@ osim.Logger.setLevelString("Off")
 # Save trial name and times dict to .txt
 if save_new_dict == True:
     file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'w')
-    file_obj.write(str(new_trial_name_dict))
+    file_obj.write(str(trial_pose_time_dict))
     file_obj.close()
-    trial_name_dict = new_trial_name_dict
+    trial_name_dict = trial_pose_time_dict
 else:
     # Read the existing txt file to get the dict
     file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'r')
