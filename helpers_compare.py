@@ -137,7 +137,7 @@ def get_cross_cor_lag(x, y):
 def get_peaks_or_troughs(angle_arr, indmin, indmax, peak_or_trough, data_type):
 
     # Define the minimum prominence when searching for the peaks
-    prominence = 30
+    from constants import prominence
 
     # Fli pthe data to find the troughs
     if peak_or_trough == 'peak':

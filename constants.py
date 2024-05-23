@@ -13,3 +13,6 @@ APDM_settings_file = "APDMDataConverter_Settings.xml"
 calibration_settings_template_file = "IMU_Calibration_Settings.xml"
 IMU_IK_settings_file = 'IMU_IK_Settings.xml'
 analyze_settings_template_file = "Analyze_Settings.xml"
+
+# Plot settings
+prominence = 20     # Set the minimum prominence which qualifys a peak in teh find_peaks() function

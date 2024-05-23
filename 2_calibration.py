@@ -22,7 +22,7 @@ from helpers_calibration import apply_cal_to_model
 """ SETTINGS """
 
 # Define which subjects/IMU types/trial name you want to run the calibration for
-subject_code_list = ['P5']
+subject_code_list = ['P6']
 IMU_type_list = ['Perfect', 'Real']
 calibration_name_dict = {'OSIM_N_self': ['N_self'], 'OSIM_Alt_self': ['Alt_self'],
                          'ALL_MANUAL': [''], 'METHOD_1_Alt_self': ['Alt_self'],
