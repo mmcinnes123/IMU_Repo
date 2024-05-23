@@ -8,6 +8,7 @@ from pose_analysis_helpers import get_coord_at_time_t
 from pose_analysis_helpers import get_HT_angles_from_sto
 
 from os.path import join
+import numpy as np
 
 """ SETTINGS """
 subject_code_list = ['P1']
@@ -16,6 +17,8 @@ subject_code_list = ['P1']
 
 
 """ MAIN """
+
+all_results = pd.DataFrame(columns=['Trial', 'Pose', 'elbow_flexion', 'elbow_pronation', 'HT_abd', 'HT_flex', 'HT_rot'])
 
 for subject_code in subject_code_list:
 
@@ -27,11 +30,12 @@ for subject_code in subject_code_list:
     trial_pose_time_dict = get_trial_pose_time_dict_from_file(parent_dir, subject_code)
 
     for trial_name in trial_pose_time_dict:
-        print(trial_name)
+
+        # Extract the dict which is specific to that trial, with pose names and associated time stamps
         pose_time_dict = trial_pose_time_dict[trial_name]
+
         for pose_name, pose_time in pose_time_dict.items():
-            print(pose_name)
-            print(pose_time)
+
             # Find the directory with the IK results
             IK_results_dir = join(OMC_dir, trial_name + '_IK_Results')
             mot_file = join(IK_results_dir, 'OMC_IK_results.mot')
@@ -44,31 +48,71 @@ for subject_code in subject_code_list:
             elbow_flexion = get_coord_at_time_t(coords_table, pose_time, key='EL_x')
             elbow_pronation = get_coord_at_time_t(coords_table, pose_time, key='PS_y')
 
-            # Or make this a dict, depending on what you do with it
-            df_row = pd.DataFrame({'Trial': [trial_name], 'Pose': [pose_name],
-                                    'elbow_flexion': [elbow_flexion], 'elbow_pronation': [elbow_pronation]})
-
-
+            # Get the values for HT joint angles from the sto file
             HT_abd, HT_flex, HT_rot = get_HT_angles_from_sto(analysis_sto_file, pose_time)
 
-            print(HT_abd, HT_flex, HT_rot)
+            # Compile the pose JAs into one dict
+            pose_dict = {'elbow_flexion': [elbow_flexion],
+                         'elbow_pronation': [elbow_pronation],
+                         'HT_abd': [HT_abd],
+                         'HT_flex': [HT_flex],
+                         'HT_rot': [HT_rot]}
+
+            # Specify the default model pose Jas
+            if pose_name in ['N_self', 'N_asst']:
+                model_pose_dict = {'elbow_flexion': np.array([0]),
+                                   'elbow_pronation': np.array([90]),
+                                   'HT_abd': np.array([0]),
+                                   'HT_flex': np.array([0]),
+                                   'HT_rot': np.array([90])}
+
+            elif pose_name in ['Alt_self', 'Alt_asst']:
+                model_pose_dict = {'elbow_flexion': np.array([90]),
+                                   'elbow_pronation': np.array([90]),
+                                   'HT_abd': np.array([0]),
+                                   'HT_flex': np.array([0]),
+                                   'HT_rot': np.array([90])}
+
+            elif pose_name == 'Alt2_self':
+                model_pose_dict = {'elbow_flexion': np.array([90]),
+                                   'elbow_pronation': np.array([90]),
+                                   'HT_abd': np.array([0]),
+                                   'HT_flex': np.array([90]),
+                                   'HT_rot': np.array([90])}
+            else:
+                model_pose_dict = None
+                print('Pose name does not match one listed here.')
+
+
+
+            # Find the pose error in each JA
+            error_dict = {'Trial': [trial_name],
+                         'Pose': [pose_name],
+                         'elbow_flexion': None,
+                         'elbow_pronation': None,
+                         'HT_abd': None,
+                         'HT_flex': None,
+                         'HT_rot': None}
+
+            # Get the error (difference between performed pose, and model default pose) for each JA
+            for JA in model_pose_dict:
+                error_dict[JA] = model_pose_dict[JA][0] - pose_dict[JA][0]
+
+            # Add the results from this pose into the results dataframe
+            new_df_row = pd.DataFrame(error_dict)
+            all_results = pd.concat([all_results, new_df_row], ignore_index=True)
+
+
+
+
 
             # TODO: rejig these functions so they are grouped better
+            # TODO: choose some print options so we can see specifics if we want to
 
 
-
-    # TODO: Get default joint angles (don't need to do this with code, can just use whatever values I use in 2_get_set_model_default.py
-
-# Get all JAs from OMC IK results
+pd.set_option('display.width', None)
+print(all_results)
 
 
-
-# Get all JAs from default model pose
-
-
-
-# Get all JA errors
-
-
-
-# Save results to file
+# TODO: Save results to file per person
+# TODO: Compile all subject results - ready for visualisation in R - be sure to maintain bias

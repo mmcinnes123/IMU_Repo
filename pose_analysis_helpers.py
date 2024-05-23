@@ -70,8 +70,6 @@ def get_body_quats_from_analysis_sto(analysis_sto_path, pose_time):
     humerus_quats = humerus_R.as_quat()[:,[1, 2, 3, 0]]
     radius_quats = radius_R.as_quat()[:,[1, 2, 3, 0]]
 
-    print('Thorax quat:', thorax_quats)
-    print('Humerus quat:', humerus_quats)
     return thorax_quats, humerus_quats, radius_quats
 
 
