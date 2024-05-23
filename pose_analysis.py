@@ -5,6 +5,7 @@ import pandas as pd
 from pose_analysis_helpers import get_trial_pose_time_dict_from_file
 from pose_analysis_helpers import get_coords_from_mot
 from pose_analysis_helpers import get_coord_at_time_t
+from pose_analysis_helpers import get_HT_angles_from_sto
 
 from os.path import join
 
@@ -26,13 +27,15 @@ for subject_code in subject_code_list:
     trial_pose_time_dict = get_trial_pose_time_dict_from_file(parent_dir, subject_code)
 
     for trial_name in trial_pose_time_dict:
-
+        print(trial_name)
         pose_time_dict = trial_pose_time_dict[trial_name]
         for pose_name, pose_time in pose_time_dict.items():
-
+            print(pose_name)
+            print(pose_time)
             # Find the directory with the IK results
             IK_results_dir = join(OMC_dir, trial_name + '_IK_Results')
             mot_file = join(IK_results_dir, 'OMC_IK_results.mot')
+            analysis_sto_file = join(IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
 
             # Read in the .mot coords file
             coords_table = get_coords_from_mot(mot_file)
@@ -45,9 +48,16 @@ for subject_code in subject_code_list:
             df_row = pd.DataFrame({'Trial': [trial_name], 'Pose': [pose_name],
                                     'elbow_flexion': [elbow_flexion], 'elbow_pronation': [elbow_pronation]})
 
-            # TODO: get the HT angles, using compare as a guide
+
+            HT_abd, HT_flex, HT_rot = get_HT_angles_from_sto(analysis_sto_file, pose_time)
+
+            print(HT_abd, HT_flex, HT_rot)
+
+            # TODO: rejig these functions so they are grouped better
 
 
+
+    # TODO: Get default joint angles (don't need to do this with code, can just use whatever values I use in 2_get_set_model_default.py
 
 # Get all JAs from OMC IK results
 

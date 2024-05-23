@@ -5,23 +5,14 @@ from scipy.spatial.transform import Rotation as R
 import numpy as np
 import pandas as pd
 
-IMU_IK_settings_file = 'IMU_IK_Settings.xml'
-OMC_IK_settings_file = 'OMC_IK_Settings.xml'
+quat_1 = [0.91826247, -0.00370748, -0.39586257, 0.00855082]
+quat_2 = [-0.7240892, -0.07780611, 0.680013, -0.08499038]
 
-# Instantiate an InverseKinematicsTool
-imuIK = osim.IMUInverseKinematicsTool(IMU_IK_settings_file)
+R1 = R.from_quat([quat_1[1], quat_1[2], quat_1[3], quat_1[0]])
+R2 = R.from_quat([quat_2[1], quat_2[2], quat_2[3], quat_2[0]])
 
-imuIK.set_time_range(0, 1)
-imuIK.set_time_range(1, 2)
+jointR = R1*R2
 
-thorax_imu_weight = osim.OrientationWeight('thorax_imu', 1.0)
-humerus_imu_weight = osim.OrientationWeight('humerus_imu', 1.0)
-radius_imu_weight = osim.OrientationWeight('radius_imu', 10.0)
-
-imuIK.upd_orientation_weights().cloneAndAppend(thorax_imu_weight)
-imuIK.upd_orientation_weights().cloneAndAppend(humerus_imu_weight)
-imuIK.upd_orientation_weights().cloneAndAppend(radius_imu_weight)
-
-imuIK.printToXML('New_IMU_IK_Settings.xml')
+print(jointR.as_euler())
 
 
