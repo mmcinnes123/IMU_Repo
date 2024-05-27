@@ -20,11 +20,6 @@ calibration_name_dict = {'OSIM_N_self': None,
                          'METHOD_3': None,
                          }
 
-# Function to read the results form csv
-def read_from_csv(file_path):
-    with open(file_path, 'r') as file:
-        df = pd.read_csv(file, index_col=0, header=0, sep=',', dtype={1: np.float64, 2: np.float64})
-    return df
 
 
 

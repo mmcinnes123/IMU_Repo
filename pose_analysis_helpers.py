@@ -6,6 +6,7 @@ import ast
 import opensim as osim
 import numpy as np
 from scipy.spatial.transform import Rotation as R
+import pandas as pd
 
 
 # Function to open the .txt file which contains a dict with info on times, and pose names, for each trial
@@ -123,6 +124,17 @@ def get_default_model_pose_dict(pose_name):
 
 
 
+def split_pose_name(pose_name):
+
+    try:
+        # Split the string and unpack into two variables
+        pose_code, pose_type = pose_name.split('_')
+
+    except ValueError:
+        print("The string does not contain exactly one underscore or is malformed.")
+        pose_code, pose_type = None, None
+
+    return pose_code, pose_type
 
 
 
