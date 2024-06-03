@@ -43,101 +43,101 @@ trial_name2 = 'CP'   # For methods which use two poses, specify the trial in whi
 #
 
 """ MAIN """
-
-for calibration_name, pose_names in calibration_name_dict.items():
-
-    # Check we've set the default pose of the template model correctly
-    pose_confirmation = input(
-        f"\nIs the default pose of the model set to match the expected subject pose ({pose_names[0]})?: ")
-    if pose_confirmation == "No":
-        quit()
-
-    for subject_code in subject_code_list:
-        for IMU_type in IMU_type_list:
-
-            print(f'Creating {calibration_name} calibrated model for '
-                  f'subject {subject_code}, using {IMU_type} IMUs from trial: {trial_name1}')
-
-            # Get/make the directory to store the newly calibrated model
-            calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
-
-            """ RUN OPENSIM BUILT-IN CALIBRATION """
-
-            if calibration_name == 'OSIM_N_self':
-                # Get the path to the orientations file specific to the chosen pose
-                cal_oris_file_path = get_cal_ori_file_path(subject_code, trial_name1, pose_names[0], IMU_type)
-                # Run the opensim calibration
-                osim_calibrate_model(cal_oris_file_path, calibrated_model_dir, template_model_file)
-
-            elif calibration_name == 'OSIM_Alt_self':
-                # Get the path to the orientations file specific to the chosen pose
-                cal_oris_file_path = get_cal_ori_file_path(subject_code, trial_name1, pose_names[0], IMU_type)
-                # Run the opensim calibration
-                osim_calibrate_model(cal_oris_file_path, calibrated_model_dir, template_model_file)
-
-            else:
-
-                # If there is more than 1 pose defined in the method's pose name dict:
-                if len(pose_names) > 1:
-                    pose_name1 = pose_names[0]  # First pose used to do the pose-based calibration part
-                    pose_name2 = pose_names[1]  # This is the pose/time used in METHOD_3 to get the radius IMU projected on the humerus IMU
-                else:
-                    pose_name1 = pose_names[0]
-                    pose_name2 = None
-
-                """ RUN CUSTOM CALIBRATION
-
-                    Definitions:
-
-                        if calibration_name == 'ALL_MANUAL':
-                            thorax_method = 'get_IMU_cal_MANUAL'
-                            humerus_method = 'get_IMU_cal_MANUAL'
-                            radius_method = 'get_IMU_cal_MANUAL'
-
-                        elif calibration_name == 'METHOD_1_Alt_self':
-                            thorax_method = 'get_IMU_cal_POSE_BASED'
-                            humerus_method = 'get_IMU_cal_hum_method_2'
-                            radius_method = 'get_IMU_cal_MANUAL'
-
-                        elif calibration_name == 'METHOD_2_Alt_self':
-                            thorax_method = 'get_IMU_cal_POSE_BASED'
-                            humerus_method = 'get_IMU_cal_hum_method_3'
-                            radius_method = 'get_IMU_cal_MANUAL'
-
-                        elif calibration_name == 'METHOD_3':
-                            thorax_method = 'get_IMU_cal_POSE_BASED'
-                            humerus_method = 'get_IMU_cal_hum_method_4'
-                            radius_method = 'get_IMU_cal_MANUAL'
-                """
-
-
-                if calibration_name == 'ALL_MANUAL':
-                    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                        get_IMU_offsets_ALL_MANUAL()
-
-                elif calibration_name == 'METHOD_1_Alt_self':
-                    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                        get_IMU_offsets_METHOD_1(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir)
-
-                elif calibration_name == 'METHOD_2_Alt_self':
-                    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                        get_IMU_offsets_METHOD_2(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir)
-
-                elif calibration_name == 'METHOD_3':
-                    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                        get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2,
-                                                 pose_name1, pose_name2, IMU_type, calibrated_model_dir)
-
-                else:
-                    print('Calibration_name did not match pre-defined calibrations')
-                    thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = None, None, None
-
-
-                # Using the IMU offsets calculated above, update the virtual IMUs in the model to create a calibrated model
-                apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
-                                   calibrated_model_dir)
-
-
+#
+# for calibration_name, pose_names in calibration_name_dict.items():
+#
+#     # Check we've set the default pose of the template model correctly
+#     pose_confirmation = input(
+#         f"\nIs the default pose of the model set to match the expected subject pose ({pose_names[0]})?: ")
+#     if pose_confirmation == "No":
+#         quit()
+#
+#     for subject_code in subject_code_list:
+#         for IMU_type in IMU_type_list:
+#
+#             print(f'Creating {calibration_name} calibrated model for '
+#                   f'subject {subject_code}, using {IMU_type} IMUs from trial: {trial_name1}')
+#
+#             # Get/make the directory to store the newly calibrated model
+#             calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
+#
+#             """ RUN OPENSIM BUILT-IN CALIBRATION """
+#
+#             if calibration_name == 'OSIM_N_self':
+#                 # Get the path to the orientations file specific to the chosen pose
+#                 cal_oris_file_path = get_cal_ori_file_path(subject_code, trial_name1, pose_names[0], IMU_type)
+#                 # Run the opensim calibration
+#                 osim_calibrate_model(cal_oris_file_path, calibrated_model_dir, template_model_file)
+#
+#             elif calibration_name == 'OSIM_Alt_self':
+#                 # Get the path to the orientations file specific to the chosen pose
+#                 cal_oris_file_path = get_cal_ori_file_path(subject_code, trial_name1, pose_names[0], IMU_type)
+#                 # Run the opensim calibration
+#                 osim_calibrate_model(cal_oris_file_path, calibrated_model_dir, template_model_file)
+#
+#             else:
+#
+#                 # If there is more than 1 pose defined in the method's pose name dict:
+#                 if len(pose_names) > 1:
+#                     pose_name1 = pose_names[0]  # First pose used to do the pose-based calibration part
+#                     pose_name2 = pose_names[1]  # This is the pose/time used in METHOD_3 to get the radius IMU projected on the humerus IMU
+#                 else:
+#                     pose_name1 = pose_names[0]
+#                     pose_name2 = None
+#
+#                 """ RUN CUSTOM CALIBRATION
+#
+#                     Definitions:
+#
+#                         if calibration_name == 'ALL_MANUAL':
+#                             thorax_method = 'get_IMU_cal_MANUAL'
+#                             humerus_method = 'get_IMU_cal_MANUAL'
+#                             radius_method = 'get_IMU_cal_MANUAL'
+#
+#                         elif calibration_name == 'METHOD_1_Alt_self':
+#                             thorax_method = 'get_IMU_cal_POSE_BASED'
+#                             humerus_method = 'get_IMU_cal_hum_method_2'
+#                             radius_method = 'get_IMU_cal_MANUAL'
+#
+#                         elif calibration_name == 'METHOD_2_Alt_self':
+#                             thorax_method = 'get_IMU_cal_POSE_BASED'
+#                             humerus_method = 'get_IMU_cal_hum_method_3'
+#                             radius_method = 'get_IMU_cal_MANUAL'
+#
+#                         elif calibration_name == 'METHOD_3':
+#                             thorax_method = 'get_IMU_cal_POSE_BASED'
+#                             humerus_method = 'get_IMU_cal_hum_method_4'
+#                             radius_method = 'get_IMU_cal_MANUAL'
+#                 """
+#
+#
+#                 if calibration_name == 'ALL_MANUAL':
+#                     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+#                         get_IMU_offsets_ALL_MANUAL()
+#
+#                 elif calibration_name == 'METHOD_1_Alt_self':
+#                     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+#                         get_IMU_offsets_METHOD_1(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir)
+#
+#                 elif calibration_name == 'METHOD_2_Alt_self':
+#                     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+#                         get_IMU_offsets_METHOD_2(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir)
+#
+#                 elif calibration_name == 'METHOD_3':
+#                     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+#                         get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2,
+#                                                  pose_name1, pose_name2, IMU_type, calibrated_model_dir)
+#
+#                 else:
+#                     print('Calibration_name did not match pre-defined calibrations')
+#                     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = None, None, None
+#
+#
+#                 # Using the IMU offsets calculated above, update the virtual IMUs in the model to create a calibrated model
+#                 apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
+#                                    calibrated_model_dir)
+#
+#
 
 
 """ TEST """
@@ -155,7 +155,9 @@ def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_na
     # Get/make the directory to store the newly calibrated model
     calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
 
-    EL_axis_rel2_humerus_IMU = np.array([0.216061, -0.0914449, 0.972088])
+    # TODO: write function to read in EL_axis from somewhere...
+    # EL_axis_rel2_humerus_IMU = get_EL_axis_rel2_humerus_IMU(IMU_type)
+    EL_axis_rel2_humerus_IMU = np.array([0.0486203, -0.164024, 0.985257])
 
     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
         get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1, pose_name1, IMU_type,
@@ -166,5 +168,5 @@ def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_na
                    calibrated_model_dir)
 
 
-run_single_cal(subject_code='P3', IMU_type='Perfect', calibration_name='METHOD_4_Alt_self',
+run_single_cal(subject_code='P5', IMU_type='Perfect', calibration_name='METHOD_4_Alt_self',
                pose_name1='Alt_self', pose_name2='Alt_self')

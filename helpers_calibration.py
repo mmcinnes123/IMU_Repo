@@ -595,7 +595,7 @@ def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1,
     a2, a3, a4 = x_comp_of_pose_based_offset , \
         y_comp_of_pose_based_offset, \
         z_comp_of_pose_based_offset    # i.e. the axis of the pose-based virtual IMU frame
-    b2, b3, b4 = [1, 0, 0], [0, 1, 0] , [0, 0, 1]     # i.e. the y axis of the IMU frame
+    b2, b3, b4 = [1, 0, 0], [0, 1, 0], [0, 0, 1]     # i.e. the y axis of the IMU frame
     w2, w3, w4 = 1, 1, 1        # These are weighted much lower because we want to prioritise the flexion axis estimation
 
     # Compile the arrays
