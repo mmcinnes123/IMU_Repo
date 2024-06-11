@@ -1,6 +1,7 @@
 
 
 from helpers_2DoF import get_np_quats_from_txt_file
+from joint_axis_est_2d import jointAxisEst2D
 
 import qmt
 import numpy as np
@@ -13,11 +14,22 @@ np.set_printoptions(suppress=True)
 input_txt_file = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P1\RawData\P1_JA_Slow - Report2 - IMU_Quats.txt'
 IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(input_txt_file)
 
-all_quats = IMU1_np
+# Trim the IMU data based on the period of interest
+start_ind = 24 * 100
+end_ind = 40 * 100
+IMU2_trimmed = IMU2_np[start_ind:end_ind]
+IMU3_trimmed = IMU3_np[start_ind:end_ind]
 
-axis = [0, 1, 0]
 
-print(all_quats[:10])
+# Define the input data from the jointAxiEst2D function
+quat1 = IMU2_trimmed     # This is the humerus IMU data
+quat2 = IMU3_trimmed     # This is the forearm IMU data
+rate = 100          # This is the sample rate of the data going into the function
+gyr1 = None         # If we use the 'ori' method, we don't need angular velocity data
+gyr2 = None
+params = dict(method='ori')
 
-quat3 = qmt.quatProject(all_quats, axis, plot=True)
+results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
+
+print(results)
 

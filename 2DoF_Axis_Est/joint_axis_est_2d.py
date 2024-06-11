@@ -7,7 +7,7 @@ from scipy import signal
 
 import qmt
 
-from .optimize import AbstractObjectiveFunction, GNSolver
+from optimize import AbstractObjectiveFunction, GNSolver
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
@@ -17,46 +17,60 @@ def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/1562292
 def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plot=False):
     # TODO: docs, debug plot
 
+    # Update the parameters (settings) with default values if they haven't been specified in the input
     defaults = dict(method='rot', gyrCutoff=5, downsampleRate=20)
     params = qmt.setDefaults(params, defaults)
 
+    # Check the quaternion and gyro arrays are the correct shape
     N = quat1.shape[0]
     assert quat1.shape == (N, 4)
     assert quat2.shape == (N, 4)
-    assert gyr1.shape == (N, 3) or gyr1 is None
-    assert gyr2.shape == (N, 3) or gyr2 is None
+    # assert gyr1.shape == (N, 3) or gyr1 is None   # This didn't work if gyr1 = None
+    # assert gyr2.shape == (N, 3) or gyr2 is None
+
+    # If no gyroscope info is provided, make sure the method is set to 'ori'
     if gyr1 is None or gyr2 is None:
         assert params['method'] == 'ori'
         gyr1 = np.zeros((N, 3))
         gyr2 = np.zeros((N, 3))
 
+    # Define each setting from the params dict
     method = params['method']
     gyrCutoff = params['gyrCutoff']
     downsampleRate = params['downsampleRate']
     assert method in ('rot', 'ori')
 
+    # Aplpy a butterworth low pass filter to the angular velocity data
+    # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
     if gyrCutoff is not None:  # apply Butterworth low pass filter
         if 2 * gyrCutoff <= 0.95 * rate:  # do not filter if (almost) at Nyquist frequency
             b, a = signal.butter(2, gyrCutoff * 2 / rate)
             gyr1 = signal.filtfilt(b, a, gyr1, axis=0)
             gyr2 = signal.filtfilt(b, a, gyr2, axis=0)
 
+    # Downsample the orientation data
     if rate == downsampleRate or downsampleRate is None:
         ind = slice(None)
     else:
         assert downsampleRate < rate
         M = int(round(N*downsampleRate/rate))
         ind = np.linspace(0, N-1, M, dtype=int)
-
     q1 = quat1[ind].copy()
     q2 = quat2[ind].copy()
+
+    # Rotate the angular velocity data (which is in local frame) by the IMU orientation, to express it in each IMU's
+    # reference frame (E1 and E2) (and downsample)
     gyr1_E1 = qmt.rotate(q1, gyr1[ind])
     gyr2_E2 = qmt.rotate(q2, gyr2[ind])
+
+    # Define the dict of data to be used in the optimisation function
     d = dict(quat1=q1, quat2=q2, gyr1_E1=gyr1_E1, gyr2_E2=gyr2_E2)
 
+    # Specify which constraint (Class) to use based on the method specified in params
     objFnCls = dict(rot=AxisEst2DRotConstraint, ori=AxisEst2DOriConstraint)[method]
     initVals = objFnCls.getInitVals()
 
+    # Run the solver
     x = None
     parameters = None
     cost = None
@@ -71,8 +85,9 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         if cost is None or solver.objFn.cost() < cost:
             cost = solver.objFn.cost()
             x = solver.objFn.getX()
-            parameters = solver.objFn.unpackX()
+            parameters = solver.objFn.unpackX()     # The outputs j1, j2 and delta are stored in here
 
+    # Extract the outputs of the optimisation: j1, j2, delta (heading offset), and for 'ori' method, beta (carry angle)
     out = dict(
         j1=parameters['j1'],
         j2=parameters['j2'],
@@ -83,6 +98,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
 
     if debug:
         out['debug'] = dict(cost=cost, x=x)
+
     return out
 
 
