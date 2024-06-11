@@ -26,14 +26,15 @@ IMU3_trimmed = IMU3_np[start_ind:end_ind]
 quat1 = IMU2_trimmed     # This is the humerus IMU data
 quat2 = IMU3_trimmed     # This is the forearm IMU data
 rate = 100          # This is the sample rate of the data going into the function
-gyr1 = None         # If we use the 'ori' method, we don't need angular velocity data
+gyr1 = None
 gyr2 = None
 params = dict(method='ori')
 
-# Calculate the angular velocities from the quaternion data, to use in the 'rot' based solver
-get_ang_vels_from_quats(quat2, rate)
 
 
-# results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
-# print(results['j1'])
+results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
+print(results)
+
+# TODO: appear to have got both methods working, but very much not in agreement - need to look a little closer/debug, check I'm doing what I think I am.
+# Could be that ang val from
 

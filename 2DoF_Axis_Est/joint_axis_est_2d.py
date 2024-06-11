@@ -8,6 +8,7 @@ from scipy import signal
 import qmt
 
 from optimize import AbstractObjectiveFunction, GNSolver
+from helpers_2DoF import get_ang_vels_from_quats
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
@@ -25,28 +26,13 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     N = quat1.shape[0]
     assert quat1.shape == (N, 4)
     assert quat2.shape == (N, 4)
-    # assert gyr1.shape == (N, 3) or gyr1 is None   # This didn't work if gyr1 = None
-    # assert gyr2.shape == (N, 3) or gyr2 is None
 
-    # If no gyroscope info is provided, make sure the method is set to 'ori'
-    if gyr1 is None or gyr2 is None:
-        assert params['method'] == 'ori'
-        gyr1 = np.zeros((N, 3))
-        gyr2 = np.zeros((N, 3))
 
     # Define each setting from the params dict
     method = params['method']
     gyrCutoff = params['gyrCutoff']
     downsampleRate = params['downsampleRate']
     assert method in ('rot', 'ori')
-
-    # Apply a butterworth low pass filter to the angular velocity data
-    # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
-    if gyrCutoff is not None:  # apply Butterworth low pass filter
-        if 2 * gyrCutoff <= 0.95 * rate:  # do not filter if (almost) at Nyquist frequency
-            b, a = signal.butter(2, gyrCutoff * 2 / rate)
-            gyr1 = signal.filtfilt(b, a, gyr1, axis=0)
-            gyr2 = signal.filtfilt(b, a, gyr2, axis=0)
 
     # Downsample the orientation data
     if rate == downsampleRate or downsampleRate is None:
@@ -58,10 +44,33 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     q1 = quat1[ind].copy()
     q2 = quat2[ind].copy()
 
-    # Rotate the angular velocity data (which is in local frame) by the IMU orientation, to express it in each IMU's
-    # reference frame (E1 and E2) (and downsample)
-    gyr1_E1 = qmt.rotate(q1, gyr1[ind])
-    gyr2_E2 = qmt.rotate(q2, gyr2[ind])
+    # If no gyroscope info is provided, create synthesised gyro data from quaternion data
+    if gyr1 is None or gyr2 is None:
+        # Use the down-sampled orientation data to calculate angular velocities
+        # Note: these are already in the IMUs reference frame, not in the local frame, as real gyro data would be
+        gyr1_E1 = get_ang_vels_from_quats(q1, downsampleRate)
+        gyr2_E2 = get_ang_vels_from_quats(q2, downsampleRate)
+
+        # And remove the last row from the ori data to match the size of the gyro data
+        q1 = q1[:-1]
+        q2 = q2[:-1]
+
+    # If gyro data is provided, it must be converted from the local frame to the reference frame
+    else:
+        assert gyr1.shape == (N, 3)
+        assert gyr2.shape == (N, 3)
+        gyr1_E1 = qmt.rotate(q1, gyr1[ind])
+        gyr2_E2 = qmt.rotate(q2, gyr2[ind])
+
+    # Apply a butterworth low pass filter to the angular velocity data
+    # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
+    if gyrCutoff is not None:  # apply Butterworth low pass filter
+        if 2 * gyrCutoff <= 0.95 * downsampleRate:  # do not filter if (almost) at Nyquist frequency
+            b, a = signal.butter(2, gyrCutoff * 2 / downsampleRate)
+            gyr1_E1 = signal.filtfilt(b, a, gyr1_E1, axis=0)
+            gyr2_E2 = signal.filtfilt(b, a, gyr2_E2, axis=0)
+
+
 
     # Define the dict of data to be used in the optimisation function
     d = dict(quat1=q1, quat2=q2, gyr1_E1=gyr1_E1, gyr2_E2=gyr2_E2)
