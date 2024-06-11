@@ -137,12 +137,14 @@ trial_name2 = 'CP'   # For methods which use two poses, specify the trial in whi
 #                 apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
 #                                    calibrated_model_dir)
 #
-#
+
+
+
 
 
 """ TEST """
 
-# Stand alone function for running a new calibration
+# Stand-alone function for running a new calibration
 
 def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_name2):
 
@@ -162,7 +164,6 @@ def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_na
     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
         get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1, pose_name1, IMU_type,
                              calibrated_model_dir)
-
 
     apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
                    calibrated_model_dir)
