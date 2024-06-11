@@ -1,6 +1,7 @@
 
 
 from helpers_2DoF import get_np_quats_from_txt_file
+from helpers_2DoF import get_ang_vels_from_quats
 from joint_axis_est_2d import jointAxisEst2D
 
 import qmt
@@ -16,7 +17,7 @@ IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(input_txt_file)
 
 # Trim the IMU data based on the period of interest
 start_ind = 24 * 100
-end_ind = 40 * 100
+end_ind = 46 * 100
 IMU2_trimmed = IMU2_np[start_ind:end_ind]
 IMU3_trimmed = IMU3_np[start_ind:end_ind]
 
@@ -29,7 +30,10 @@ gyr1 = None         # If we use the 'ori' method, we don't need angular velocity
 gyr2 = None
 params = dict(method='ori')
 
-results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
+# Calculate the angular velocities from the quaternion data, to use in the 'rot' based solver
+get_ang_vels_from_quats(quat2, rate)
 
-print(results)
+
+# results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
+# print(results['j1'])
 

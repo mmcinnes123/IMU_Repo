@@ -40,7 +40,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     downsampleRate = params['downsampleRate']
     assert method in ('rot', 'ori')
 
-    # Aplpy a butterworth low pass filter to the angular velocity data
+    # Apply a butterworth low pass filter to the angular velocity data
     # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
     if gyrCutoff is not None:  # apply Butterworth low pass filter
         if 2 * gyrCutoff <= 0.95 * rate:  # do not filter if (almost) at Nyquist frequency
