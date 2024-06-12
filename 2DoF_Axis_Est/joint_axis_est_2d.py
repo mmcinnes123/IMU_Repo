@@ -9,6 +9,8 @@ import qmt
 
 from optimize import AbstractObjectiveFunction, GNSolver
 from helpers_2DoF import get_ang_vels_from_quats
+from helpers_2DoF import plot_gyr_data
+from helpers_2DoF import visualise_quat_data
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
@@ -44,6 +46,8 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     q1 = quat1[ind].copy()
     q2 = quat2[ind].copy()
 
+
+
     # If no gyroscope info is provided, create synthesised gyro data from quaternion data
     if gyr1 is None or gyr2 is None:
         # Use the down-sampled orientation data to calculate angular velocities
@@ -55,12 +59,20 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         q1 = q1[:-1]
         q2 = q2[:-1]
 
+        # visualise_quat_data(q2, rate)
+        #
+        # # Plot gyro data to see if it's smooth enough
+        # plot_gyr_data(gyr2_E2, downsampleRate)
+
     # If gyro data is provided, it must be converted from the local frame to the reference frame
     else:
         assert gyr1.shape == (N, 3)
         assert gyr2.shape == (N, 3)
         gyr1_E1 = qmt.rotate(q1, gyr1[ind])
         gyr2_E2 = qmt.rotate(q2, gyr2[ind])
+
+
+
 
     # Apply a butterworth low pass filter to the angular velocity data
     # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
@@ -69,6 +81,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
             b, a = signal.butter(2, gyrCutoff * 2 / downsampleRate)
             gyr1_E1 = signal.filtfilt(b, a, gyr1_E1, axis=0)
             gyr2_E2 = signal.filtfilt(b, a, gyr2_E2, axis=0)
+
 
 
 

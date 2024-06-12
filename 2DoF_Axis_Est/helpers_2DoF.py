@@ -2,6 +2,7 @@
 import pandas as pd
 import qmt
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Read quaternion orientation data from a .txt TMM report file
 def get_np_quats_from_txt_file(input_file):
@@ -26,13 +27,45 @@ def get_ang_vels_from_quats(quats, sample_rate):
     dt = 1/sample_rate
 
     # Calculate quaternion changes from i - 1 to i
-    q_change = qmt.qmult(quats[1:], qmt.qinv(quats[:-1]))
+    q_change = qmt.qmult(qmt.qinv(quats[:-1]), quats[1:])
+
+    # Use this function to stop the quat suddenly flipping from close to [1, 0, 0, 0] to [-1, 0, 0, 0]
+    q_change_unwraped = qmt.quatUnwrap(q_change)
 
     # Breakdown equation A42 into steps
-    q_w = q_change[:, 0]
-    q_xyz = q_change[:, 1:]
+    q_w = q_change_unwraped[:, 0]
+    q_xyz = q_change_unwraped[:, 1:]
     mult_factor = (2 / dt) * (np.arccos(np.clip(q_w, -1, 1)) / np.linalg.norm(q_xyz, axis=1))
     ang_vels = mult_factor[:, np.newaxis] * q_xyz
 
     return ang_vels
 
+def plot_gyr_data(gyr, rate):
+
+    # Sampling interval (in seconds)
+    sampling_interval = 1 / rate  # 20Hz
+
+    # Generate the time array
+    time = np.arange(len(gyr)) * sampling_interval
+
+    # Plotting
+    plt.figure(figsize=(12, 6))
+
+    plt.plot(time, gyr[:, 0], label='X component', color='r')
+    plt.plot(time, gyr[:, 1], label='Y component', color='g')
+    plt.plot(time, gyr[:, 2], label='Z component', color='b')
+
+    plt.xlabel('Time (s)')
+    plt.ylabel('Angular Velocity')
+    plt.title('Angular Velocity 3D Vectors')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+def visualise_quat_data(quats, rate):
+    t = qmt.timeVec(N=len(quats), rate=rate)    # Make a tiem vec based on the length of the quats
+    data = qmt.Struct(t=t, quat=quats)
+    # run webapp
+    webapp = qmt.Webapp('/view/imubox', data=data)
+    webapp.run()
