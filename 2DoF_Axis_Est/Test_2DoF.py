@@ -1,7 +1,7 @@
 
 
 from helpers_2DoF import get_np_quats_from_txt_file
-from helpers_2DoF import get_ang_vels_from_quats
+from helpers_2DoF import get_joint_axis_directly_from_ang_vels
 from joint_axis_est_2d import jointAxisEst2D
 
 import qmt
@@ -12,46 +12,57 @@ np.set_printoptions(suppress=True)
 
 # Read in some IMU quaternion data from a TMM report .txt file
 # input_txt_file = str(askopenfilename(title=' Choose the raw data .txt file with IMU/quat data ... '))
-input_txt_file = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P1\RawData\P1_JA_Slow - Report2 - IMU_Quats.txt'
+input_txt_file = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P1\RawData\P1_JA_Slow - Report3 - Cluster_Quats.txt'
 IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(input_txt_file)
 
+rate = 100          # This is the sample rate of the data going into the function
+FE_start_time = 22
+FE_end_time = 30
+PS_start_time = 34
+PS_end_time = 42
+
 # Trim the IMU data based on the period of interest
-start_ind = 22 * 100
-end_ind = 42 * 100
+start_ind = FE_start_time * 100
+end_ind = PS_end_time * 100
 IMU2_trimmed = IMU2_np[start_ind:end_ind]
 IMU3_trimmed = IMU3_np[start_ind:end_ind]
-
 
 # Define the input data from the jointAxiEst2D function
 quat1 = IMU2_trimmed     # This is the humerus IMU data
 quat2 = IMU3_trimmed     # This is the forearm IMU data
-rate = 100          # This is the sample rate of the data going into the function
 gyr1 = None
 gyr2 = None
 
-# params = dict(method='ori')
-# results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
-# print(results)
-#
+# Run the ori method
+params = dict(method='ori')
+ori_results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
+print('J1 axis estimation with ori method: ', ori_results['j1'])
+print('J2 axis estimation with ori method: ', ori_results['j2'])
 
-#
+
+# Run the rot method
 params = dict(method='rot')
-results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
-print(results)
+rot_results = jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=params, debug=True, plot=False)
+print('J1 axis estimation with rot method: ', rot_results['j1'])
+print('J2 axis estimation with rot method: ', rot_results['j2'])
 
-# TODO: appear to have got both methods working, but very much not in agreement - need to look a little closer/debug, check I'm doing what I think I am.
-# Could be that ang val from the quat data is too noisy to produce good estimates ( I feel like this is whyy I just used TMM ang vels when
-# doing frame calibration stuff...)
-# ??? Is the quat data I'm using here filtered in TMM?
-# What is the 'cost' in the debug output?
 
-# # generate example data
-# t = qmt.timeVec(T=20, Ts=0.05)
-# quat = q1
-# axis = np.column_stack([np.cos(t), np.zeros_like(t), np.sin(t)])
-# # quat = qmt.quatFromAngleAxis(np.sin(t), axis)
-# data = qmt.Struct(t=t, quat=quat)
-#
-# # run webapp
-# webapp = qmt.Webapp('/view/imubox', data=data)
-# webapp.run()
+
+
+# Get joint axis estimates directly from ang vel data, assuming subject perfectly isolated each joint DoF
+start_ind = FE_start_time * 100
+end_ind = FE_end_time * 100
+IMU2_trimmed = IMU2_np[start_ind:end_ind]
+IMU3_trimmed = IMU3_np[start_ind:end_ind]
+params = dict(jointAxis='j1')
+FE_axis = get_joint_axis_directly_from_ang_vels(IMU2_trimmed, IMU3_trimmed, rate, params=params, debug_plot=False)
+print('J1 estimate direct from angular velocities: ', FE_axis)
+
+# Get joint axis estimates directly from ang vel data, assuming subject perfectly isolated each joint DoF
+start_ind = PS_start_time * 100
+end_ind = PS_end_time * 100
+IMU2_trimmed = IMU2_np[start_ind:end_ind]
+IMU3_trimmed = IMU3_np[start_ind:end_ind]
+params = dict(jointAxis='j2')
+PS_axis = get_joint_axis_directly_from_ang_vels(IMU2_trimmed, IMU3_trimmed, rate, params=params, debug_plot=False)
+print('J2 estimate direct from angular velocities: ', PS_axis)
