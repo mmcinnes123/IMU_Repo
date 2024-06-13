@@ -52,17 +52,13 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     if gyr1 is None or gyr2 is None:
         # Use the down-sampled orientation data to calculate angular velocities
         # Note: these are already in the IMUs reference frame, not in the local frame, as real gyro data would be
-        gyr1_E1 = get_ang_vels_from_quats(q1, downsampleRate)
-        gyr2_E2 = get_ang_vels_from_quats(q2, downsampleRate)
+        gyr1_E1 = get_ang_vels_from_quats(q1, downsampleRate, debug_plot=True)
+        gyr2_E2 = get_ang_vels_from_quats(q2, downsampleRate, debug_plot=True)
 
         # And remove the last row from the ori data to match the size of the gyro data
         q1 = q1[:-1]
         q2 = q2[:-1]
 
-        # visualise_quat_data(q2, rate)
-        #
-        # # Plot gyro data to see if it's smooth enough
-        # plot_gyr_data(gyr2_E2, downsampleRate)
 
     # If gyro data is provided, it must be converted from the local frame to the reference frame
     else:
