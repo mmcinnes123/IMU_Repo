@@ -26,19 +26,14 @@ def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
     """ Function to calculate 3D angular velocity vectors (in the IMU's global frame (Ei), from IMU orientation quats.
     The following is based on equations A41 and A42 in Appendix C """
 
-    dt = 1/sample_rate
-
     # Calculate quaternion changes from i - 1 to i
     q_change = qmt.qmult(quats[1:], qmt.qinv(quats[:-1]))
 
     # Use this function to stop the quat suddenly flipping from close to [1, 0, 0, 0] to [-1, 0, 0, 0]
-    q_change_unwraped = qmt.quatUnwrap(q_change)
+    q_change = qmt.posScalar(q_change)
 
-    # Breakdown equation A42 into steps
-    q_w = q_change_unwraped[:, 0]
-    q_xyz = q_change_unwraped[:, 1:]
-    mult_factor = (2 / dt) * (np.arccos(np.clip(q_w, -1, 1)) / np.linalg.norm(q_xyz, axis=1))
-    ang_vels = mult_factor[:, np.newaxis] * q_xyz
+    # Get ang vel from array of q_change (equivalent to equation A42)
+    ang_vels = qmt.quatToRotVec(q_change) * sample_rate
 
     if debug_plot:
         print("Animating input quaternion data...")
@@ -49,7 +44,23 @@ def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
     return ang_vels
 
 
+def get_local_ang_vels_from_quats(quats, sample_rate, debug_plot):
+    """ Function to calculate 3D angular velocity vectors (in the IMU's local frame, from IMU orientation quats."""
 
+    # Calculate quaternion changes from i - 1 to i
+    q_change = qmt.qmult(qmt.qinv(quats[:-1]), quats[1:])
+
+    # Use this function to stop the quat suddenly flipping from close to [1, 0, 0, 0] to [-1, 0, 0, 0]
+    q_change = qmt.posScalar(q_change)
+
+    # Get ang vel from array of q_change (equivalent to equation A42)
+    ang_vels = qmt.quatToRotVec(q_change) * sample_rate
+
+    if debug_plot:
+        print("Plotting output angular velocity vectors...")
+        plot_gyr_data(ang_vels, sample_rate)
+
+    return ang_vels
 
 def plot_gyr_data(gyr, rate):
 
@@ -124,7 +135,7 @@ def get_joint_axis_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, de
         angVels[angVels[:, 1] < 0] *= -1
 
     # Normalise the angVels
-    angVels = angVels / np.linalg.norm(angVels, axis=1)[:, np.newaxis]
+    angVels /= np.linalg.norm(angVels, axis=1)[:, np.newaxis]
     angVels = np.nan_to_num(angVels)    # Replace any nans with 0 to allow filter to run
 
     # Apply a butterworth low pass filter to the angular velocity data
@@ -148,28 +159,7 @@ def get_joint_axis_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, de
     return avg_ang_vel
 
 
-def get_local_ang_vels_from_quats(quats, sample_rate, debug_plot):
-    """ Function to calculate 3D angular velocity vectors (in the IMU's local frame, from IMU orientation quats."""
 
-    dt = 1 / sample_rate
-
-    # Calculate quaternion changes from i - 1 to i
-    q_change = qmt.qmult(qmt.qinv(quats[:-1]), quats[1:])
-
-    # Use this function to stop the quat suddenly flipping from close to [1, 0, 0, 0] to [-1, 0, 0, 0]
-    q_change_unwraped = qmt.quatUnwrap(q_change)
-
-    # Breakdown equation A42 into steps
-    q_w = q_change_unwraped[:, 0]
-    q_xyz = q_change_unwraped[:, 1:]
-    mult_factor = (2 / dt) * (np.arccos(np.clip(q_w, -1, 1)) / np.linalg.norm(q_xyz, axis=1))
-    ang_vels = mult_factor[:, np.newaxis] * q_xyz
-
-    if debug_plot:
-        print("Plotting output angular velocity vectors...")
-        plot_gyr_data(ang_vels, sample_rate)
-
-    return ang_vels
 
 
 
