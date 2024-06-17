@@ -5,9 +5,10 @@
 import os
 import pandas as pd
 from helpers_compare import *
+from tkinter.filedialog import askopenfilename, askdirectory
 
 
-def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
+def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type, test):
 
     print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, calibration type: {calibration_name}')
 
@@ -15,21 +16,29 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     sample_rate = 100
 
     # Define some file names
-    compare_name = subject_code + '_' + calibration_name + '_' + trial_name
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
-    IMU_type_dir = os.path.join(parent_dir, IMU_type)
-    IMU_IK_results_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name, trial_name)
-    OMC_IK_results_dir = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results')
-    results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
-    IMU_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
-    OMC_analysis_sto_path = os.path.join(OMC_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
-    IMU_mot_file = os.path.join(IMU_IK_results_dir, 'IMU_IK_results.mot')
-    OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
     JA_range_dict_file = os.path.join(parent_dir, subject_code + '_JA_range_dict.txt')
+    compare_name = subject_code + '_' + calibration_name + '_' + trial_name
+
+    if test:
+        results_dir = str(askdirectory(title=' Choose the folder where you want to save the compare results ... '))
+        OMC_mot_file = str(askopenfilename(title=' Choose the OMC .mot coords file ... '))
+        OMC_analysis_sto_path = str(askopenfilename(title=' Choose the OMC .sto analysis file ... '))
+        IMU_mot_file = str(askopenfilename(title=' Choose the IMU .mot coords file ... '))
+        IMU_analysis_sto_path = str(askopenfilename(title=' Choose the IMU .sto analysis file ... '))
+
+    else:
+        IMU_type_dir = os.path.join(parent_dir, IMU_type)
+        IMU_IK_results_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name, trial_name)
+        OMC_IK_results_dir = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results')
+        IMU_analysis_sto_path = os.path.join(IMU_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
+        OMC_analysis_sto_path = os.path.join(OMC_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
+        IMU_mot_file = os.path.join(IMU_IK_results_dir, 'IMU_IK_results.mot')
+        OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
+        results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
 
     # Make results folder if it doesn't exist yet
     os.makedirs(results_dir, exist_ok=True)
-
 
 
     """ READ IN DATA """
@@ -174,7 +183,8 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
                     mode='w', encoding='utf-8', na_rep='nan')
 
 
-
+# Run single test
 if __name__ == '__main__':
-    run_IK_compare('P4', 'JA_Slow', 'ALL_MANUAL', 0, 90, False, 'Real')
+
+    run_IK_compare('P1', 'JA_Slow', 'OSIM_Alt_self', 0, 90, False, 'Perfect', test=True)
 
