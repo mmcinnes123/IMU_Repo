@@ -53,13 +53,13 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
     cluster_in_hum = qmt.quatFrom2Axes(x_axis, y_axis, None, plot=False)
 
     # Now express the FE axis in the cluster frame
-    FE_in_clus, debug = qmt.rotate(cluster_in_hum, EL_axis_rel2_humerus, debug=True, plot=False)
+    FE_in_clus = qmt.rotate(cluster_in_hum, EL_axis_rel2_humerus, plot=False)
 
     if debug:
         print('get_J1_J2_from_calibrated_OMC_model() DEBUG:')
-        print('FE axis in humerus body frame: ', EL_axis_rel2_humerus)
-        print('Model file used: ', model_file)
-        print('Marker 1 position: ', np.array_str(marker_1_in_hum))
+        print('\tFE axis in humerus body frame: ', EL_axis_rel2_humerus)
+        print('\tModel file used: ', model_file)
+        print('\tMarker 1 position: ', np.array_str(marker_1_in_hum))
 
     # TODO: Write same code to find PS in radius frame
 
@@ -108,11 +108,25 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
 
     if debug:
         print('get_J1_J2_from_opt() DEBUG:')
-        print('TMM file used: ', tmm_txt_file)
-        print('Between times: ', start_ind/sample_rate, end_ind/sample_rate)
-        print('Using optimistaion method: ', opt_method)
-        # print('Complete optimisation results: ')
+        print('\tTMM file used: ', tmm_txt_file)
+        print('\tBetween times: ', start_ind/sample_rate, end_ind/sample_rate)
+        print('\tUsing optimistaion method: ', opt_method)
+        # print('\tComplete optimisation results: ')
         # print(opt_results)
+
+        # Get variation in movement of each IMU
+        def get_ori_variation(IMU_quats):
+            quat_changes = np.zeros((len(IMU_quats), 4))
+            for row in range(len(IMU_quats)):
+                quat_changes[row] = qmt.qmult(qmt.qinv(IMU_quats[row]), IMU_quats[0])  # Get orientation change from q0, for all t
+            angles = qmt.quatAngle(quat_changes, plot=True)  # Get the magnitude of the change from q0
+            mean_diff = np.mean(np.array(abs(angles)))  # Get the average change in ori from q0
+            return mean_diff
+
+        IMU2_mean_diff = get_ori_variation(IMU2_trimmed)
+        IMU3_mean_diff = get_ori_variation(IMU3_trimmed)
+        print('\tMean variation in orientation Humerus IMU: ', IMU2_mean_diff * 180 / np.pi)
+        print('\tMean variation in orientation Radius IMU: ', IMU3_mean_diff * 180 / np.pi)
 
     return FE, PS, opt_results
 
@@ -145,11 +159,11 @@ trial_for_opt = 'JA_Slow'
 IMU_type_for_opt = 'Perfect'
 opt_method = 'rot'
 time_dict = {
-    # 'P1': {'JA_Slow': {'FE_start': 16, 'FE_end': 29, 'PS_start': 31, 'PS_end': 47}},
-    # 'P2': {'JA_Slow': {'FE_start': 15, 'FE_end': 28, 'PS_start': 30, 'PS_end': 46}},
-    # 'P3': {'JA_Slow': {'FE_start': 18, 'FE_end': 34, 'PS_start': 35, 'PS_end': 49}},
-    # 'P4': {'JA_Slow': {'FE_start': 23, 'FE_end': 39, 'PS_start': 42, 'PS_end': 60}},
-    # 'P5': {'JA_Slow': {'FE_start': 30, 'FE_end': 47, 'PS_start': 48, 'PS_end': 65}},
+    'P1': {'JA_Slow': {'FE_start': 16, 'FE_end': 29, 'PS_start': 31, 'PS_end': 47}},
+    'P2': {'JA_Slow': {'FE_start': 15, 'FE_end': 28, 'PS_start': 30, 'PS_end': 46}},
+    'P3': {'JA_Slow': {'FE_start': 18, 'FE_end': 34, 'PS_start': 35, 'PS_end': 49}},
+    'P4': {'JA_Slow': {'FE_start': 23, 'FE_end': 39, 'PS_start': 42, 'PS_end': 60}},
+    'P5': {'JA_Slow': {'FE_start': 30, 'FE_end': 47, 'PS_start': 48, 'PS_end': 65}},
     'P6': {'JA_Slow': {'FE_start': 26, 'FE_end': 44, 'PS_start': 47, 'PS_end': 65}}
              }
 sample_rate = 100          # This is the sample rate of the data going into the function
@@ -167,33 +181,29 @@ for subject_code in time_dict.keys():
     subject_time_dict = time_dict[subject_code]
 
     """ FINDING REFERENCE J1 AXIS IN HUMERUS CLUSTER FRAME """
-    FE_in_clus = get_J1_J2_from_calibrated_OMC_model(model_file, debug=True)
-    print('OMC reference FE axis in humerus cluster frame:', FE_in_clus)
+    FE_in_clus = get_J1_J2_from_calibrated_OMC_model(model_file, debug=False)
+    # print('OMC reference FE axis in humerus cluster frame:', FE_in_clus)
 
 
     """ FINDING FE AND PS FROM OPTIMISATION RESULT """
     opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
-                                                     opt_method, subject_time_dict, sample_rate, debug=True)
-    print('FE axis estimation with rot method: ', opt_FE)
-    print('PS axis estimation with rot method: ', opt_PS)
-    print('and heading offset: ', opt_results['delta']*180/np.pi)
+                                                     opt_method, subject_time_dict, sample_rate, debug=False)
+    # print('FE axis estimation with rot method: ', opt_FE)
+    # print('PS axis estimation with rot method: ', opt_PS)
+    # print('and heading offset: ', opt_results['delta']*180/np.pi)
+    # print('Cost: ', opt_results['debug']['cost'])
+    # print('x: ', opt_results['debug']['x'])
 
     """ COMPARE WITH OPTIMISATION """
 
     # Note, optimisation based J1, J2 can point in either direction
     if np.sign(opt_FE[2]) == np.sign(-FE_in_clus[2]):
-        print('Changing sign of opt_FE.')
         opt_FE = -opt_FE
 
     error = qmt.angleBetween2Vecs(FE_in_clus, opt_FE)
     print('Error: ', error*180/np.pi)
 
-    visulalise_3D_vec_on_IMU(opt_FE, FE_in_clus)
+#     # visulalise_3D_vec_on_IMU(opt_FE, FE_in_clus)
 
 
 
-# vec1 = np.array([1, 0, 0])
-# vec2 = np.array([0, 0, 1])
-# visulalise_3D_vec_on_IMU(vec1, vec2)
-
-# print(qmt.quatFromAngleAxis(3.14/2, [1, 0,0]))
