@@ -100,7 +100,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
             deltaX = solver.step()
             if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
                 break
-        if cost is None or solver.objFn.cost() < cost:
+        if cost is None or solver.objFn.cost() < cost:  # Update the cost, x, and parameters if cost is less than for previous initVal
             cost = solver.objFn.cost()
             x = solver.objFn.getX()
             parameters = solver.objFn.unpackX()     # The outputs j1, j2 and delta are stored in here
@@ -267,7 +267,7 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
             e_y /= np.linalg.norm(e_y)
             e_z /= np.linalg.norm(e_z)
             init = []
-            for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.rad2deg([-90, 0, 90, 180])):
+            for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.deg2rad([-90, 0, 90, 180])):
                 init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), delta, 1, 1])
             return np.array(init, float)
         elif variant.startswith('rand'):  # e.g. 'rand100_delta0', 'rand100')
