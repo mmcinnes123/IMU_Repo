@@ -15,7 +15,7 @@ from helpers_calibration import get_IMU_offsets_METHOD_4
 from helpers_calibration import get_cal_ori_file_path
 from helpers_calibration import apply_cal_to_model
 
-
+from tkinter.filedialog import askopenfilename, askdirectory
 import numpy as np
 
 
@@ -155,11 +155,11 @@ def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_na
         quit()
 
     # Get/make the directory to store the newly calibrated model
-    calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
+    calibrated_model_dir = str(askdirectory(title=' Choose the folder where you want to save the results ... '))
 
     # TODO: write function to read in EL_axis from somewhere...
     # EL_axis_rel2_humerus_IMU = get_EL_axis_rel2_humerus_IMU(IMU_type)
-    EL_axis_rel2_humerus_IMU = np.array([0.0486203, -0.164024, 0.985257])
+    EL_axis_rel2_humerus_IMU = np.array([0.19084964, -0.07404047, 0.97882298])
 
     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
         get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1, pose_name1, IMU_type,
@@ -169,5 +169,5 @@ def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_na
                    calibrated_model_dir)
 
 
-run_single_cal(subject_code='P5', IMU_type='Perfect', calibration_name='METHOD_4_Alt_self',
+run_single_cal(subject_code='P3', IMU_type='Perfect', calibration_name='METHOD_4_Alt_self',
                pose_name1='Alt_self', pose_name2='Alt_self')

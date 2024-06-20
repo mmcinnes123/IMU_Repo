@@ -7,6 +7,7 @@ import os
 import opensim as osim
 import numpy as np
 import pandas as pd
+import qmt
 from scipy.spatial.transform import Rotation as R
 
 # Calibration settings
@@ -130,7 +131,7 @@ def get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2, pose_name1,
 
 
 
-# Function to apply METHOD_2
+# Function to apply METHOD_4
 def get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir):
 
     # Get the IMU orientation data at calibration pose time 1
@@ -150,7 +151,7 @@ def get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1
     radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
 
     # Write the rotated IMU orientations to sto file for visualisation
-    write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated1, humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, calibrated_model_dir)
+    # write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated1, humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, calibrated_model_dir)
 
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
@@ -568,7 +569,7 @@ def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1,
     # Get the body-IMU offset for each body, based on the pose-based method (mirroring OpenSims built-in calibration)
     pose_based_virtual_IMU = get_IMU_cal_POSE_BASED(humerus_IMU_ori_rotated1, humerus_ori)
     print("The pose-based virtual IMU offset is:")
-    print(pose_based_virtual_IMU.as_matrix())
+    print(pose_based_virtual_IMU.as_quat())
 
     # Get the individual axes of the pose-based virtual IMU frame
     y_comp_of_pose_based_offset = pose_based_virtual_IMU.as_matrix()[:, 1]
@@ -607,9 +608,13 @@ def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1,
     rot, rssd = R.align_vectors(a, b, weights=w)
 
     print("The optimal virtual IMU offset was calculated as: ")
-    print(rot.as_matrix())
+    print(rot.as_quat())
 
     virtual_IMU = rot
+
+    # Alternative function
+    # alt_virtual_IMU = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=True)
+    # print('Alternative virtual IMU offset:', alt_virtual_IMU)
 
     return virtual_IMU
 

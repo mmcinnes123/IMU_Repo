@@ -186,5 +186,5 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 # Run single test
 if __name__ == '__main__':
 
-    run_IK_compare('P1', 'JA_Slow', 'OSIM_Alt_self', 0, 90, False, 'Perfect', test=True)
+    run_IK_compare('P3', 'JA_Slow', 'METHOD_4_Opt', 0, 90, False, 'Perfect', test=True)
 
