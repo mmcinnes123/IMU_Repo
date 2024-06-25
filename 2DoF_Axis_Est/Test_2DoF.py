@@ -10,13 +10,13 @@ import opensim as osim
 import itertools
 from scipy.spatial.transform import Rotation as R
 from os.path import join
-
+import logging
 import numpy as np
 from tkinter.filedialog import askopenfilename, askdirectory
 np.set_printoptions(suppress=True)
 
 osim.Logger.setLevelString("Off")
-
+logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 
 
 
@@ -24,6 +24,7 @@ osim.Logger.setLevelString("Off")
 """" RUN FUNCTIONS ABOVE """
 
 # Data to use for the optimisation
+sample_rate = 100          # This is the sample rate of the data going into the function
 trial_for_opt = 'JA_Slow'
 IMU_type_for_opt = 'Perfect'
 opt_method = 'rot'
@@ -35,16 +36,18 @@ time_dict = {
     'P5': {'JA_Slow': {'FE_start': 30, 'FE_end': 47, 'PS_start': 48, 'PS_end': 65}},
     'P6': {'JA_Slow': {'FE_start': 26, 'FE_end': 44, 'PS_start': 47, 'PS_end': 65}}
              }
-sample_rate = 100          # This is the sample rate of the data going into the function
-
 
 # subject_list = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
-subject_list = ['P1']
+subject_list = ['P1', 'P2']
 # subject_list = []
+
+logging.info(f'Using IMU type: {IMU_type_for_opt}, with data from trial: {trial_for_opt}.')
+
+opt_rel2_OMC_errors = {}
 
 for subject_code in subject_list:
 
-    print('Results for Subject: ', subject_code)
+    logging.info(f'Results for Subject {subject_code}')
 
     # Define some files
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
@@ -53,51 +56,47 @@ for subject_code in subject_list:
     subject_time_dict = time_dict[subject_code]
 
     """ FINDING REFERENCE J1 AXIS IN HUMERUS CLUSTER FRAME """
-    FE_in_clus = get_J1_J2_from_calibrated_OMC_model(model_file, debug=True)
-    print('OMC reference FE axis in humerus cluster frame:', FE_in_clus)
-
+    OMC_FE = get_J1_J2_from_calibrated_OMC_model(model_file, debug=False)
+    logging.info(f'OMC FE axis in humerus cluster frame: {OMC_FE}')
 
     """ FINDING FE AND PS FROM OPTIMISATION RESULT """
     opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
                                                      opt_method, subject_time_dict, sample_rate, debug=False)
-    print('FE axis estimation with rot method: ', opt_FE)
-    # print('PS axis estimation with rot method: ', opt_PS)
-    print('and heading offset: ', opt_results['delta']*180/np.pi)
+    heading_offset = opt_results['delta']*180/np.pi
+    logging.info(f'Opt (rot) FE axis in humerus IMU frame: {opt_FE}')
+    logging.info(f'Opt (rot) PS axis in forearm IMU frame: {opt_PS}')
+    logging.info(f'Opt (rot) heading offset: {heading_offset}')
     # print('Cost: ', opt_results['debug']['cost'])
     # print('x: ', opt_results['debug']['x'])
 
-
     """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
-    iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
-                                                 subject_time_dict, sample_rate, debug=False)
-    # print('FE axis estimation from isolated joint movement: ', iso_FE)
-
+    # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
+    #                                              subject_time_dict, sample_rate, debug=False)
+    # logging.info(f'Iso FE axis in humerus IMU frame: {iso_FE}')
 
     """ COMPARE """
 
-    # Note, optimisation based J1, J2 can point in either direction
-    if np.sign(opt_FE[2]) == np.sign(-FE_in_clus[2]):
+    # Constrain the Opt FE axis to point in same direction as OMC reference
+    if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):
         opt_FE = -opt_FE
 
-    opt_error = qmt.angleBetween2Vecs(FE_in_clus, opt_FE)
-    print('Error between opt_FE and OMC_FE: ', opt_error*180/np.pi)
+    opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180/np.pi
+    logging.info(f'Error between opt_FE and OMC_FE (deg): {opt_error}')
 
-    # Compare results of optimisation with the isolated movement estimates
-    # opt_iso_error = qmt.angleBetween2Vecs(iso_FE, opt_FE)
-    # print('Error between opt_FE and iso_FE: ', opt_iso_error*180/np.pi)
+    # visulalise_3D_vec_on_IMU(opt_FE, OMC_FE, None)
+    # visulalise_3D_vec_on_IMU(OMC_FE, opt_FE, iso_FE)
 
-    visulalise_3D_vec_on_IMU(opt_FE, FE_in_clus, None)
-    # visulalise_3D_vec_on_IMU(FE_in_clus, opt_FE, iso_FE)
+    opt_rel2_OMC_errors[subject_code] = opt_error
 
 
+""" COMPILE ALL RESULTS """
 
 
-# # The optimal virtual IMU offset was calculated as:
-# IMU_offset_hum = np.array([-0.03217144, 0.77309788, -0.02682034, 0.63290231])
-# OMC_offset_hum = np.array([-0.05252603, 0.67153327, -0.05773951, 0.73685157])
-#
-# quat_change = qmt.qmult(qmt.qinv(IMU_offset_hum), OMC_offset_hum)  # Get orientation change from q0, for all t
-# angles = qmt.quatAngle(quat_change, plot=False)  # Get the magnitude of the change from q0
-# print('Angle difference between estimated virtual IMU offset and OMC virtual IMU offset is: ', np.rad2deg(angles))
-#
+all_errors = np.array(list(opt_rel2_OMC_errors.values()))
+mean_all_errors = np.mean(all_errors)
+
+logging.info(f'All errors: {opt_rel2_OMC_errors}.')
+logging.info(f'Mean: {mean_all_errors}.')
+
+
 
