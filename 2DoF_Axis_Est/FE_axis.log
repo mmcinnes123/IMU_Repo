@@ -1,15 +1,25 @@
 INFO:root:Using IMU type: Perfect, with data from trial: JA_Slow.
-INFO:root:Results for Subject P1
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.10579772 -0.32176158  0.9408753 ]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.21766153  0.13880414 -0.96610396]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.04650548 0.9959771  0.07659545]
-INFO:root:Opt (rot) heading offset: -6.275272071822902
-INFO:root:Error between opt_FE and OMC_FE (deg): 12.39582087334457
-INFO:root:Results for Subject P2
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.00468547 -0.21570951  0.97643098]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.01852575 -0.19408553  0.98080967]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.00240475 0.9948904  0.10093216]
-INFO:root:Opt (rot) heading offset: -10.009263629324575
-INFO:root:Error between opt_FE and OMC_FE (deg): 1.492300201804719
-INFO:root:All errors: {'P1': 12.39582087334457, 'P2': 1.492300201804719}.
-INFO:root:Mean: 6.944060537574645.
+INFO:root:Results for Subject P13
+INFO:root:OMC FE axis in humerus cluster frame: [-0.22743327 -0.17844257  0.95728907]
+WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.0
+WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.1
+WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.2
+WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.0
+WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.1
+WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.2
+INFO:qmt.utils.webapp:cancelling 2 outstanding tasks
+INFO:qmt.utils.webapp:cancelled
+WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.0
+WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.1
+WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.2
+WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.0
+WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.1
+WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.2
+INFO:qmt.utils.webapp:cancelling 2 outstanding tasks
+INFO:qmt.utils.webapp:cancelled
+INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.53686376  0.8373382   0.10316026]
+INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.01281288  0.99580931  0.09055191]
+INFO:root:Opt (rot) heading offset: 95.94900180828685
+INFO:root:Error between opt_FE and OMC_FE (deg): 85.90334794719965
+INFO:root:All errors: {'P13': 85.90334794719965}.
+INFO:root:Mean: 85.90334794719965.

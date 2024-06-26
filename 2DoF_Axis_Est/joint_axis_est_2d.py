@@ -11,6 +11,7 @@ from optimize import AbstractObjectiveFunction, GNSolver
 from helpers_2DoF import plot_gyr_data
 from helpers_2DoF import visualise_quat_data
 from helpers_2DoF import get_ang_vels_from_quats
+from helpers_2DoF import visulalise_3D_vecs_on_IMU
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
@@ -106,6 +107,23 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
 
     if debug:
         out['debug'] = dict(cost=cost, x=x)
+
+    if plot:
+
+        if gyr1 is None or gyr2 is None:
+            # Express input ang vels in local frames
+            gyr2_2 = qmt.rotate(qmt.qinv(q2), gyr2_E2)
+            gyr2_1 = qmt.rotate(qmt.qinv(q1), gyr2_E2)
+
+        else:
+            # If gyro data is provided, gyr1, gyr2 are in local frames
+            gyr2_2 = gyr2
+            gyr2_1 = qmt.rotate(qmt.qmult(qmt.qinv(q2), q1), gyr2)
+
+        print('Visualising ang vel of IMU2 in IMU2 frame')
+        visulalise_3D_vecs_on_IMU(gyr2_2, downsampleRate)
+        print('Visualising ang vel of IMU2 in IMU1 frame')
+        visulalise_3D_vecs_on_IMU(gyr2_1, downsampleRate)
 
     return out
 

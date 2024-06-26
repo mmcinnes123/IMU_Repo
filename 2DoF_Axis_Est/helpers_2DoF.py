@@ -195,7 +195,7 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
 
 
 
-def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method, subject_time_dict, sample_rate, debug):
+def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method, subject_event_dict, sample_rate, debug):
 
     assert IMU_type_for_opt in ['Real', 'Perfect'], 'IMU type not Real or Perfect'
     assert opt_method in ['rot', 'ori'], 'Opt method not rot or ori'
@@ -217,10 +217,8 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(tmm_txt_file)
 
     # Get the start and end time for which to run the optimisation
-    FE_start_time = subject_time_dict[trial_for_opt]['FE_start']
-    FE_end_time = subject_time_dict[trial_for_opt]['FE_end']
-    PS_start_time = subject_time_dict[trial_for_opt]['PS_start']
-    PS_end_time = subject_time_dict[trial_for_opt]['PS_end']
+    FE_start_time = subject_event_dict[trial_for_opt]['FE_start']
+    PS_end_time = subject_event_dict[trial_for_opt]['PS_end']
 
     # Trim the IMU data based on the period of interest
     start_ind = FE_start_time * sample_rate
@@ -232,7 +230,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     from joint_axis_est_2d import jointAxisEst2D
 
     params = dict(method=opt_method)
-    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=False)
+    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=True)
     FE = opt_results['j1']
     PS = opt_results['j2']
 
@@ -249,7 +247,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
             quat_changes = np.zeros((len(IMU_quats), 4))
             for row in range(len(IMU_quats)):
                 quat_changes[row] = qmt.qmult(qmt.qinv(IMU_quats[row]), IMU_quats[0])  # Get orientation change from q0, for all t
-            angles = qmt.quatAngle(quat_changes, plot=True)  # Get the magnitude of the change from q0
+            angles = qmt.quatAngle(quat_changes, plot=False)  # Get the magnitude of the change from q0
             mean_diff = np.mean(np.array(abs(angles)))  # Get the average change in ori from q0
             return mean_diff
 
@@ -336,7 +334,25 @@ def visulalise_3D_vec_on_IMU(vec1, vec2, vec3):
     webapp = qmt.Webapp('/demo/imu-raw-data', data=data)
     webapp.run()
 
+def visulalise_3D_vecs_on_IMU(vecs1, rate):
 
+    imu_letter = 'F'
+
+    # Test visualising vector
+    gyr = vecs1
+    N = len(gyr)
+    # acc = [vec2 for _ in range(N)]
+    # mag = [vec3 for _ in range(N)]
+    quat = [[-0.70738827, 0.70682518, 0, 0] for _ in range(N)]
+
+    config = {'imus': [{'signal': 'quat1', 'letter': imu_letter}]}
+
+    t = qmt.timeVec(N=len(gyr), rate=rate)  # Make a tiem vec based on the length of the quats
+    data = qmt.Struct(t=t, quat1=quat, gyr1=gyr)
+
+    # run webapp
+    webapp = qmt.Webapp('/demo/imu-raw-data', config=config, data=data)
+    webapp.run()
 
 # Function added by MM
 def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
@@ -362,3 +378,15 @@ def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
     return ang_vels
 
 
+def get_event_dict_from_file(subject_code):
+
+    event_files_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\SubjectEventFiles'
+    event_file_name = subject_code + '_event_dict.txt'
+    event_file = join(event_files_folder, event_file_name)
+
+    file_obj = open(event_file, 'r')
+    event_dict_str = file_obj.read()
+    file_obj.close()
+    event_dict = eval(event_dict_str)
+
+    return event_dict
