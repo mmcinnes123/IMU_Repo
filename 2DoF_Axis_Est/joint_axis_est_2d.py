@@ -100,7 +100,6 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     out = dict(
         j1=parameters['j1'],
         j2=parameters['j2'],
-        delta=qmt.wrapToPi(parameters['delta']),
     )
     if 'beta' in parameters:
         out['beta'] = qmt.wrapToPi(parameters['beta'])
@@ -381,7 +380,7 @@ class AxisEst2DRotConstraint(AbstractAxisEst2DObjectiveFunction):
 class AxisEst2DRotConstraint_Mhairi(AbstractAxisEst2DObjectiveFunction):
     def __init__(self, init):
         super().__init__(init)
-        self.updateIndices = slice(0, 5)
+        self.updateIndices = slice(0, 4)
 
     def errAndJac(self):
         if 'err' in self._cache and 'jac' in self._cache:
@@ -446,11 +445,10 @@ class AxisEst2DRotConstraint_Mhairi(AbstractAxisEst2DObjectiveFunction):
         return err, jac
 
     def unpackX(self):
-        assert self._x.shape == (7,)
+        assert self._x.shape == (6,)
         return {
-            'j1': axisFromThetaPhi(self._x[0], self._x[1], self._x[5]),
-            'j2': axisFromThetaPhi(self._x[2], self._x[3], self._x[6]),
-            'delta': self._x[4],
+            'j1': axisFromThetaPhi(self._x[0], self._x[1], self._x[4]),
+            'j2': axisFromThetaPhi(self._x[2], self._x[3], self._x[5]),
         }
 
 

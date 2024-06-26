@@ -25,13 +25,13 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 # Data to use for the optimisation
 sample_rate = 100          # This is the sample rate of the data going into the function
 trial_for_opt = 'JA_Slow'
-IMU_type_for_opt = 'Perfect'
+IMU_type_for_opt = 'Real'
 opt_method = 'rot'
 logging.info(f'Using IMU type: {IMU_type_for_opt}, with data from trial: {trial_for_opt}.')
 
 # List of subjects
-# subject_list = [f'P{i}' for i in range(1, 23)]
-subject_list = ['P13']
+subject_list = [f'P{i}' for i in range(1, 23)]
+# subject_list = ['P13']
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -55,11 +55,11 @@ for subject_code in subject_list:
 
     """ FINDING FE AND PS FROM OPTIMISATION RESULT """
     opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
-                                                     opt_method, subject_event_dict, sample_rate, debug=True)
-    heading_offset = opt_results['delta']*180/np.pi
+                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+    # heading_offset = opt_results['delta']*180/np.pi
     logging.info(f'Opt (rot) FE axis in humerus IMU frame: {opt_FE}')
     logging.info(f'Opt (rot) PS axis in forearm IMU frame: {opt_PS}')
-    logging.info(f'Opt (rot) heading offset: {heading_offset}')
+    # logging.info(f'Opt (rot) heading offset: {heading_offset}')
     # print('Cost: ', opt_results['debug']['cost'])
     # print('x: ', opt_results['debug']['x'])
 
