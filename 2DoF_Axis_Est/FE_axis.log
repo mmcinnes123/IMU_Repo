@@ -1,9 +1,3 @@
 INFO:root:Using IMU type: Perfect, with data from trial: JA_Slow.
 INFO:root:Results for Subject P13
 INFO:root:OMC FE axis in humerus cluster frame: [-0.22743327 -0.17844257  0.95728907]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.53686376  0.8373382   0.10316026]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.01281288  0.99580931  0.09055191]
-INFO:root:Opt (rot) heading offset: 95.94900180828685
-INFO:root:Error between opt_FE and OMC_FE (deg): 85.90334794719965
-INFO:root:All errors: {'P13': 85.90334794719965}.
-INFO:root:Mean: 85.90334794719965.

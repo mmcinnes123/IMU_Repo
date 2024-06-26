@@ -76,7 +76,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     d = dict(quat1=q1, quat2=q2, gyr1_E1=gyr1_E1, gyr2_E2=gyr2_E2)
 
     # Specify which constraint (Class) to use based on the method specified in params
-    objFnCls = dict(rot=AxisEst2DRotConstraint, ori=AxisEst2DOriConstraint)[method]
+    objFnCls = dict(rot=AxisEst2DRotConstraint_Mhairi, ori=AxisEst2DOriConstraint)[method]
     initVals = objFnCls.getInitVals()
 
     # Run the solver
@@ -277,9 +277,10 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
             init = []
             # Build up, row by row, every combination of options for j1, j2 and delta, from the options of ex, ey, ez
             # (above) for j1 and j2, and the options of -90, 0, 90, 180 for delta
-            for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.deg2rad([-90, 0, 90, 180])):
+            # for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.deg2rad([-90, 0, 90, 180])):
+            for j1, j2 in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z]):
                 # Build the row by concatenating along the row (np.r_), J1, J2 (2 params each), delta, and the ints)
-                init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), delta, 1, 1])
+                init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), 1, 1])
             return np.array(init, float)
         # An alternative set of init values using random numbers, or setting delta to 0
         elif variant.startswith('rand'):  # e.g. 'rand100_delta0', 'rand100')
@@ -377,10 +378,87 @@ class AxisEst2DRotConstraint(AbstractAxisEst2DObjectiveFunction):
         }
 
 
+class AxisEst2DRotConstraint_Mhairi(AbstractAxisEst2DObjectiveFunction):
+    def __init__(self, init):
+        super().__init__(init)
+        self.updateIndices = slice(0, 5)
+
+    def errAndJac(self):
+        if 'err' in self._cache and 'jac' in self._cache:
+            return self._cache['err'], self._cache['jac']
+
+        d = self._data
+        theta1, phi1, theta2, phi2, var1, var2 = self._x
+
+        q1 = d['quat1']
+        q2 = d['quat2']
+        w1_e = d['gyr1_E1']  # gyr1_E1 = qmt.rotate(quat1, gyr1)
+        w2_e = d['gyr2_E2']  # gyr2_E2 = qmt.rotate(quat2, gyr2)
+        N = q1.shape[0]
+        assert q1.shape == q2.shape == (N, 4)
+        assert w1_e.shape == w2_e.shape == (N, 3)
+
+        # Get j1 and j2 in axis form, from our latest estimates of theta1, phi1, etc
+        j1_est = axisFromThetaPhi(theta1, phi1, var1)
+        j2_est = axisFromThetaPhi(theta2, phi2, var2)
+
+        # Get j1 and j2 in the (shared) inertial reference frame
+        j1_e = _rotate(q1, j1_est)
+        j2_e = _rotate(q2, j2_est)
+
+        # Calculate the elements for our cost function
+        ax_orig = _cross(j1_e, j2_e)
+        ax_norm = np.linalg.norm(ax_orig, axis=1)[:, None]
+        ax = ax_orig / ax_norm
+        w_d = w1_e - w2_e   # The relative angular velocity term
+
+        # Calculate the current error from our cost function
+        err = inner1d(w_d, ax)
+
+        ### Calculate the jacobian by finding every partial derivative
+
+        # Find the partial derivatives of j1 and j2, wrt theta1, phi1, theta2, phi2, from the basic definition of
+        # spherical coords (theta, phi) from a 3D vector
+        dj1_theta, dj1_phi = axisGradient(theta1, phi1, var1)
+        dj2_theta, dj2_phi = axisGradient(theta2, phi2, var2)
+
+        # Find partial derivatives of the error function wrt the joint axes (theta1, phi1, theta2, phi2)
+        d_ax_orig_theta1 = _cross(_rotate(q1, dj1_theta), j2_e)
+        d_ax_theta1 = d_ax_orig_theta1/ax_norm - ax_orig * inner1d(ax_orig, d_ax_orig_theta1)[:, None] / ax_norm**3
+        d_theta1 = inner1d(w_d, d_ax_theta1)
+        d_ax_orig_phi1 = _cross(_rotate(q1, dj1_phi), j2_e)
+        d_ax_phi1 = d_ax_orig_phi1 / ax_norm - ax_orig * inner1d(ax_orig, d_ax_orig_phi1)[:, None] / ax_norm ** 3
+        d_phi1 = inner1d(w_d, d_ax_phi1)
+        d_ax_orig_theta2 = _cross(j1_e, _rotate(q2, dj2_theta))
+        d_ax_theta2 = d_ax_orig_theta2 / ax_norm - ax_orig * inner1d(ax_orig, d_ax_orig_theta2)[:, None] / ax_norm ** 3
+        d_theta2 = inner1d(w_d, d_ax_theta2)
+        d_ax_orig_phi2 = _cross(j1_e, _rotate(q2, dj2_phi))
+        d_ax_phi2 = d_ax_orig_phi2 / ax_norm - ax_orig * inner1d(ax_orig, d_ax_orig_phi2)[:, None] / ax_norm ** 3
+        d_phi2 = inner1d(w_d, d_ax_phi2)
+
+        # Set the partial derivative of the cost function wrt delta to zero
+        d_delta = np.zeros(len(d_theta1))
+
+        jac = np.column_stack([d_theta1, d_phi1, d_theta2, d_phi2])
+
+        self._cache['err'] = err
+        self._cache['jac'] = jac
+        return err, jac
+
+    def unpackX(self):
+        assert self._x.shape == (7,)
+        return {
+            'j1': axisFromThetaPhi(self._x[0], self._x[1], self._x[5]),
+            'j2': axisFromThetaPhi(self._x[2], self._x[3], self._x[6]),
+            'delta': self._x[4],
+        }
+
+
 class AxisEst2DOriConstraint(AbstractAxisEst2DObjectiveFunction):
     def __init__(self, init):
         super().__init__(init)
-        self.updateIndices = slice(0, 6)
+        # self.updateIndices = slice(0, 6)
+        self.updateIndices = slice(0, 5)
 
     def errAndJac(self):
         if 'err' in self._cache and 'jac' in self._cache:
