@@ -230,7 +230,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     from joint_axis_est_2d import jointAxisEst2D
 
     params = dict(method=opt_method)
-    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=True)
+    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=False)
     FE = opt_results['j1']
     PS = opt_results['j2']
 
@@ -239,8 +239,8 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
         print('\tTMM file used: ', tmm_txt_file)
         print('\tBetween times: ', start_ind/sample_rate, end_ind/sample_rate)
         print('\tUsing optimistaion method: ', opt_method)
-        # print('\tComplete optimisation results: ')
-        # print(opt_results)
+        print('\tComplete optimisation results: ')
+        print(opt_results)
 
         # Get variation in movement of each IMU
         def get_ori_variation(IMU_quats):

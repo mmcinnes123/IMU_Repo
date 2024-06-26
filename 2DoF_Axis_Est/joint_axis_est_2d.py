@@ -275,17 +275,24 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
             e_y /= np.linalg.norm(e_y)
             e_z /= np.linalg.norm(e_z)
             init = []
+            # Build up, row by row, every combination of options for j1, j2 and delta, from the options of ex, ey, ez
+            # (above) for j1 and j2, and the options of -90, 0, 90, 180 for delta
             for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.deg2rad([-90, 0, 90, 180])):
+                # Build the row by concatenating along the row (np.r_), J1, J2 (2 params each), delta, and the ints)
                 init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), delta, 1, 1])
             return np.array(init, float)
+        # An alternative set of init values using random numbers, or setting delta to 0
         elif variant.startswith('rand'):  # e.g. 'rand100_delta0', 'rand100')
             if seed is None:
                 r = np.random
             else:
                 r = np.random.RandomState(seed)
+            # Get the number after 'rand', e.g. 100
             N = variant[len('rand'):-len('_delta0')] if variant.endswith('_delta0') else variant[len('rand'):]
             assert N.isdigit()
+            # Create the init array using random values between pi and -pi for the first 6 params, then rand integers for the last two
             init = np.c_[r.uniform(-np.pi, np.pi, (int(N), 6)), r.randint(1, 3, (int(N), 2))]
+            # Set delta to 0
             if variant.endswith('_delta0'):
                 init[:, 4] = 0
             return init

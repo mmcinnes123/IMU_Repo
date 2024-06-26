@@ -2,7 +2,6 @@
 # Inputs are: two .mot files
 # Outputs are: .png plots of each joint of interest
 
-import os
 import pandas as pd
 from helpers_compare import *
 from tkinter.filedialog import askopenfilename, askdirectory

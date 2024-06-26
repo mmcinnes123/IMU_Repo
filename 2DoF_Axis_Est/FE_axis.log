@@ -1,22 +1,6 @@
 INFO:root:Using IMU type: Perfect, with data from trial: JA_Slow.
 INFO:root:Results for Subject P13
 INFO:root:OMC FE axis in humerus cluster frame: [-0.22743327 -0.17844257  0.95728907]
-WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.0
-WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.1
-WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.2
-WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.0
-WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.1
-WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.2
-INFO:qmt.utils.webapp:cancelling 2 outstanding tasks
-INFO:qmt.utils.webapp:cancelled
-WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.0
-WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.1
-WARNING:js:signal used in UiLinePlot does not exist in sample: acc1.2
-WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.0
-WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.1
-WARNING:js:signal used in UiLinePlot does not exist in sample: mag1.2
-INFO:qmt.utils.webapp:cancelling 2 outstanding tasks
-INFO:qmt.utils.webapp:cancelled
 INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.53686376  0.8373382   0.10316026]
 INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.01281288  0.99580931  0.09055191]
 INFO:root:Opt (rot) heading offset: 95.94900180828685
