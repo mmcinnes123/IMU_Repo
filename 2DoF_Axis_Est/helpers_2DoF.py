@@ -198,7 +198,6 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
 def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method, subject_event_dict, sample_rate, debug):
 
     assert IMU_type_for_opt in ['Real', 'Perfect'], 'IMU type not Real or Perfect'
-    assert opt_method in ['rot', 'ori'], 'Opt method not rot or ori'
 
     if IMU_type_for_opt == 'Perfect':
         report_ext = ' - Report3 - Cluster_Quats.txt'

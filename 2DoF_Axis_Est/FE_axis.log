@@ -1,113 +1,23 @@
-INFO:root:Using IMU type: Real, with data from trial: JA_Slow.
+INFO:root:Using IMU type: Perfect, with data from trial: JA_Slow.
 INFO:root:Results for Subject P1
 INFO:root:OMC FE axis in humerus cluster frame: [ 0.10579772 -0.32176158  0.9408753 ]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.18355478  0.06671953 -0.98074265]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.06025135 0.99628768 0.06148687]
-INFO:root:Error between opt_FE and OMC_FE (deg): 15.49399678588064
+INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.24479392 -0.02603435  0.96922554]
+INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.03788655 -0.98935404 -0.14051049]
+INFO:root:Error between opt_FE and OMC_FE (deg): 18.877930979263013
 INFO:root:Results for Subject P2
 INFO:root:OMC FE axis in humerus cluster frame: [ 0.00468547 -0.21570951  0.97643098]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.01752041 -0.05751137  0.9981911 ]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.00204456 0.99540163 0.09576754]
-INFO:root:Error between opt_FE and OMC_FE (deg): 9.188849290955536
+INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.05542935 -0.13271709  0.98960283]
+INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.00066467 0.9916015  0.12932912]
+INFO:root:Error between opt_FE and OMC_FE (deg): 5.626688537164868
 INFO:root:Results for Subject P3
 INFO:root:OMC FE axis in humerus cluster frame: [-0.09232654 -0.22716363  0.96945474]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.12918233 -0.17968879  0.97520452]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.09675051 0.99107466 0.09170802]
-INFO:root:Error between opt_FE and OMC_FE (deg): 13.011965475758883
+INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.20015692 -0.03898452  0.97898795]
+INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.08573188 -0.99425257 -0.06412383]
+INFO:root:Error between opt_FE and OMC_FE (deg): 20.036478610635605
 INFO:root:Results for Subject P4
 INFO:root:OMC FE axis in humerus cluster frame: [-0.13786473 -0.25686799  0.95654699]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.16040802  0.08431701 -0.98344289]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.09104079 0.99483165 0.04496177]
-INFO:root:Error between opt_FE and OMC_FE (deg): 10.102001753257698
+INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.03034063 -0.34828452 -0.93689772]
+INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.06570414 -0.99716869 -0.03657288]
+INFO:root:Error between opt_FE and OMC_FE (deg): 35.81421950842335
 INFO:root:Results for Subject P5
 INFO:root:OMC FE axis in humerus cluster frame: [-0.13908254 -0.23058285  0.963046  ]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.06879287  0.283871   -0.95639155]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.07414585 0.99503519 0.06638803]
-INFO:root:Error between opt_FE and OMC_FE (deg): 5.0698739938132125
-INFO:root:Results for Subject P6
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.06464167 -0.17367757  0.9826635 ]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.0163888  -0.12383241  0.9921678 ]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.11265234 0.99051414 0.07868412]
-INFO:root:Error between opt_FE and OMC_FE (deg): 4.01286858557061
-INFO:root:Results for Subject P7
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.3410771  -0.13115719  0.93082448]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.2322488  -0.06176997  0.97069303]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.12376018 0.98886719 0.08261421]
-INFO:root:Error between opt_FE and OMC_FE (deg): 7.745697605876156
-INFO:root:Results for Subject P8
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.1001554  -0.20459231  0.97369445]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.07785861 -0.12869013  0.98862373]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.07581611 0.99618706 0.04316558]
-INFO:root:Error between opt_FE and OMC_FE (deg): 4.61391920021855
-INFO:root:Results for Subject P9
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.11883946 -0.12967273  0.98439431]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.17939869 -0.10053805  0.97862567]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.13072774 -0.97283814 -0.19103982]
-INFO:root:Error between opt_FE and OMC_FE (deg): 3.865372516177594
-INFO:root:Results for Subject P10
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.44756355 -0.16637519  0.87862174]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [0.2535124  0.03235138 0.96679101]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [ 0.03617705  0.99823095 -0.04718254]
-INFO:root:Error between opt_FE and OMC_FE (deg): 16.75655062338606
-INFO:root:Results for Subject P11
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.052587   -0.13359318  0.98962491]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.25037941 -0.06300461 -0.96609553]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.11590211 0.9897755  0.08313335]
-INFO:root:Error between opt_FE and OMC_FE (deg): 20.852075977286987
-INFO:root:Results for Subject P12
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.01833044 -0.19370891  0.9808725 ]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [0.1875455  0.01655713 0.98211636]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.12538344 0.99099986 0.04688565]
-INFO:root:Error between opt_FE and OMC_FE (deg): 15.511690168778536
-INFO:root:Results for Subject P13
-INFO:root:OMC FE axis in humerus cluster frame: [-0.22743327 -0.17844257  0.95728907]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.4459393  -0.0573223  -0.89322578]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.0207266  0.99343212 0.11253016]
-INFO:root:Error between opt_FE and OMC_FE (deg): 18.865157869796484
-INFO:root:Results for Subject P14
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.09891676 -0.23342353  0.96731532]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.38681534  0.17841535 -0.90473303]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.08563237 0.99528175 0.04562173]
-INFO:root:Error between opt_FE and OMC_FE (deg): 17.23736618379476
-INFO:root:Results for Subject P15
-INFO:root:OMC FE axis in humerus cluster frame: [-0.12028726 -0.09464839  0.98820173]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.05024986  0.14895713 -0.98756606]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.00893382 0.99962431 0.02591182]
-INFO:root:Error between opt_FE and OMC_FE (deg): 5.079763383400639
-INFO:root:Results for Subject P16
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.22987212 -0.16546229  0.95903652]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [0.22279616 0.03682025 0.97416946]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.07988047 0.99337884 0.08256867]
-INFO:root:Error between opt_FE and OMC_FE (deg): 11.649535676216049
-INFO:root:Results for Subject P17
-INFO:root:OMC FE axis in humerus cluster frame: [-0.07832425 -0.13672648  0.98749237]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.16560922  0.02886207  0.98576902]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.17116411 0.98256292 0.07261507]
-INFO:root:Error between opt_FE and OMC_FE (deg): 10.741169030844366
-INFO:root:Results for Subject P18
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.52085022 -0.12119075  0.84498394]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.47539077  0.07637309 -0.87645352]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.09804539 0.99238264 0.07459086]
-INFO:root:Error between opt_FE and OMC_FE (deg): 4.078773315590081
-INFO:root:Results for Subject P19
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.06778297 -0.13974094  0.98785016]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [0.06599991 0.04519843 0.99679542]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [ 0.09667525  0.99530523 -0.00462552]
-INFO:root:Error between opt_FE and OMC_FE (deg): 10.624420081194312
-INFO:root:Results for Subject P20
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.30416303 -0.14399233  0.94165867]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [-0.3716264   0.0451981  -0.92728148]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [-0.07251069 -0.99077275 -0.11450568]
-INFO:root:Error between opt_FE and OMC_FE (deg): 6.907914779049817
-INFO:root:Results for Subject P21
-INFO:root:OMC FE axis in humerus cluster frame: [-0.15476092 -0.07417002  0.98514865]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.43701389 -0.00252009  0.89945123]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [0.10001579 0.99337773 0.05654671]
-INFO:root:Error between opt_FE and OMC_FE (deg): 35.049152610937284
-INFO:root:Results for Subject P22
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.01738456 -0.13814487  0.9902443 ]
-INFO:root:Opt (rot) FE axis in humerus IMU frame: [ 0.11671759 -0.09820593  0.98829783]
-INFO:root:Opt (rot) PS axis in forearm IMU frame: [ 0.11130661  0.99350341 -0.02370254]
-INFO:root:Error between opt_FE and OMC_FE (deg): 6.138168371598578
-INFO:root:All errors: {'P1': 15.49399678588064, 'P2': 9.188849290955536, 'P3': 13.011965475758883, 'P4': 10.102001753257698, 'P5': 5.0698739938132125, 'P6': 4.01286858557061, 'P7': 7.745697605876156, 'P8': 4.61391920021855, 'P9': 3.865372516177594, 'P10': 16.75655062338606, 'P11': 20.852075977286987, 'P12': 15.511690168778536, 'P13': 18.865157869796484, 'P14': 17.23736618379476, 'P15': 5.079763383400639, 'P16': 11.649535676216049, 'P17': 10.741169030844366, 'P18': 4.078773315590081, 'P19': 10.624420081194312, 'P20': 6.907914779049817, 'P21': 35.049152610937284, 'P22': 6.138168371598578}.
-INFO:root:Mean: 11.481649239971945.

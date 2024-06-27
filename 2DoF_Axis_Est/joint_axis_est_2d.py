@@ -34,7 +34,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     method = params['method']
     gyrCutoff = params['gyrCutoff']
     downsampleRate = params['downsampleRate']
-    assert method in ('rot', 'ori')
+    assert method in ('rot', 'ori', 'rot_noDelta')
 
     # Downsample the orientation data
     if rate == downsampleRate or downsampleRate is None:
@@ -76,8 +76,12 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     d = dict(quat1=q1, quat2=q2, gyr1_E1=gyr1_E1, gyr2_E2=gyr2_E2)
 
     # Specify which constraint (Class) to use based on the method specified in params
-    objFnCls = dict(rot=AxisEst2DRotConstraint_Mhairi, ori=AxisEst2DOriConstraint)[method]
-    initVals = objFnCls.getInitVals()
+    objFnCls = dict(rot=AxisEst2DRotConstraint, rot_noDelta=AxisEst2DRotConstraint_Mhairi, ori=AxisEst2DOriConstraint)[method]
+    if method == 'rot_noDelta':
+        initVals_variant = 'rot_noDelta'
+    else:
+        initVals_variant = 'default'
+    initVals = objFnCls.getInitVals(variant=initVals_variant)
 
     # Run the solver
     x = None
@@ -101,6 +105,10 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         j1=parameters['j1'],
         j2=parameters['j2'],
     )
+
+    if 'delta' in parameters:
+        out['delta'] = qmt.wrapToPi(parameters['delta'])
+
     if 'beta' in parameters:
         out['beta'] = qmt.wrapToPi(parameters['beta'])
 
@@ -265,7 +273,7 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
 
     @staticmethod
     def getInitVals(variant='default', seed=None):
-        assert variant in 'default' or variant.startswith('rand')
+        assert variant in ['default', 'rot_noDelta'] or variant.startswith('rand')
         if variant == 'default':
             e_x = np.array([1, 0.01, 0.01], float)
             e_y = np.array([0.01, 1, 0.01], float)
@@ -276,7 +284,19 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
             init = []
             # Build up, row by row, every combination of options for j1, j2 and delta, from the options of ex, ey, ez
             # (above) for j1 and j2, and the options of -90, 0, 90, 180 for delta
-            # for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.deg2rad([-90, 0, 90, 180])):
+            for j1, j2, delta in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z], np.deg2rad([-90, 0, 90, 180])):
+                # Build the row by concatenating along the row (np.r_), J1, J2 (2 params each), delta, and the ints)
+                init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), delta, 1, 1])
+            return np.array(init, float)
+        if variant == 'rot_noDelta':
+            e_x = np.array([1, 0.01, 0.01], float)
+            e_y = np.array([0.01, 1, 0.01], float)
+            e_z = np.array([0.01, 0.01, 1], float)
+            e_x /= np.linalg.norm(e_x)
+            e_y /= np.linalg.norm(e_y)
+            e_z /= np.linalg.norm(e_z)
+            init = []
+            # Build up, row by row, every combination of options for j1, j2, from the options of ex, ey, ez
             for j1, j2 in itertools.product([e_x, e_y, e_z], [e_x, e_y, e_z]):
                 # Build the row by concatenating along the row (np.r_), J1, J2 (2 params each), delta, and the ints)
                 init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), 1, 1])
@@ -435,13 +455,11 @@ class AxisEst2DRotConstraint_Mhairi(AbstractAxisEst2DObjectiveFunction):
         d_ax_phi2 = d_ax_orig_phi2 / ax_norm - ax_orig * inner1d(ax_orig, d_ax_orig_phi2)[:, None] / ax_norm ** 3
         d_phi2 = inner1d(w_d, d_ax_phi2)
 
-        # Set the partial derivative of the cost function wrt delta to zero
-        d_delta = np.zeros(len(d_theta1))
-
         jac = np.column_stack([d_theta1, d_phi1, d_theta2, d_phi2])
 
         self._cache['err'] = err
         self._cache['jac'] = jac
+
         return err, jac
 
     def unpackX(self):
@@ -455,8 +473,7 @@ class AxisEst2DRotConstraint_Mhairi(AbstractAxisEst2DObjectiveFunction):
 class AxisEst2DOriConstraint(AbstractAxisEst2DObjectiveFunction):
     def __init__(self, init):
         super().__init__(init)
-        # self.updateIndices = slice(0, 6)
-        self.updateIndices = slice(0, 5)
+        self.updateIndices = slice(0, 6)
 
     def errAndJac(self):
         if 'err' in self._cache and 'jac' in self._cache:
