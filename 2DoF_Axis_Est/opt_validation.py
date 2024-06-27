@@ -26,12 +26,11 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 sample_rate = 100          # This is the sample rate of the data going into the function
 trial_for_opt = 'JA_Slow'
 IMU_type_for_opt = 'Perfect'
-opt_method = 'ori'
+opt_method = 'rot'      # Options: 'rot', 'ori', 'rot_noDelta'
 logging.info(f'Using IMU type: {IMU_type_for_opt}, with data from trial: {trial_for_opt}.')
 
 # List of subjects
 subject_list = [f'P{i}' for i in range(1, 23)]
-# subject_list = ['P13']
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -63,6 +62,7 @@ for subject_code in subject_list:
     logging.info(f'Opt (rot) PS axis in forearm IMU frame: {opt_PS}')
     # print('Cost: ', opt_results['debug']['cost'])
     # print('x: ', opt_results['debug']['x'])
+    print('SD in third DoF: ', opt_results['debug']['SD_third_DoF'])
 
     """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
     # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,

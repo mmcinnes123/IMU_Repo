@@ -113,7 +113,28 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         out['beta'] = qmt.wrapToPi(parameters['beta'])
 
     if debug:
-        out['debug'] = dict(cost=cost, x=x)
+        # Calculate the variation in the 3rd degree of freedom over the sample period, as a measure of error
+
+        z_ax = np.array([0, 0, 1])
+        b1_s1_ang = np.arccos(np.dot(z_ax, parameters['j1']))
+        b1_s1_ax = _cross1d(z_ax, parameters['j1'])
+        q_b1_s1 = qmt.quatFromAngleAxis(b1_s1_ang, b1_s1_ax)    # Get ori of a body which has a z axis aligned with J1
+
+        y_ax = np.array([0, 1, 0])
+        b2_s2_ang = np.arccos(np.dot(y_ax, parameters['j2']))
+        b2_s2_ax = _cross1d(y_ax, parameters['j2'])
+        q_b2_s2 = qmt.quatFromAngleAxis(b2_s2_ang, b2_s2_ax)    # Get ori of a body which has a 2 axis aligned with J2
+
+        q2_1 = _qmult(_qinv(q1), q2)     # Relative sensor ori
+        q_joint = _qmult(_qmult(_qinv(q_b1_s1), q2_1), q_b2_s2)    # Relative body ori
+
+        # arcsin_arg = 2*q_joint[:, 0]*q_joint[:, 1] + 2*q_joint[:, 2]*q_joint[:, 3]
+        # third_DoF_angle = np.arcsin(np.clip(arcsin_arg, -1, 1))
+
+        third_DoF_angle_eul = qmt.eulerAngles(q_joint, 'zxy', intrinsic=True, plot=False)
+        SD_third_DoF = qmt.rms(np.rad2deg(third_DoF_angle_eul[:,1]), plot=False)
+
+        out['debug'] = dict(cost=cost, x=x, SD_third_DoF=SD_third_DoF)
 
     if plot:
 
@@ -131,6 +152,8 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         visulalise_3D_vecs_on_IMU(gyr2_2, downsampleRate)
         print('Visualising ang vel of IMU2 in IMU1 frame')
         visulalise_3D_vecs_on_IMU(gyr2_1, downsampleRate)
+
+
 
     return out
 

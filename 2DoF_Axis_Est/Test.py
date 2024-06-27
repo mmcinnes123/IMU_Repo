@@ -1,19 +1,9 @@
 import numpy as np
 import itertools
 
-def axisToThetaPhi(j, var):
-    if var == 1:
-        theta = np.arccos(j[2])
-        phi = np.arctan2(j[1], j[0])
-    elif var == 2:
-        theta = np.arccos(j[0])
-        phi = np.arctan2(j[1], j[2])
-    else:
-        raise ValueError('invalid axis var')
-    return theta, phi
+def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
+    return np.einsum('ij,ij->i', np.atleast_2d(a), np.atleast_2d(b))
 
-x = slice(0, 5)
+a = inner1d(np.array([0, 0, 1]).T, [0.09554825, 0.00132716, 0.99542392])
 
-y = [1, 2, 3, 4, 5, 6]
-
-print(y[x])
+print(a)

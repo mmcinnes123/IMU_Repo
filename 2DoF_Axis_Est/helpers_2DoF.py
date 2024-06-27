@@ -157,10 +157,10 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
 
     # Based on how the hu joint is defined in the model, relative to the hu joint parent frame,
     # the vector of hu rotation axis (EL_x) is:
-    EL_axis_rel2_hu_parent = [0.969, -0.247, 0]
+    FE_axis_rel2_hu_parent = [0.969, -0.247, 0]
 
     # Get the vector of hu rotation axis, relative to the humerus frame
-    EL_axis_rel2_humerus = hu_parent_rel2_hum_R.apply(EL_axis_rel2_hu_parent)
+    FE_axis_rel2_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
 
     """Get the cluster frame, expressed in the humerus frame, specific to the subject's model"""
 
@@ -180,11 +180,11 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
     cluster_in_hum = qmt.quatFrom2Axes(x_axis, y_axis, None, plot=False)
 
     # Now express the FE axis in the cluster frame
-    FE_in_clus = qmt.rotate(cluster_in_hum, EL_axis_rel2_humerus, plot=False)
+    FE_in_clus = qmt.rotate(cluster_in_hum, FE_axis_rel2_humerus, plot=False)
 
     if debug:
         print('get_J1_J2_from_calibrated_OMC_model() DEBUG:')
-        print('\tFE axis in humerus body frame: ', EL_axis_rel2_humerus)
+        print('\tFE axis in humerus body frame: ', FE_axis_rel2_humerus)
         print('\tModel file used: ', model_file)
         print('\tMarker 1 position: ', np.array_str(marker_1_in_hum))
         print('\tOMC Cluster in humerus body frame: ', cluster_in_hum)
