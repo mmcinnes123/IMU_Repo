@@ -76,7 +76,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     d = dict(quat1=q1, quat2=q2, gyr1_E1=gyr1_E1, gyr2_E2=gyr2_E2)
 
     # Specify which constraint (Class) to use based on the method specified in params
-    objFnCls = dict(rot=AxisEst2DRotConstraint, rot_noDelta=AxisEst2DRotConstraint_Mhairi, ori=AxisEst2DOriConstraint)[method]
+    objFnCls = dict(rot=AxisEst2DRotConstraint, rot_noDelta=AxisEst2DRotConstraint_noDelta, ori=AxisEst2DOriConstraint)[method]
     if method == 'rot_noDelta':
         initVals_variant = 'rot_noDelta'
     else:
@@ -128,11 +128,8 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         q2_1 = _qmult(_qinv(q1), q2)     # Relative sensor ori
         q_joint = _qmult(_qmult(_qinv(q_b1_s1), q2_1), q_b2_s2)    # Relative body ori
 
-        # arcsin_arg = 2*q_joint[:, 0]*q_joint[:, 1] + 2*q_joint[:, 2]*q_joint[:, 3]
-        # third_DoF_angle = np.arcsin(np.clip(arcsin_arg, -1, 1))
-
         third_DoF_angle_eul = qmt.eulerAngles(q_joint, 'zxy', intrinsic=True, plot=False)
-        SD_third_DoF = qmt.rms(np.rad2deg(third_DoF_angle_eul[:,1]), plot=False)
+        SD_third_DoF = np.nanstd(np.rad2deg(third_DoF_angle_eul[:,1]))
 
         out['debug'] = dict(cost=cost, x=x, SD_third_DoF=SD_third_DoF)
 
@@ -420,7 +417,7 @@ class AxisEst2DRotConstraint(AbstractAxisEst2DObjectiveFunction):
         }
 
 
-class AxisEst2DRotConstraint_Mhairi(AbstractAxisEst2DObjectiveFunction):
+class AxisEst2DRotConstraint_noDelta(AbstractAxisEst2DObjectiveFunction):
     def __init__(self, init):
         super().__init__(init)
         self.updateIndices = slice(0, 4)
