@@ -7,11 +7,11 @@ from scipy import signal
 
 import qmt
 
-from optimize import AbstractObjectiveFunction, GNSolver
-from helpers_2DoF import plot_gyr_data
-from helpers_2DoF import visualise_quat_data
-from helpers_2DoF import get_ang_vels_from_quats
-from helpers_2DoF import visulalise_3D_vecs_on_IMU
+from TwoDoF_Axis_Est.optimize import AbstractObjectiveFunction, GNSolver
+from TwoDoF_Axis_Est.helpers_2DoF import plot_gyr_data
+from TwoDoF_Axis_Est.helpers_2DoF import visualise_quat_data
+from TwoDoF_Axis_Est.helpers_2DoF import get_ang_vels_from_quats
+from TwoDoF_Axis_Est.helpers_2DoF import visulalise_3D_vecs_on_IMU
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926

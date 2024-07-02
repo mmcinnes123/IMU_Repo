@@ -78,7 +78,7 @@ def get_IMU_offsets_METHOD_2(subject_code, IMU_type, pose_name, calibrated_model
     thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
 
     # Get model body orientations in ground during default pose
-    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
 
     # Get heading offset between IMU heading and model heading
     heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
@@ -120,7 +120,7 @@ def get_IMU_offsets_METHOD_3(subject_code, IMU_type, calibrated_model_dir):
     thorax_IMU_ori2, humerus_IMU_ori2, radius_IMU_ori2 = read_sto_quaternion_file(cal_oris_file_path_2)
 
     # Get model body orientations in ground during default pose
-    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name1)
 
     # Get heading offset between IMU heading and model heading
     heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
@@ -145,7 +145,6 @@ def get_IMU_offsets_METHOD_3(subject_code, IMU_type, calibrated_model_dir):
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 
 
-
 # Function to apply METHOD_4
 def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
 
@@ -154,13 +153,12 @@ def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
     opt_trial_name = 'JA_Slow'
     opt_method = 'rot_noDelta'
 
-
     # Get the IMU orientation data at calibration pose time
     cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, pose_trial_name, pose_name, IMU_type)
     thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
 
     # Get model body orientations in ground during default pose
-    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
 
     # Get heading offset between IMU heading and model heading
     heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)

@@ -15,7 +15,10 @@ from constants import template_model_file
 
 """ CALIBRATION OPTIONS """
 
+
 def run_method(method_name, subject_code, IMU_type):
+
+    print(f'\nRunning method {method_name} with {IMU_type} IMUs for subject: {subject_code}')
 
     if method_name.startswith('OSIM'):
 
@@ -79,7 +82,7 @@ def run_method(method_name, subject_code, IMU_type):
 
 """ RUN THE CALIBRATION """
 
-subject_list = [f'P{i}' for i in range(1, 23)]
+subject_list = [f'P{i}' for i in range(13, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
 IMU_type_list = ['Perfect']
 method_name_list = ['METHOD_4a']
 # method_name_list = ['OSIM_Alt_self', 'OSIM_N_self', 'ALL_MANUAL', 'METHOD_1_self', 'METHOD_2_self', 'METHOD_4a']

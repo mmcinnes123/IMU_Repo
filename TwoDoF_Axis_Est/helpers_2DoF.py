@@ -40,7 +40,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     IMU3_trimmed = IMU3_np[start_ind:end_ind]
 
     # Run the rot method
-    from joint_axis_est_2d import jointAxisEst2D
+    from TwoDoF_Axis_Est.joint_axis_est_2d import jointAxisEst2D
 
     params = dict(method=opt_method)
     opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=False)
