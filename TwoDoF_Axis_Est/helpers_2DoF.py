@@ -9,6 +9,68 @@ from scipy.spatial.transform import Rotation as R
 from os.path import join
 
 
+def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method, subject_event_dict, sample_rate, debug):
+
+    assert IMU_type_for_opt in ['Real', 'Perfect'], 'IMU type not Real or Perfect'
+
+    if IMU_type_for_opt == 'Perfect':
+        report_ext = ' - Report3 - Cluster_Quats.txt'
+    elif IMU_type_for_opt == 'Real':
+        report_ext = ' - Report2 - IMU_Quats.txt'
+    else:
+        report_ext = None
+
+    # Get the .txt file with quats based on subject code, whcih trial to use, and which type of IMU
+    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    raw_data_dir = join(parent_dir, 'RawData')
+    tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
+    tmm_txt_file = join(raw_data_dir, tmm_txt_file_name)
+
+    # Read in the IMU quaternion data from a TMM report .txt file
+    IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(tmm_txt_file)
+
+    # Get the start and end time for which to run the optimisation
+    FE_start_time = subject_event_dict[trial_for_opt]['FE_start']
+    PS_end_time = subject_event_dict[trial_for_opt]['PS_end']
+
+    # Trim the IMU data based on the period of interest
+    start_ind = FE_start_time * sample_rate
+    end_ind = PS_end_time * sample_rate
+    IMU2_trimmed = IMU2_np[start_ind:end_ind]
+    IMU3_trimmed = IMU3_np[start_ind:end_ind]
+
+    # Run the rot method
+    from joint_axis_est_2d import jointAxisEst2D
+
+    params = dict(method=opt_method)
+    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=False)
+    FE = opt_results['j1']
+    PS = opt_results['j2']
+
+    if debug:
+        print('get_J1_J2_from_opt() DEBUG:')
+        print('\tTMM file used: ', tmm_txt_file)
+        print('\tBetween times: ', start_ind/sample_rate, end_ind/sample_rate)
+        print('\tUsing optimistaion method: ', opt_method)
+        print('\tComplete optimisation results: ')
+        print(opt_results)
+
+        # Get variation in movement of each IMU
+        def get_ori_variation(IMU_quats):
+            quat_changes = np.zeros((len(IMU_quats), 4))
+            for row in range(len(IMU_quats)):
+                quat_changes[row] = qmt.qmult(qmt.qinv(IMU_quats[row]), IMU_quats[0])  # Get orientation change from q0, for all t
+            angles = qmt.quatAngle(quat_changes, plot=False)  # Get the magnitude of the change from q0
+            mean_diff = np.mean(np.array(abs(angles)))  # Get the average change in ori from q0
+            return mean_diff
+
+        IMU2_mean_diff = get_ori_variation(IMU2_trimmed)
+        IMU3_mean_diff = get_ori_variation(IMU3_trimmed)
+        print('\tMean variation in orientation Humerus IMU: ', IMU2_mean_diff * 180 / np.pi)
+        print('\tMean variation in orientation Radius IMU: ', IMU3_mean_diff * 180 / np.pi)
+
+    return FE, PS, opt_results
+
 
 # Read quaternion orientation data from a .txt TMM report file
 def get_np_quats_from_txt_file(input_file):
@@ -22,10 +84,6 @@ def get_np_quats_from_txt_file(input_file):
     IMU2_np = IMU2_df.to_numpy()
     IMU3_np = IMU3_df.to_numpy()
     return IMU1_np, IMU2_np, IMU3_np
-
-
-
-
 
 
 def get_local_ang_vels_from_quats(quats, sample_rate, debug_plot):
@@ -45,6 +103,7 @@ def get_local_ang_vels_from_quats(quats, sample_rate, debug_plot):
         plot_gyr_data(ang_vels, sample_rate)
 
     return ang_vels
+
 
 def plot_gyr_data(gyr, rate):
 
@@ -75,76 +134,6 @@ def visualise_quat_data(quats, rate):
     # run webapp
     webapp = qmt.Webapp('/view/imubox', data=data)
     webapp.run()
-
-
-def get_joint_axis_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, debug_plot):
-
-    # Set the defaults, update with params
-    defaults = dict(jointAxis='j1', gyrCutoff=5, downsampleRate=20)
-    params = qmt.setDefaults(params, defaults)
-    gyrCutoff = params['gyrCutoff']
-    downsampleRate = params['downsampleRate']
-    jointAxis = params['jointAxis']
-    assert jointAxis in ('j1', 'j2')
-
-
-    # Check the quaternion array is the correct shape
-    N = quatsIMU1.shape[0]
-    N = quatsIMU2.shape[0]
-    assert quatsIMU1.shape == (N, 4)
-    assert quatsIMU2.shape == (N, 4)
-
-    # Down-sample the orientation data
-    if rate == downsampleRate or downsampleRate is None:
-        ind = slice(None)
-    else:
-        assert downsampleRate < rate
-        M = int(round(N*downsampleRate/rate))
-        ind = np.linspace(0, N-1, M, dtype=int)
-    q1 = quatsIMU1[ind].copy()
-    q2 = quatsIMU2[ind].copy()
-
-    if jointAxis == 'j1':
-        # First express IMU2 in IMU2 frame
-        q2_in1 = qmt.qmult(qmt.qinv(q1), q2)
-        # Then get angular velocities of IMU2, expressed in IMU1 frame
-        angVels = get_ang_vels_from_quats(q2_in1, downsampleRate, debug_plot=False)
-        # Change the sign of all elements whenever the z-element becomes negative (keeping axis always pointing pos y dir)
-        angVels[angVels[:, 2] < 0] *= -1
-
-    else:
-        # Get angular velocities of IMU2 (in local IMU frame) from the down-sampled orientation data
-        angVels = get_local_ang_vels_from_quats(q2, downsampleRate, debug_plot=False)
-        # Change the sign of all elements whenever the y-element becomes negative (keeping axis always pointing pos y dir)
-        angVels[angVels[:, 1] < 0] *= -1
-
-    # Normalise the angVels
-    angVels /= np.linalg.norm(angVels, axis=1)[:, np.newaxis]
-    angVels = np.nan_to_num(angVels)    # Replace any nans with 0 to allow filter to run
-
-    # Apply a butterworth low pass filter to the angular velocity data
-    # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
-    if gyrCutoff is not None:  # apply Butterworth low pass filter
-        if 2 * gyrCutoff <= 0.95 * downsampleRate:  # do not filter if (almost) at Nyquist frequency
-            b, a = signal.butter(2, gyrCutoff * 2 / downsampleRate)
-            angVels = signal.filtfilt(b, a, angVels, axis=0)
-
-    # Average the ang vel 3D vectors
-    avg_ang_vel = np.nanmean(angVels, axis=0)
-
-    if debug_plot:
-        print("Animating first input quaternion data:")
-        visualise_quat_data(quatsIMU1, rate)
-        print("Animating second input quaternion data:")
-        visualise_quat_data(quatsIMU2, rate)
-        print("Plotting normalised/filtered angular velocity vectors:")
-        plot_gyr_data(angVels, rate)
-
-    return avg_ang_vel
-
-
-
-
 
 
 def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
@@ -213,70 +202,6 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
     return FE_in_hum_clus, PS_in_rad_clus
 
 
-
-def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method, subject_event_dict, sample_rate, debug):
-
-    assert IMU_type_for_opt in ['Real', 'Perfect'], 'IMU type not Real or Perfect'
-
-    if IMU_type_for_opt == 'Perfect':
-        report_ext = ' - Report3 - Cluster_Quats.txt'
-    elif IMU_type_for_opt == 'Real':
-        report_ext = ' - Report2 - IMU_Quats.txt'
-    else:
-        report_ext = None
-
-    # Get the .txt file with quats based on subject code, whcih trial to use, and which type of IMU
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
-    raw_data_dir = join(parent_dir, 'RawData')
-    tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
-    tmm_txt_file = join(raw_data_dir, tmm_txt_file_name)
-
-    # Read in the IMU quaternion data from a TMM report .txt file
-    IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(tmm_txt_file)
-
-    # Get the start and end time for which to run the optimisation
-    FE_start_time = subject_event_dict[trial_for_opt]['FE_start']
-    PS_end_time = subject_event_dict[trial_for_opt]['PS_end']
-
-    # Trim the IMU data based on the period of interest
-    start_ind = FE_start_time * sample_rate
-    end_ind = PS_end_time * sample_rate
-    IMU2_trimmed = IMU2_np[start_ind:end_ind]
-    IMU3_trimmed = IMU3_np[start_ind:end_ind]
-
-    # Run the rot method
-    from joint_axis_est_2d import jointAxisEst2D
-
-    params = dict(method=opt_method)
-    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=False)
-    FE = opt_results['j1']
-    PS = opt_results['j2']
-
-    if debug:
-        print('get_J1_J2_from_opt() DEBUG:')
-        print('\tTMM file used: ', tmm_txt_file)
-        print('\tBetween times: ', start_ind/sample_rate, end_ind/sample_rate)
-        print('\tUsing optimistaion method: ', opt_method)
-        print('\tComplete optimisation results: ')
-        print(opt_results)
-
-        # Get variation in movement of each IMU
-        def get_ori_variation(IMU_quats):
-            quat_changes = np.zeros((len(IMU_quats), 4))
-            for row in range(len(IMU_quats)):
-                quat_changes[row] = qmt.qmult(qmt.qinv(IMU_quats[row]), IMU_quats[0])  # Get orientation change from q0, for all t
-            angles = qmt.quatAngle(quat_changes, plot=False)  # Get the magnitude of the change from q0
-            mean_diff = np.mean(np.array(abs(angles)))  # Get the average change in ori from q0
-            return mean_diff
-
-        IMU2_mean_diff = get_ori_variation(IMU2_trimmed)
-        IMU3_mean_diff = get_ori_variation(IMU3_trimmed)
-        print('\tMean variation in orientation Humerus IMU: ', IMU2_mean_diff * 180 / np.pi)
-        print('\tMean variation in orientation Radius IMU: ', IMU3_mean_diff * 180 / np.pi)
-
-    return FE, PS, opt_results
-
-
 def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, subject_time_dict, sample_rate, debug):
 
     assert IMU_type_for_opt in ['Real', 'Perfect'], 'IMU type not Real or Perfect'
@@ -309,7 +234,8 @@ def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, s
     IMU2_trimmed_FE = IMU2_np[start_ind_FE:end_ind_FE]
     IMU3_trimmed_FE = IMU3_np[start_ind_FE:end_ind_FE]
     FE_params = dict(jointAxis='j1')
-    FE_axis = get_joint_axis_directly_from_ang_vels(IMU2_trimmed_FE, IMU3_trimmed_FE, sample_rate, params=FE_params, debug_plot=False)
+    FE_axis = get_J1_J2_directly_from_ang_vels(IMU2_trimmed_FE, IMU3_trimmed_FE, sample_rate, params=FE_params,
+                                               debug_plot=False)
 
     # Get the FE axis based on FE movement sample
     start_ind_PS = PS_start_time * sample_rate
@@ -317,7 +243,8 @@ def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, s
     IMU2_trimmed_PS = IMU2_np[start_ind_PS:end_ind_PS]
     IMU3_trimmed_PS = IMU3_np[start_ind_PS:end_ind_PS]
     PS_params = dict(jointAxis='j1')
-    PS_axis = get_joint_axis_directly_from_ang_vels(IMU2_trimmed_PS, IMU3_trimmed_PS, sample_rate, params=PS_params, debug_plot=False)
+    PS_axis = get_J1_J2_directly_from_ang_vels(IMU2_trimmed_PS, IMU3_trimmed_PS, sample_rate, params=PS_params,
+                                               debug_plot=False)
 
     if debug:
         print('get_J1_J2_from_isolate_move() DEBUG:')
@@ -326,6 +253,72 @@ def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, s
         print('\tBetween times (PS): ', start_ind_PS/sample_rate, end_ind_PS/sample_rate)
 
     return FE_axis, PS_axis
+
+
+def get_J1_J2_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, debug_plot):
+
+    # Set the defaults, update with params
+    defaults = dict(jointAxis='j1', gyrCutoff=5, downsampleRate=20)
+    params = qmt.setDefaults(params, defaults)
+    gyrCutoff = params['gyrCutoff']
+    downsampleRate = params['downsampleRate']
+    jointAxis = params['jointAxis']
+    assert jointAxis in ('j1', 'j2')
+
+
+    # Check the quaternion array is the correct shape
+    N = quatsIMU1.shape[0]
+    N = quatsIMU2.shape[0]
+    assert quatsIMU1.shape == (N, 4)
+    assert quatsIMU2.shape == (N, 4)
+
+    # Down-sample the orientation data
+    if rate == downsampleRate or downsampleRate is None:
+        ind = slice(None)
+    else:
+        assert downsampleRate < rate
+        M = int(round(N*downsampleRate/rate))
+        ind = np.linspace(0, N-1, M, dtype=int)
+    q1 = quatsIMU1[ind].copy()
+    q2 = quatsIMU2[ind].copy()
+
+    if jointAxis == 'j1':
+        # First express IMU2 in IMU2 frame
+        q2_in1 = qmt.qmult(qmt.qinv(q1), q2)
+        # Then get angular velocities of IMU2, expressed in IMU1 frame
+        angVels = get_ang_vels_from_quats(q2_in1, downsampleRate, debug_plot=False)
+        # Change the sign of all elements whenever the z-element becomes negative (keeping axis always pointing pos y dir)
+        angVels[angVels[:, 2] < 0] *= -1
+
+    else:
+        # Get angular velocities of IMU2 (in local IMU frame) from the down-sampled orientation data
+        angVels = get_local_ang_vels_from_quats(q2, downsampleRate, debug_plot=False)
+        # Change the sign of all elements whenever the y-element becomes negative (keeping axis always pointing pos y dir)
+        angVels[angVels[:, 1] < 0] *= -1
+
+    # Normalise the angVels
+    angVels /= np.linalg.norm(angVels, axis=1)[:, np.newaxis]
+    angVels = np.nan_to_num(angVels)    # Replace any nans with 0 to allow filter to run
+
+    # Apply a butterworth low pass filter to the angular velocity data
+    # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
+    if gyrCutoff is not None:  # apply Butterworth low pass filter
+        if 2 * gyrCutoff <= 0.95 * downsampleRate:  # do not filter if (almost) at Nyquist frequency
+            b, a = signal.butter(2, gyrCutoff * 2 / downsampleRate)
+            angVels = signal.filtfilt(b, a, angVels, axis=0)
+
+    # Average the ang vel 3D vectors
+    avg_ang_vel = np.nanmean(angVels, axis=0)
+
+    if debug_plot:
+        print("Animating first input quaternion data:")
+        visualise_quat_data(quatsIMU1, rate)
+        print("Animating second input quaternion data:")
+        visualise_quat_data(quatsIMU2, rate)
+        print("Plotting normalised/filtered angular velocity vectors:")
+        plot_gyr_data(angVels, rate)
+
+    return avg_ang_vel
 
 
 def visulalise_3D_vec_on_IMU(vec1, vec2, vec3):

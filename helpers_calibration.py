@@ -1,9 +1,13 @@
 # Functions used to run IMU_Calibration
 
 from constants import calibration_settings_template_file
+from constants import sample_rate
+from constants import template_model_file
 from helpers_preprocess import APDM_2_sto_Converter
+from TwoDoF_Axis_Est.helpers_2DoF import get_J1_J2_from_opt
 
-import os
+from os.path import join
+from os import makedirs
 import opensim as osim
 import numpy as np
 import pandas as pd
@@ -14,7 +18,6 @@ from scipy.spatial.transform import Rotation as R
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
 baseIMUName = 'thorax_imu'
 baseIMUHeading = '-x'  # Which axis of the thorax IMU points in same direction as the model's thorax x-axis?
-template_model_file = 'das3.osim'
 
 
 
@@ -34,14 +37,16 @@ def get_IMU_offsets_ALL_MANUAL():
 
 
 # Function to apply METHOD_1
-def get_IMU_offsets_METHOD_1(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir):
+def get_IMU_offsets_METHOD_1(subject_code, pose_name, IMU_type, calibrated_model_dir):
+
+    trial_name = 'CP'
 
     # Get the IMU orientation data at calibration pose time 1
-    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type)
     thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
 
     # Get model body orientations in ground during default pose
-    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file)
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
 
     # Get heading offset between IMU heading and model heading
     heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
@@ -64,10 +69,12 @@ def get_IMU_offsets_METHOD_1(subject_code, trial_name1, pose_name1, IMU_type, ca
 
 
 # Function to apply METHOD_2
-def get_IMU_offsets_METHOD_2(subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir):
+def get_IMU_offsets_METHOD_2(subject_code, IMU_type, pose_name, calibrated_model_dir):
+
+    trial_name = 'CP'
 
     # Get the IMU orientation data at calibration pose time 1
-    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type)
     thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
 
     # Get model body orientations in ground during default pose
@@ -94,7 +101,15 @@ def get_IMU_offsets_METHOD_2(subject_code, trial_name1, pose_name1, IMU_type, ca
 
 
 # Function to apply METHOD_3
-def get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2, pose_name1, pose_name2, IMU_type, calibrated_model_dir):
+def get_IMU_offsets_METHOD_3(subject_code, IMU_type, calibrated_model_dir):
+
+    pose_name1 = 'Alt_self'
+    pose_name2 = 'Alt2_self'
+    trial_name1 = 'CP'  # Specify which trial to use for the first calibration pose
+    if subject_code in ['P1', 'P2', 'P3']:  # Specify which trial to use for the second calibration pose
+        trial_name2 = 'JA_Slow'
+    else:
+        trial_name2 = 'CP'
 
     # Get the IMU orientation data at calibration pose time 1
     cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
@@ -132,10 +147,16 @@ def get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2, pose_name1,
 
 
 # Function to apply METHOD_4
-def get_IMU_offsets_METHOD_4(EL_axis_in_humerus_IMU, PS_axis_in_radius_IMU, subject_code, trial_name1, pose_name1, IMU_type):
+def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
 
-    # Get the IMU orientation data at calibration pose time 1
-    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
+    pose_name = 'Alt_self'
+    pose_trial_name = 'CP'
+    opt_trial_name = 'JA_Slow'
+    opt_method = 'rot_noDelta'
+
+
+    # Get the IMU orientation data at calibration pose time
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, pose_trial_name, pose_name, IMU_type)
     thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
 
     # Get model body orientations in ground during default pose
@@ -150,10 +171,19 @@ def get_IMU_offsets_METHOD_4(EL_axis_in_humerus_IMU, PS_axis_in_radius_IMU, subj
     humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
     radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
 
+    """ FINDING FE AND PS FROM OPTIMISATION RESULT """
+
+    # Get the dict with the timings for FE and PS events
+    subject_event_dict = get_event_dict_from_file(subject_code)
+
+    # Get the estimated FE and PS axes from the optimisation
+    opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
+                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
-    humerus_virtual_IMU = get_IMU_cal_hum_method_5(EL_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori, debug=True)
-    radius_virtual_IMU = get_IMU_cal_rad_method_1(PS_axis_in_radius_IMU, debug=True)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_5(opt_FE, humerus_IMU_ori_rotated1, humerus_ori, debug=True)
+    radius_virtual_IMU = get_IMU_cal_rad_method_1(opt_PS, debug=True)
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 
@@ -165,9 +195,9 @@ def get_IMU_offsets_METHOD_4(EL_axis_in_humerus_IMU, PS_axis_in_radius_IMU, subj
 # Get the file path for the sto file containing the IMU orientation data during the specified pose
 def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
-    sto_files_dir = os.path.join(os.path.join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
+    sto_files_dir = join(join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
     cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
-    cal_oris_file_path = os.path.join(sto_files_dir, cal_oris_file)
+    cal_oris_file_path = join(sto_files_dir, cal_oris_file)
     return cal_oris_file_path
 
 
@@ -195,7 +225,12 @@ def read_sto_quaternion_file(IMU_orientations_file):
 
 
 # Get the orientation of each model body, relative to the ground frame, during the default pose
-def get_model_body_oris_during_default_pose(model_file):
+def get_model_body_oris_during_default_pose(model_file, pose_name):
+
+    """ Make sure model is in correct pose """
+
+    # Set the template model pose
+    set_default_model_pose(model_file, pose_name)
 
     """ Get model body orientations in ground during default pose """
 
@@ -302,30 +337,21 @@ def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
 # Get/make the folder for saving the calibrated model, defined by the calibration name
 def get_calibrated_model_dir(subject_code, IMU_type, calibration_name):
 
-    # Define some file paths
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
-    IMU_type_dir = os.path.join(parent_dir, IMU_type)  # working dir for each IMU type
-    if os.path.exists(IMU_type_dir) == False:
-        os.mkdir(IMU_type_dir)
 
-    # Get/make the directory based on calibration name
-    calibrated_model_dir = get_make_model_dir(IMU_type_dir, calibration_name)
+    IMU_type_dir = join(parent_dir, IMU_type)  # dir for each IMU type
+    makedirs(IMU_type_dir, exist_ok=True)
+
+    calibrated_models_dir = join(IMU_type_dir, 'Calibrated_Models')     # dir for calibrated models
+    makedirs(calibrated_models_dir, exist_ok=True)
+
+    calibrated_model_dir = join(calibrated_models_dir, calibration_name)   # dir for calibrated model
+    makedirs(calibrated_model_dir, exist_ok=True)
 
     # Create opensim logger file
     osim.Logger.removeFileSink()
     osim.Logger.addFileSink(calibrated_model_dir + r'\calibration.log')
 
-    return calibrated_model_dir
-
-
-# Get/make the calibrated model folder
-def get_make_model_dir(IMU_type_dir, calibration_name):
-    calibrated_models_dir = os.path.join(IMU_type_dir, 'Calibrated_Models')
-    if os.path.exists(calibrated_models_dir) == False:
-        os.mkdir(calibrated_models_dir)
-    calibrated_model_dir = os.path.join(calibrated_models_dir, calibration_name)
-    if os.path.exists(calibrated_model_dir) == False:
-        os.mkdir(calibrated_model_dir)
     return calibrated_model_dir
 
 
@@ -356,7 +382,36 @@ def apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_I
     model.setName("IMU_Calibrated_das")
     model.printToXML(results_dir + r"\Calibrated_" + model_file)
 
+def set_default_model_pose(model_file, pose):
 
+    if pose in ['Alt_self', 'Alt_asst']:
+        EL_X_new = 90  # Specify the default elbow flexion angle in degrees
+    elif pose in ['N_self', 'N_asst']:
+        EL_X_new = 0    # Specify the default elbow flexion angle in degrees
+    else:
+        EL_X_new = None
+        print('Pose name not specified correctly')
+        quit()
+
+    osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
+    model = osim.Model(model_file)
+    model.getCoordinateSet().get('EL_x').setDefaultValue(EL_X_new * np.pi / 180)
+    model.printToXML(model_file)
+
+    print(f'\nIMU das3.osim default elbow angle has been updated to {EL_X_new} degrees.')
+
+def get_event_dict_from_file(subject_code):
+
+    event_files_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\SubjectEventFiles'
+    event_file_name = subject_code + '_event_dict.txt'
+    event_file = join(event_files_folder, event_file_name)
+
+    file_obj = open(event_file, 'r')
+    event_dict_str = file_obj.read()
+    file_obj.close()
+    event_dict = eval(event_dict_str)
+
+    return event_dict
 
 
 """ SENSOR-2-SEGMENT OFFSET CALCULATION FUNCTIONS (applied seperately to each body-IMU pair) """
@@ -835,7 +890,7 @@ def get_IMU_offset(cal_method_dict, calibration_orientations_file, cal_oris2_fil
 
 # def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
 #     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
-#     sto_files_dir = os.path.join(os.path.join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
+#     sto_files_dir = join(join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
 #     cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
-#     cal_oris_file_path = os.path.join(sto_files_dir, cal_oris_file)
+#     cal_oris_file_path = join(sto_files_dir, cal_oris_file)
 #     return cal_oris_file_path

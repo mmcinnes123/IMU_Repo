@@ -1,7 +1,7 @@
 
 
 from helpers_2DoF import get_np_quats_from_txt_file
-from helpers_2DoF import get_joint_axis_directly_from_ang_vels
+from helpers_2DoF import get_J1_J2_directly_from_ang_vels
 from joint_axis_est_2d import jointAxisEst2D
 
 import qmt
@@ -54,7 +54,7 @@ end_ind = FE_end_time * 100
 IMU2_trimmed = IMU2_np[start_ind:end_ind]
 IMU3_trimmed = IMU3_np[start_ind:end_ind]
 params = dict(jointAxis='j1')
-FE_axis = get_joint_axis_directly_from_ang_vels(IMU2_trimmed, IMU3_trimmed, rate, params=params, debug_plot=False)
+FE_axis = get_J1_J2_directly_from_ang_vels(IMU2_trimmed, IMU3_trimmed, rate, params=params, debug_plot=False)
 print('J1 estimate direct from angular velocities: ', FE_axis)
 
 # Get joint axis estimates directly from ang vel data, assuming subject perfectly isolated each joint DoF
@@ -63,7 +63,7 @@ end_ind = PS_end_time * 100
 IMU2_trimmed = IMU2_np[start_ind:end_ind]
 IMU3_trimmed = IMU3_np[start_ind:end_ind]
 params = dict(jointAxis='j2')
-PS_axis = get_joint_axis_directly_from_ang_vels(IMU2_trimmed, IMU3_trimmed, rate, params=params, debug_plot=False)
+PS_axis = get_J1_J2_directly_from_ang_vels(IMU2_trimmed, IMU3_trimmed, rate, params=params, debug_plot=False)
 print('J2 estimate direct from angular velocities: ', PS_axis)
 
 
