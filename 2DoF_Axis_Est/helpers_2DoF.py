@@ -149,6 +149,28 @@ def get_joint_axis_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, de
 
 def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
 
+    """Get the cluster frames, expressed relative to the body frames, specific to the subject's model"""
+
+    # Read in calibrated model file to get position of humerus markers in humerus body frame
+    my_model = osim.Model(model_file)
+    marker_1_in_hum = my_model.getMarkerSet().get('Hum_Clus_1').get_location().to_numpy()
+    marker_3_in_hum = my_model.getMarkerSet().get('Hum_Clus_3').get_location().to_numpy()
+    marker_4_in_hum = my_model.getMarkerSet().get('Hum_Clus_4').get_location().to_numpy()
+    # And radius markers in radius body frame
+    marker_1_in_rad = my_model.getMarkerSet().get('Fore_Clus_1').get_location().to_numpy()
+    marker_2_in_rad = my_model.getMarkerSet().get('Fore_Clus_2').get_location().to_numpy()
+    marker_4_in_rad = my_model.getMarkerSet().get('Fore_Clus_4').get_location().to_numpy()
+
+    # Humerus cluster CF expressed in the humerus CF, using the marker positions
+    hum_clus_y_axis = marker_1_in_hum - marker_4_in_hum     # y_axis is marker 4 to marker 1 (pointing down)
+    hum_clus_x_axis = marker_3_in_hum - marker_4_in_hum     # x_axis is marker 4 to marker 3 (pointing backwards)
+    hum_clus_in_hum = qmt.quatFrom2Axes(hum_clus_x_axis, hum_clus_y_axis, None, plot=False)
+
+    # Forearm cluster CF expressed in the radius CF, using the marker positions
+    rad_clus_y_axis = marker_2_in_rad - marker_1_in_rad     # y_axis is marker 1 to marker 2 (pointing down)
+    rad_clus_x_axis = marker_1_in_rad - marker_4_in_rad     # x_axis is marker 4 to marker 1 (pointing backwards)
+    rad_clus_in_rad = qmt.quatFrom2Axes(rad_clus_x_axis, rad_clus_y_axis, None, plot=False)
+
     """Get the FE axis expressed in the model's humerus body frame, based on default model"""
 
     # Based on how the hu joint is defined in the model, the XYZ euler ori offset of the parent frame,
@@ -160,38 +182,34 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
     FE_axis_rel2_hu_parent = [0.969, -0.247, 0]
 
     # Get the vector of hu rotation axis, relative to the humerus frame
-    FE_axis_rel2_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
-
-    """Get the cluster frame, expressed in the humerus frame, specific to the subject's model"""
-
-    # Read in calibrated model file to get position of humerus markers in humerus frame
-    my_model = osim.Model(model_file)
-    marker_1_in_hum = my_model.getMarkerSet().get('Hum_Clus_1').get_location().to_numpy()
-    marker_3_in_hum = my_model.getMarkerSet().get('Hum_Clus_3').get_location().to_numpy()
-    marker_4_in_hum = my_model.getMarkerSet().get('Hum_Clus_4').get_location().to_numpy()
-
-    # y_axis is marker 4 to marker 1 (pointing down)
-    y_axis = marker_1_in_hum - marker_4_in_hum
-
-    # x_axis is marker 4 to marker 3 (pointing backwards)
-    x_axis = marker_3_in_hum - marker_4_in_hum
-
-    # Get the cluster CF expressed in the humerus CF, using the marker positions
-    cluster_in_hum = qmt.quatFrom2Axes(x_axis, y_axis, None, plot=False)
+    FE_axis_in_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
 
     # Now express the FE axis in the cluster frame
-    FE_in_clus = qmt.rotate(cluster_in_hum, FE_axis_rel2_humerus, plot=False)
+    FE_in_hum_clus = qmt.rotate(hum_clus_in_hum, FE_axis_in_humerus, plot=False)
+
+    """ Get the PS axis expressed in the model's radius body frame, based on default model """
+
+    # PS_axis of the ur joint is defined relative to the parent/child frames, where the child frame = radius body frame
+    PS_axis_in_radius = [0.182, 0.98227, -0.044946]
+
+    # Now express the PS axis in the forearm cluster frame
+    PS_in_rad_clus = qmt.rotate(rad_clus_in_rad, PS_axis_in_radius, plot=False)
 
     if debug:
         print('get_J1_J2_from_calibrated_OMC_model() DEBUG:')
-        print('\tFE axis in humerus body frame: ', FE_axis_rel2_humerus)
         print('\tModel file used: ', model_file)
-        print('\tMarker 1 position: ', np.array_str(marker_1_in_hum))
-        print('\tOMC Cluster in humerus body frame: ', cluster_in_hum)
+        print('\tHum_Clus Marker 1 position: ', np.array_str(marker_1_in_hum))
+        print('\tFore_Clus Marker 1 position: ', np.array_str(marker_1_in_rad))
+        print('')
+        print('\tFE axis in humerus body frame: ', FE_axis_in_humerus)
+        print('\tHumerus cluster in humerus body frame: ', hum_clus_in_hum)
+        print('\tFE axis in humerus cluster frame: ', FE_in_hum_clus)
+        print('')
+        print('\tPS axis in radius body frame: ', PS_axis_in_radius)
+        print('\tRadius cluster in radius body frame: ', rad_clus_in_rad)
+        print('\tPS axis in radius cluster frame: ', PS_in_rad_clus)
 
-    # TODO: Write same code to find PS in radius frame
-
-    return FE_in_clus
+    return FE_in_hum_clus, PS_in_rad_clus
 
 
 
