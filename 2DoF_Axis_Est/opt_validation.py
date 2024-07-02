@@ -27,15 +27,15 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
 trial_for_opt = 'JA_Slow'
-# IMU_type_for_opt_list = ['Real', 'Perfect']
-# opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+IMU_type_for_opt_list = ['Real', 'Perfect']
+opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
 
-IMU_type_for_opt_list = ['Perfect']
-opt_method_list = ['rot_noDelta']
+# IMU_type_for_opt_list = ['Perfect']
+# opt_method_list = ['rot_noDelta']
 
 
 # List of subjects
-subject_list = [f'P{i}' for i in range(1, 2)]
+subject_list = [f'P{i}' for i in range(1, 23)]
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -62,8 +62,9 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
             subject_event_dict = get_event_dict_from_file(subject_code)
 
             """ FINDING REFERENCE J1 AXIS IN HUMERUS CLUSTER FRAME """
-            OMC_FE, OMC_PS = get_J1_J2_from_calibrated_OMC_model(model_file, debug=True)
+            OMC_FE, OMC_PS = get_J1_J2_from_calibrated_OMC_model(model_file, debug=False)
             logging.info(f'OMC FE axis in humerus cluster frame: {OMC_FE}')
+            logging.info(f'OMC PS axis in forearm cluster frame: {OMC_PS}')
 
             """ FINDING FE AND PS FROM OPTIMISATION RESULT """
             opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
@@ -86,42 +87,42 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
             # print('Cost: ', opt_results['debug']['cost'])
             # print('x: ', opt_results['debug']['x'])
 
+
+
+            """ COMPARE """
+
+            # Constrain the Opt FE axis to point in same direction as OMC reference
+            if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):   # Constrain based on the z-component, expected to be largest
+                opt_FE = -opt_FE
+            if np.sign(opt_PS[1]) == np.sign(-OMC_PS[1]):   # Constrain based on the y-component, expected to be largest
+                opt_PS = -opt_PS
+
+            FE_opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180 / np.pi
+            PS_opt_error = qmt.angleBetween2Vecs(OMC_PS, opt_PS) * 180 / np.pi
+            logging.info(f'Error between opt_FE and OMC_FE (deg): {FE_opt_error}')
+            logging.info(f'Error between opt_PS and OMC_PS (deg): {PS_opt_error}')
+
+            # Log the results
+            new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
+                                    'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
+                                    'HeadingOffset': [heading_offset], 'FEOptError': [FE_opt_error],
+                                    'PSOptError': [PS_opt_error], 'SD_third_DoF': [SD_third_DoF]})
+            all_data = pd.concat([all_data, new_row], ignore_index=True)
+
+            print(f'FE Error: {FE_opt_error}')
+            print(f'PS Error: {PS_opt_error}')
+            print(f'Finished analysis for {subject_code}.')
+
+            # Visualise 3D animation of the results
+            # visulalise_3D_vec_on_IMU(opt_PS, OMC_PS, None)
+            # visulalise_3D_vec_on_IMU(OMC_FE, opt_FE, iso_FE)
+
             """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
             # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
             #                                              subject_time_dict, sample_rate, debug=False)
             # logging.info(f'Iso FE axis in humerus IMU frame: {iso_FE}')
 
-            """ COMPARE """
-
-            # Constrain the Opt FE axis to point in same direction as OMC reference
-            if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):
-                opt_FE = -opt_FE
-
-            opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180/np.pi
-            logging.info(f'Error between opt_FE and OMC_FE (deg): {opt_error}')
-
-            # visulalise_3D_vec_on_IMU(opt_FE, OMC_FE, None)
-            # visulalise_3D_vec_on_IMU(OMC_FE, opt_FE, iso_FE)
-
-            opt_rel2_OMC_errors[subject_code] = opt_error
-
-            print(f'Error: {opt_error}')
-            print(f'Finished analysis for {subject_code}.')
-
-            new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
-                                    'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
-                                    'HeadingOffset': [heading_offset], 'OptError': [opt_error], 'SD_third_DoF': [SD_third_DoF]})
-            all_data = pd.concat([all_data, new_row], ignore_index=True)
-
 """ COMPILE ALL RESULTS """
-
-
-# Summarise Errors
-all_errors = np.array(list(opt_rel2_OMC_errors.values()))
-mean_all_errors = np.nanmean(all_errors)
-
-logging.info(f'All errors: {opt_rel2_OMC_errors}.')
-logging.info(f'Mean: {mean_all_errors}.')
 
 # Print all results to csv
 all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))

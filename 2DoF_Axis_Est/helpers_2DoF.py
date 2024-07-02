@@ -200,6 +200,7 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
         print('\tModel file used: ', model_file)
         print('\tHum_Clus Marker 1 position: ', np.array_str(marker_1_in_hum))
         print('\tFore_Clus Marker 1 position: ', np.array_str(marker_1_in_rad))
+        print('\tFore_Clus Marker 2 position: ', np.array_str(marker_2_in_rad))
         print('')
         print('\tFE axis in humerus body frame: ', FE_axis_in_humerus)
         print('\tHumerus cluster in humerus body frame: ', hum_clus_in_hum)
