@@ -5,6 +5,9 @@ from constants import APDM_settings_file, APDM_template_file, sample_rate
 import opensim as osim
 import numpy as np
 import pandas as pd
+from os.path import join
+import ast
+
 
 
 # Read all data_out in from specified input file
@@ -92,17 +95,30 @@ def write_movements_and_calibration_stos(input_file_path, cal_pose_time_dict, IM
     # Iterate through list of calibration poses and associated times to create separate .sto files
     for pose_name in cal_pose_time_dict:
 
-        cal_pose_time = cal_pose_time_dict[pose_name]   # The time at which to extract the data
+        if pose_name.startswith(('N', 'Alt')) and cal_pose_time_dict[pose_name] is not None:
 
-        # Extract one row based on time of calibration pose
-        IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
-        IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
-        IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
+            cal_pose_time = cal_pose_time_dict[pose_name]   # The time at which to extract the data
 
-        # Write data to APDM format .csv
-        file_tag = IMU_type + '_Quats_' + str(pose_name)
-        write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, APDM_template_file, trial_results_dir, file_tag)
+            print('for pose: ', pose_name)
+            print('at time: ', cal_pose_time)
 
-        # Write data to .sto using OpenSim APDM converter tool
-        APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
-                             output_file_name=trial_results_dir + "\\" + file_tag + ".sto")
+            # Extract one row based on time of calibration pose
+            IMU1_cal_df = extract_cal_row(IMU1_df, cal_pose_time, sample_rate)
+            IMU2_cal_df = extract_cal_row(IMU2_df, cal_pose_time, sample_rate)
+            IMU3_cal_df = extract_cal_row(IMU3_df, cal_pose_time, sample_rate)
+
+            # Write data to APDM format .csv
+            file_tag = IMU_type + '_Quats_' + str(pose_name)
+            write_to_APDM(IMU1_cal_df, IMU2_cal_df, IMU3_cal_df, IMU3_cal_df, APDM_template_file, trial_results_dir, file_tag)
+
+            # Write data to .sto using OpenSim APDM converter tool
+            APDM_2_sto_Converter(APDM_settings_file, input_file_name=trial_results_dir + "\\" + file_tag + ".csv",
+                                 output_file_name=trial_results_dir + "\\" + file_tag + ".sto")
+
+def get_trial_pose_time_dict_from_file(directory, subject_code):
+    # Read the existing txt file to get the dict
+    file_obj = open(join(directory, 'SubjectEventFiles', subject_code + '_event_dict.txt'), 'r')
+    content = file_obj.read()
+    trial_pose_time_dict = ast.literal_eval(content)
+    file_obj.close()
+    return trial_pose_time_dict

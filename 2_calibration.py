@@ -15,15 +15,15 @@ from constants import template_model_file
 
 """ CALIBRATION OPTIONS """
 
-def run_method(subject_code, IMU_type, calibration_name):
+def run_method(method_name, subject_code, IMU_type):
 
-    if calibration_name.startswith('OSIM'):
+    if method_name.startswith('OSIM'):
 
         trial_name = 'CP'
 
-        if calibration_name == 'OSIM_N_self':
+        if method_name == 'OSIM_N_self':
             pose_name = 'N_self'
-        elif calibration_name == 'OSIM_Alt_self':
+        elif method_name == 'OSIM_Alt_self':
             pose_name = 'Alt_self'
         else:
             pose_name = None
@@ -35,7 +35,7 @@ def run_method(subject_code, IMU_type, calibration_name):
         set_default_model_pose(template_model_file, pose_name)
 
         # Get/make the directory to save the calibrated model
-        calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
+        calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, method_name)
 
         # Run the opensim calibration
         osim_calibrate_model(cal_oris_file_path, calibrated_model_dir, template_model_file)
@@ -43,27 +43,27 @@ def run_method(subject_code, IMU_type, calibration_name):
     else:
 
         # Get/make the directory to store the newly calibrated model
-        calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, calibration_name)
+        calibrated_model_dir = get_calibrated_model_dir(subject_code, IMU_type, method_name)
 
-        if calibration_name == 'ALL_MANUAL':
+        if method_name == 'ALL_MANUAL':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_ALL_MANUAL()
 
-        elif calibration_name == 'METHOD_1_self':
+        elif method_name == 'METHOD_1_self':
             pose_name = 'Alt_self'
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_1(subject_code, pose_name, IMU_type, calibrated_model_dir)
 
-        elif calibration_name == 'METHOD_2_self':
+        elif method_name == 'METHOD_2_self':
             pose_name = 'Alt_self'
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_2(subject_code, IMU_type, pose_name, calibrated_model_dir)
 
-        elif calibration_name == 'METHOD_3_self':
+        elif method_name == 'METHOD_3_self':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_3(subject_code, IMU_type, calibrated_model_dir)
 
-        elif calibration_name == 'METHOD_4a':
+        elif method_name == 'METHOD_4a':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_4a(subject_code, IMU_type)
 
@@ -79,11 +79,12 @@ def run_method(subject_code, IMU_type, calibration_name):
 
 """ RUN THE CALIBRATION """
 
-subject_list = [f'P{i}' for i in range(1, 2)]
+subject_list = [f'P{i}' for i in range(1, 23)]
 IMU_type_list = ['Perfect']
 method_name_list = ['METHOD_4a']
+# method_name_list = ['OSIM_Alt_self', 'OSIM_N_self', 'ALL_MANUAL', 'METHOD_1_self', 'METHOD_2_self', 'METHOD_4a']
 
 for subject_code in subject_list:
     for IMU_type in IMU_type_list:
-        for calibration_name in method_name_list:
-            run_method(subject_code, IMU_type, calibration_name)
+        for method_name in method_name_list:
+            run_method(method_name, subject_code, IMU_type)
