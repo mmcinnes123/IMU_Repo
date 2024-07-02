@@ -132,7 +132,7 @@ def get_IMU_offsets_METHOD_3(subject_code, trial_name1, trial_name2, pose_name1,
 
 
 # Function to apply METHOD_4
-def get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1, pose_name1, IMU_type, calibrated_model_dir):
+def get_IMU_offsets_METHOD_4(EL_axis_in_humerus_IMU, PS_axis_in_radius_IMU, subject_code, trial_name1, pose_name1, IMU_type):
 
     # Get the IMU orientation data at calibration pose time 1
     cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, trial_name1, pose_name1, IMU_type)
@@ -150,13 +150,10 @@ def get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1
     humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
     radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
 
-    # Write the rotated IMU orientations to sto file for visualisation
-    # write_rotated_IMU_oris_to_file(thorax_IMU_ori_rotated1, humerus_IMU_ori_rotated1, radius_IMU_ori_rotated1, calibrated_model_dir)
-
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
-    humerus_virtual_IMU = get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori)
-    radius_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+    humerus_virtual_IMU = get_IMU_cal_hum_method_5(EL_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori, debug=True)
+    radius_virtual_IMU = get_IMU_cal_rad_method_1(PS_axis_in_radius_IMU, debug=True)
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 
@@ -365,7 +362,7 @@ def apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_I
 """ SENSOR-2-SEGMENT OFFSET CALCULATION FUNCTIONS (applied seperately to each body-IMU pair) """
 
 
-# This method uses the default pose of the model to calculate and initial orientation offset between body and IMU.
+# This method uses the default pose of the model to calculate an initial orientation offset between body and IMU.
 # It replicates the built-in OpenSim calibration
 def get_IMU_cal_POSE_BASED(IMU_ori, body_ori):
 
@@ -545,10 +542,7 @@ def get_IMU_cal_hum_method_4(humerus_IMU_ori_at_t1, humerus_ori_at_t1,
 
 # Function to define the humerus IMU offset based on an estimated elbow flexion axis
 # Note: this is based on the fixed carry angle defined in the model
-def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori):
-
-    # From TMM, the EL axis expressed in the humerus IMU frame is
-    print("The measured elbow flexion axis in the humerus IMU frame is:", EL_axis_rel2_humerus_IMU)
+def get_IMU_cal_hum_method_5(FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori, debug):
 
     """ GET MODEL EF AXIS IN HUMERUS FRAME """
 
@@ -558,18 +552,15 @@ def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1,
 
     # Based on how the hu joint is defined in the model, relative to the hu joint parent frame,
     # the vector of hu rotation axis (EL_x) is:
-    EL_axis_rel2_hu_parent = [0.969, -0.247, 0]
+    FE_axis_rel2_hu_parent = [0.969, -0.247, 0]
 
     # Get the vector of hu rotation axis, relative to the humerus frame
-    EL_axis_rel2_humerus = hu_parent_rel2_hum_R.apply(EL_axis_rel2_hu_parent)
-    print("The model's elbow flexion axis in the humerus frame is: ", EL_axis_rel2_humerus)
+    FE_axis_in_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
 
     """ GET THE POSE-BASED IMU OFFSET TO CONSTRAIN RESULTS """
 
     # Get the body-IMU offset for each body, based on the pose-based method (mirroring OpenSims built-in calibration)
     pose_based_virtual_IMU = get_IMU_cal_POSE_BASED(humerus_IMU_ori_rotated1, humerus_ori)
-    print("The pose-based virtual IMU offset is:")
-    print(pose_based_virtual_IMU.as_quat())
 
     # Get the individual axes of the pose-based virtual IMU frame
     y_comp_of_pose_based_offset = pose_based_virtual_IMU.as_matrix()[:, 1]
@@ -588,15 +579,15 @@ def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1,
     # IMU frame from the pose-based calibration
 
     # Specify the first pairs of vectors which should be aligned, with the highest weighting
-    a1 = EL_axis_rel2_humerus
-    b1 = EL_axis_rel2_humerus_IMU
+    a1 = FE_axis_in_humerus
+    b1 = FE_axis_in_humerus_IMU
     w1 = 10000
 
     # Specify the other pairs of vectors, using the initial guess at the IMU offset based on pose
     a2, a3, a4 = x_comp_of_pose_based_offset , \
         y_comp_of_pose_based_offset, \
         z_comp_of_pose_based_offset    # i.e. the axis of the pose-based virtual IMU frame
-    b2, b3, b4 = [1, 0, 0], [0, 1, 0], [0, 0, 1]     # i.e. the y axis of the IMU frame
+    b2, b3, b4 = [1, 0, 0], [0, 1, 0], [0, 0, 1]     # i.e. the x, y, z axis of the IMU frame
     w2, w3, w4 = 1, 1, 1        # These are weighted much lower because we want to prioritise the flexion axis estimation
 
     # Compile the arrays
@@ -606,17 +597,84 @@ def get_IMU_cal_hum_method_5(EL_axis_rel2_humerus_IMU, humerus_IMU_ori_rotated1,
 
     # Run the align_vectors() optimisation
     rot, rssd = R.align_vectors(a, b, weights=w)
-
-    print("The optimal virtual IMU offset was calculated as: ")
-    print(rot.as_quat())
-
     virtual_IMU = rot
 
     # Alternative function
     # alt_virtual_IMU = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=True)
     # print('Alternative virtual IMU offset:', alt_virtual_IMU)
 
+    if debug:
+        print("The estimated FE axis in the humerus IMU frame is:", FE_axis_in_humerus_IMU)
+        print("The model's EF axis in the humerus frame is: ", FE_axis_in_humerus)
+        print("The initial estimate of virtual IMU offset from pose-based calibration is: \n", pose_based_virtual_IMU.as_matrix())
+        print("The optimal virtual IMU offset is: \n", rot.as_matrix())
+
     return virtual_IMU
+
+
+# Function to define the humerus IMU offset based on an estimated elbow flexion axis
+# Note: this is based on the fixed carry angle defined in the model
+def get_IMU_cal_rad_method_1(PS_axis_in_radius_IMU, debug):
+
+    """ GET MODEL PS AXIS IN RADIUS FRAME """
+
+    # PS_axis of the ur joint is defined relative to the parent/child frames, where the child frame = radius body frame
+    PS_axis_in_radius = [0.182, 0.98227, -0.044946]
+
+    """ GET THE POSE-BASED IMU OFFSET TO CONSTRAIN RESULTS """
+
+    # Get the IMU offset defined by a manual alignment, to refine results of the optimisation estimation
+    manual_virtual_IMU = get_IMU_cal_MANUAL('Radius')
+
+    # Get the individual axes of the manual virtual IMU frame
+    x_comp_of_manual_offset = manual_virtual_IMU.as_matrix()[:, 0]
+    y_comp_of_manual_offset = manual_virtual_IMU.as_matrix()[:, 1]
+    z_comp_of_manual_offset = manual_virtual_IMU.as_matrix()[:, 2]
+
+    """ FIND OPTIMAL VIRTUAL IMU OFFSET BASED ON THE INPUTS """
+
+    # We are trying to find a rotational offset between two frames, A - the model's radius, and B - the radius IMU
+    # The scipy align_vectors() function finds a rotational offset between two frames which optimally aligns two sets of
+    # vectors defined in those frames: a, and b.
+    # The largest weight is given to the first pair of vectors, because we want to strictly enforce that the estimated
+    # PS axis is aligned with the model PS axis.
+    # The other pairs of vectors are included to constrain the undefined DoF which would be present if we only used the
+    # PS axis vectors. These pairs try to align the radius IMU frame with the initial estimate of virtual
+    # IMU frame from the manual calibration
+
+    # Specify the first pairs of vectors which should be aligned, with the highest weighting
+    a1 = PS_axis_in_radius
+    b1 = PS_axis_in_radius_IMU
+    w1 = 10000
+
+    # Specify the other pairs of vectors, using the initial guess at the IMU offset based on manual alignment
+    a2, a3, a4 = x_comp_of_manual_offset, \
+        y_comp_of_manual_offset, \
+        z_comp_of_manual_offset  # i.e. the axis of the pose-based virtual IMU frame
+    b2, b3, b4 = [1, 0, 0], [0, 1, 0], [0, 0, 1]  # i.e. the x, y, z axis of the IMU frame
+    w2, w3, w4 = 1, 1, 1  # These are weighted much lower because we want to prioritise the flexion axis estimation
+
+    # Compile the arrays
+    a = [a1, a2, a3, a4]
+    b = [b1, b2, b3, b4]
+    w = [w1, w2, w3, w4]
+
+    # Run the align_vectors() optimisation
+    rot, rssd = R.align_vectors(a, b, weights=w)
+    virtual_IMU = rot
+
+    # Alternative function
+    # alt_virtual_IMU = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=True)
+    # print('Alternative virtual IMU offset:', alt_virtual_IMU)
+
+    if debug:
+        print("The estimated PS axis in the forearm IMU frame is:", PS_axis_in_radius_IMU)
+        print("The model's PS axis in the radius frame is: ", PS_axis_in_radius)
+        print("The initial estimate of virtual IMU offset from manual alignment is: \n", manual_virtual_IMU.as_matrix())
+        print("The optimal virtual IMU offset is: \n", rot.as_matrix())
+
+    return virtual_IMU
+
 
 """ BUILT IN OPENSIM CALIBRATION """
 

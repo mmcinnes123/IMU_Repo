@@ -159,15 +159,15 @@ def run_single_cal(subject_code, IMU_type, calibration_name, pose_name1, pose_na
 
     # TODO: write function to read in EL_axis from somewhere...
     # EL_axis_rel2_humerus_IMU = get_EL_axis_rel2_humerus_IMU(IMU_type)
-    EL_axis_rel2_humerus_IMU = np.array([0.19084964, -0.07404047, 0.97882298])
+    EL_axis_rel2_humerus_IMU = np.array([0.21942293, -0.06199764, 0.97365798])
+    PS_axis_in_radius_IMU = np.array([-0.04310916, -0.99628405, -0.0745634])
 
     thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-        get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, subject_code, trial_name1, pose_name1, IMU_type,
-                             calibrated_model_dir)
+        get_IMU_offsets_METHOD_4(EL_axis_rel2_humerus_IMU, PS_axis_in_radius_IMU, subject_code, trial_name1, pose_name1, IMU_type)
 
     apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
                    calibrated_model_dir)
 
 
-run_single_cal(subject_code='P3', IMU_type='Perfect', calibration_name='METHOD_4_Alt_self',
+run_single_cal(subject_code='P1', IMU_type='Perfect', calibration_name='METHOD_4_Alt_self',
                pose_name1='Alt_self', pose_name2='Alt_self')

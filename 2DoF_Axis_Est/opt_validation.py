@@ -27,15 +27,15 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
 trial_for_opt = 'JA_Slow'
-IMU_type_for_opt_list = ['Real', 'Perfect']
-opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+# IMU_type_for_opt_list = ['Real', 'Perfect']
+# opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
 
-# IMU_type_for_opt_list = ['Perfect']
-# opt_method_list = ['rot_noDelta']
+IMU_type_for_opt_list = ['Perfect']
+opt_method_list = ['rot_noDelta']
 
 
 # List of subjects
-subject_list = [f'P{i}' for i in range(1, 23)]
+subject_list = [f'P{i}' for i in range(1, 2)]
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -69,8 +69,7 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
             """ FINDING FE AND PS FROM OPTIMISATION RESULT """
             opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
                                                              opt_method, subject_event_dict, sample_rate, debug=False)
-            logging.info(f'Opt FE axis in humerus IMU frame: {opt_FE}')
-            logging.info(f'Opt PS axis in forearm IMU frame: {opt_PS}')
+
 
             # Log optional outputs
             if 'delta' in opt_results:
@@ -96,6 +95,9 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
                 opt_FE = -opt_FE
             if np.sign(opt_PS[1]) == np.sign(-OMC_PS[1]):   # Constrain based on the y-component, expected to be largest
                 opt_PS = -opt_PS
+
+            logging.info(f'Opt FE axis in humerus IMU frame: {opt_FE}')
+            logging.info(f'Opt PS axis in forearm IMU frame: {opt_PS}')
 
             FE_opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180 / np.pi
             PS_opt_error = qmt.angleBetween2Vecs(OMC_PS, opt_PS) * 180 / np.pi
@@ -125,6 +127,6 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
 """ COMPILE ALL RESULTS """
 
 # Print all results to csv
-all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
+# all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
 
 
