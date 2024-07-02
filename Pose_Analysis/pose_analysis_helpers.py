@@ -7,12 +7,13 @@ import opensim as osim
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import pandas as pd
+from os.path import join
 
 
 # Function to open the .txt file which contains a dict with info on times, and pose names, for each trial
-def get_trial_pose_time_dict_from_file(parent_dir, subject_code):
+def get_trial_pose_time_dict_from_file(directory, subject_code):
     # Read the existing txt file to get the dict
-    file_obj = open(parent_dir + '\\' + subject_code + '_cal_pose_dict.txt', 'r')
+    file_obj = open(join(directory, 'SubjectEventFiles', subject_code + '_event_dict.txt'), 'r')
     content = file_obj.read()
     trial_pose_time_dict = ast.literal_eval(content)
     file_obj.close()

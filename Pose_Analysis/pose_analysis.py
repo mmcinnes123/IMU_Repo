@@ -28,7 +28,7 @@ write_results = True
 if write_results:
 
     # Settings
-    subject_code_list = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
+    subject_code_list = [f'P{i}' for i in range(1, 23)]
 
     for subject_code in subject_code_list:
 
@@ -40,7 +40,7 @@ if write_results:
         OMC_dir = join(parent_dir, 'OMC')
 
         # Get the dict which defines when each pose happened in each trial
-        trial_pose_time_dict = get_trial_pose_time_dict_from_file(parent_dir, subject_code)
+        trial_pose_time_dict = get_trial_pose_time_dict_from_file(directory, subject_code)
 
         for trial_name in trial_pose_time_dict:
 
@@ -49,52 +49,54 @@ if write_results:
 
             for pose_name, pose_time in pose_time_dict.items():
 
-                if pose_time == None:
-                    print(f"No pose data for {subject_code}, {trial_name}, {pose_name}")
-                    elbow_flexion, elbow_pronation = [np.nan], [np.nan]
-                    HT_abd, HT_flex, HT_rot = [np.nan], [np.nan], [np.nan]
+                if pose_name.startswith(('N', 'Alt')):
 
-                else:
-                    # Find the directory with the IK results files
-                    IK_results_dir = join(OMC_dir, trial_name + '_IK_Results')
-                    mot_file = join(IK_results_dir, 'OMC_IK_results.mot')
-                    analysis_sto_file = join(IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
+                    if pose_time == None:
+                        print(f"No pose data for {subject_code}, {trial_name}, {pose_name}")
+                        elbow_flexion, elbow_pronation = [np.nan], [np.nan]
+                        HT_abd, HT_flex, HT_rot = [np.nan], [np.nan], [np.nan]
 
-                    # Get some joint angles/coords from the mot file
-                    elbow_flexion, elbow_pronation = get_coords_from_mot_file(mot_file, pose_time)
+                    else:
+                        # Find the directory with the IK results files
+                        IK_results_dir = join(OMC_dir, trial_name + '_IK_Results')
+                        mot_file = join(IK_results_dir, 'OMC_IK_results.mot')
+                        analysis_sto_file = join(IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
 
-                    # Get the values for HT joint angles from the sto file
-                    HT_abd, HT_flex, HT_rot = get_HT_angles_from_sto(analysis_sto_file, pose_time)
+                        # Get some joint angles/coords from the mot file
+                        elbow_flexion, elbow_pronation = get_coords_from_mot_file(mot_file, pose_time)
 
-                # Compile the pose JAs into one dict
-                pose_dict = {'elbow_flexion': elbow_flexion,
-                             'elbow_pronation': elbow_pronation,
-                             'HT_abd': HT_abd,
-                             'HT_flex': HT_flex,
-                             'HT_rot': HT_rot}
+                        # Get the values for HT joint angles from the sto file
+                        HT_abd, HT_flex, HT_rot = get_HT_angles_from_sto(analysis_sto_file, pose_time)
 
-                # Get the default model pose JAs, based on the pose_name
-                model_pose_dict = get_default_model_pose_dict(pose_name)
+                    # Compile the pose JAs into one dict
+                    pose_dict = {'elbow_flexion': elbow_flexion,
+                                 'elbow_pronation': elbow_pronation,
+                                 'HT_abd': HT_abd,
+                                 'HT_flex': HT_flex,
+                                 'HT_rot': HT_rot}
 
-                # Find the pose error (difference between performed pose, and model default pose) for each JA
-                error_dict = {JA + '_error': pose_dict[JA][0] - model_pose_dict[JA][0] for JA in model_pose_dict}
+                    # Get the default model pose JAs, based on the pose_name
+                    model_pose_dict = get_default_model_pose_dict(pose_name)
 
-                # Split the pose_name into a code, and whether it was assisted
-                pose_code, pose_type = split_pose_name(pose_name)
+                    # Find the pose error (difference between performed pose, and model default pose) for each JA
+                    error_dict = {JA + '_error': pose_dict[JA][0] - model_pose_dict[JA][0] for JA in model_pose_dict}
 
-                # Add the results from this pose into the results dataframe
-                meta_dict = {'Subject': [subject_code],
-                             'Trial': [trial_name],
-                             'Pose_code': [pose_code],
-                             'Pose_type': [pose_type],
-                             'Pose_time': [pose_time]}
-                new_df_row = pd.DataFrame({**meta_dict, **pose_dict, **error_dict})
-                subject_results = pd.concat([subject_results, new_df_row], ignore_index=True)
+                    # Split the pose_name into a code, and whether it was assisted
+                    pose_code, pose_type = split_pose_name(pose_name)
 
-                inspect_results = False
-                if inspect_results:
-                    pd.set_option('display.width', None)
-                    print(subject_results)
+                    # Add the results from this pose into the results dataframe
+                    meta_dict = {'Subject': [subject_code],
+                                 'Trial': [trial_name],
+                                 'Pose_code': [pose_code],
+                                 'Pose_type': [pose_type],
+                                 'Pose_time': [pose_time]}
+                    new_df_row = pd.DataFrame({**meta_dict, **pose_dict, **error_dict})
+                    subject_results = pd.concat([subject_results, new_df_row], ignore_index=True)
+
+                    inspect_results = False
+                    if inspect_results:
+                        pd.set_option('display.width', None)
+                        print(subject_results)
 
         # Save the results for each subject
         print(f'Writing subject {subject_code} results to .csv.')
@@ -108,7 +110,7 @@ if write_results:
 
 """ COMPILE ALL RESULTS """
 
-compile_results = True
+compile_results = False
 if compile_results:
 
     # Settings
@@ -133,5 +135,5 @@ if compile_results:
     pd.set_option('display.width', None)
 
     # Save all results to folder for analyis in R
-    all_results.to_csv(join(directory, 'R Analysis', 'PoseResults_forR.csv'))
+    all_results.to_csv(join(directory, 'R Analysis', 'R Pose', 'PoseResults_forR.csv'))
     print('Written all pose results to file in R Analysis')
