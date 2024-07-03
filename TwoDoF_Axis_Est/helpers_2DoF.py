@@ -47,6 +47,13 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     FE = opt_results['j1']
     PS = opt_results['j2']
 
+    # Constrain the Opt FE axis to always point laterally (z component should be positive)
+    if np.sign(FE[2]) == -1:  # Constrain based on the z-component, expected to be largest
+        FE = -FE
+    # Constrain the Opt PS axis to always point proximally (y component should be negative)
+    if np.sign(PS[1]) == 1:  # Constrain based on the z-component, expected to be largest
+        PS = -PS
+
     if debug:
         print('get_J1_J2_from_opt() DEBUG:')
         print('\tTMM file used: ', tmm_txt_file)

@@ -49,7 +49,7 @@ def get_IMU_offsets_METHOD_1(subject_code, pose_name, IMU_type, calibrated_model
     thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
 
     # Get heading offset between IMU heading and model heading
-    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
 
     # Apply the heading offset to the IMU orientations
     heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
@@ -81,7 +81,7 @@ def get_IMU_offsets_METHOD_2(subject_code, IMU_type, pose_name, calibrated_model
     thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
 
     # Get heading offset between IMU heading and model heading
-    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
 
     # Apply the heading offset to the IMU orientations
     heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
@@ -123,7 +123,7 @@ def get_IMU_offsets_METHOD_3(subject_code, IMU_type, calibrated_model_dir):
     thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name1)
 
     # Get heading offset between IMU heading and model heading
-    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
 
     # Apply the heading offset to the IMU orientations
     heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
@@ -161,7 +161,7 @@ def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
     thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
 
     # Get heading offset between IMU heading and model heading
-    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading)
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
 
     # Apply the heading offset to the IMU orientations
     heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
@@ -175,13 +175,13 @@ def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
     subject_event_dict = get_event_dict_from_file(subject_code)
 
     # Get the estimated FE and PS axes from the optimisation
-    opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
                                                      opt_method, subject_event_dict, sample_rate, debug=False)
 
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
-    humerus_virtual_IMU = get_IMU_cal_hum_method_5(opt_FE, humerus_IMU_ori_rotated1, humerus_ori, debug=True)
-    radius_virtual_IMU = get_IMU_cal_rad_method_1(opt_PS, debug=True)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_5(opt_FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori, debug=False)
+    radius_virtual_IMU = get_IMU_cal_rad_method_1(opt_PS_axis_in_radius_IMU, debug=False)
 
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 
@@ -259,7 +259,7 @@ def get_scipyR_of_body_in_ground(body, state):
     return scipyR
 
 # Get the heading offset between the thorax IMU heading and the heading of the model in its default state
-def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label):
+def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label, debug):
 
     # Calculate the heading offset
     if base_IMU_axis_label == 'x':
@@ -279,9 +279,11 @@ def get_heading_offset(base_body_ori, base_IMU_ori, base_IMU_axis_label):
     # Update the sign of the heading offset
     if base_IMU_axis[2] < 0:  # Calculate the sign of the rotation (if the z-component of IMU x-axis is negative, rotation is negative)
         heading_offset = -heading_offset
-    print("Heading offset is: " + str(round(heading_offset * 180 / np.pi, 2)))
-    print("(i.e. IMU heading is rotated " + str(round(-heading_offset * 180 / np.pi, 2))
-          + " degrees around the vertical axis, relative to the model's default heading.")
+
+    if debug:
+        print("Heading offset is: " + str(round(heading_offset * 180 / np.pi, 2)))
+        print("(i.e. IMU heading is rotated " + str(round(-heading_offset * 180 / np.pi, 2))
+              + " degrees around the vertical axis, relative to the model's default heading.")
 
     return heading_offset
 
@@ -855,7 +857,7 @@ def get_IMU_offset(cal_method_dict, calibration_orientations_file, cal_oris2_fil
 
     """ Get heading offset between IMU heading and model heading """
 
-    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori, base_IMU_axis_label)
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori, base_IMU_axis_label, debug=False)
 
     # Apply the heading offset to the IMU orientations
     heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
