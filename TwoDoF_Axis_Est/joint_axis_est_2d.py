@@ -95,6 +95,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
             deltaX = solver.step()
             if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
                 break
+
         if cost is None or solver.objFn.cost() < cost:  # Update the cost, x, and parameters if cost is less than for previous initVal
             cost = solver.objFn.cost()
             x = solver.objFn.getX()
@@ -308,7 +309,8 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
                 # Build the row by concatenating along the row (np.r_), J1, J2 (2 params each), delta, and the ints)
                 init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), delta, 1, 1])
             return np.array(init, float)
-        if variant == 'rot_noDelta':
+
+        elif variant == 'rot_noDelta':
             e_x = np.array([1, 0.01, 0.01], float)
             e_y = np.array([0.01, 1, 0.01], float)
             e_z = np.array([0.01, 0.01, 1], float)
@@ -321,6 +323,7 @@ class AbstractAxisEst2DObjectiveFunction(AbstractObjectiveFunction, ABC):
                 # Build the row by concatenating along the row (np.r_), J1, J2 (2 params each), delta, and the ints)
                 init.append(np.r_[axisToThetaPhi(j1, 1), axisToThetaPhi(j2, 1), 1, 1])
             return np.array(init, float)
+
         # An alternative set of init values using random numbers, or setting delta to 0
         elif variant.startswith('rand'):  # e.g. 'rand100_delta0', 'rand100')
             if seed is None:

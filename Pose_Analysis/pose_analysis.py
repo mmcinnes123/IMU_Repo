@@ -24,7 +24,7 @@ all_results_template = pd.DataFrame(columns=['Subject', 'Trial', 'Pose_code', 'P
 
 """ MAIN """
 
-write_results = True
+write_results = False
 if write_results:
 
     # Settings
@@ -110,11 +110,11 @@ if write_results:
 
 """ COMPILE ALL RESULTS """
 
-compile_results = False
+compile_results = True
 if compile_results:
 
     # Settings
-    subject_code_list = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
+    subject_code_list = [f'P{i}' for i in range(1, 23)]
 
     # Make an empty dict, based on the template above
     all_results = all_results_template

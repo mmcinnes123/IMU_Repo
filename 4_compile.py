@@ -9,17 +9,17 @@ import os
 
 # Quick Settings
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
-list_of_subjects = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
-IMU_type_list = ['Perfect', 'Real']
+list_of_subjects = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+IMU_type_list = ['Perfect']
 trial_name = 'JA_Slow'
-calibration_name_dict = {'OSIM_N_self': None,
-                         'OSIM_Alt_self': None,
-                         'ALL_MANUAL': None,
-                         'METHOD_1_Alt_self': None,
-                         'METHOD_2_Alt_self': None,
-                         'METHOD_3': None,
-                         }
-
+# calibration_name_dict = {'OSIM_N_self': None,
+#                          'OSIM_Alt_self': None,
+#                          'ALL_MANUAL': None,
+#                          'METHOD_1_Alt_self': None,
+#                          'METHOD_2_Alt_self': None,
+#                          'METHOD_3': None,
+#                          }
+calibration_name_dict = {'METHOD_4a': None}
 
 
 

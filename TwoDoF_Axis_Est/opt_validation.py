@@ -33,9 +33,8 @@ trial_for_opt = 'JA_Slow'
 IMU_type_for_opt_list = ['Perfect']
 opt_method_list = ['rot_noDelta']
 
-
 # List of subjects
-subject_list = [f'P{i}' for i in range(1, 2)]
+subject_list = [f'P{i}' for i in range(11, 12)]
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -70,7 +69,6 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
             opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
                                                              opt_method, subject_event_dict, sample_rate, debug=False)
 
-
             # Log optional outputs
             if 'delta' in opt_results:
                 heading_offset = abs(opt_results['delta']*180/np.pi)
@@ -85,8 +83,6 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
 
             # print('Cost: ', opt_results['debug']['cost'])
             # print('x: ', opt_results['debug']['x'])
-
-
 
             """ COMPARE """
 
@@ -117,7 +113,7 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
 
             # Visualise 3D animation of the results
             # visulalise_3D_vec_on_IMU(opt_PS, OMC_PS, None)
-            # visulalise_3D_vec_on_IMU(OMC_FE, opt_FE, iso_FE)
+            visulalise_3D_vec_on_IMU(OMC_FE, opt_FE, None)
 
             """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
             # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,

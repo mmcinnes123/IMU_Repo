@@ -82,7 +82,8 @@ def run_method(method_name, subject_code, IMU_type):
 
 """ RUN THE CALIBRATION """
 
-subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+# subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+subject_list = ['P11']
 IMU_type_list = ['Perfect']
 method_name_list = ['METHOD_4a']
 # method_name_list = ['OSIM_Alt_self', 'OSIM_N_self', 'ALL_MANUAL', 'METHOD_1_self', 'METHOD_2_self', 'METHOD_4a']
