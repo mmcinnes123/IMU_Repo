@@ -75,9 +75,9 @@ def run_method(method_name, subject_code, IMU_type):
             print('Method not defined properly.')
             quit()
 
-        # Create the calibrated model, applying the calculated offsets to the default model
-        apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
-                           calibrated_model_dir)
+        # # # Create the calibrated model, applying the calculated offsets to the default model
+        # apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
+        #                    calibrated_model_dir)
 
 
 """ RUN THE CALIBRATION """

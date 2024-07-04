@@ -13,6 +13,8 @@ import numpy as np
 import pandas as pd
 import qmt
 from scipy.spatial.transform import Rotation as R
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # Calibration settings
 sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
@@ -639,7 +641,7 @@ def get_IMU_cal_hum_method_5(FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, h
     w1 = 10000
 
     # Specify the other pairs of vectors, using the initial guess at the IMU offset based on pose
-    a2, a3, a4 = x_comp_of_pose_based_offset , \
+    a2, a3, a4 = x_comp_of_pose_based_offset, \
         y_comp_of_pose_based_offset, \
         z_comp_of_pose_based_offset    # i.e. the axis of the pose-based virtual IMU frame
     b2, b3, b4 = [1, 0, 0], [0, 1, 0], [0, 0, 1]     # i.e. the x, y, z axis of the IMU frame
@@ -650,19 +652,104 @@ def get_IMU_cal_hum_method_5(FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, h
     b = [b1, b2, b3, b4]
     w = [w1, w2, w3, w4]
 
-    # Run the align_vectors() optimisation
-    rot, rssd = R.align_vectors(a, b, weights=w)
-    virtual_IMU = rot
-
     # Alternative function
-    # alt_virtual_IMU = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=True)
-    # print('Alternative virtual IMU offset:', alt_virtual_IMU)
+    virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
+    print('Alternative virtual IMU offset:', virtual_IMU_quat)
+
+    # Convert the virtual IMU offset to a scipy R
+    virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])
 
     if debug:
         print("The estimated FE axis in the humerus IMU frame is:", FE_axis_in_humerus_IMU)
         print("The model's EF axis in the humerus frame is: ", FE_axis_in_humerus)
         print("The initial estimate of virtual IMU offset from pose-based calibration is: \n", pose_based_virtual_IMU.as_matrix())
-        print("The optimal virtual IMU offset is: \n", rot.as_matrix())
+        print("The optimal virtual IMU offset is: \n", virtual_IMU.as_matrix())
+
+        """ PLOT THE OPTIMISATION """
+
+        # Function to plot an arrow in 3D
+        def plot_arrow(ax, start, direction, color, linewidth, length, label):
+            ax.plot([start[0], start[0] + direction[0]*length],
+                    [start[1], start[1] + direction[1]*length],
+                    [start[2], start[2] + direction[2]*length], color=color, linewidth=linewidth)
+            if label != None:
+                ax.text(start[0] + direction[0]*length*1.1, start[1] + direction[1]*length*1.1, start[2] + direction[2]*length*1.1, label,
+                        color=color, fontsize=12)
+
+        # Create a new figure
+        fig = plt.figure()
+
+        # Define the unit vectors for the x, y, and z axes
+        x_axis = np.array([1, 0, 0])
+        y_axis = np.array([0, 1, 0])
+        z_axis = np.array([0, 0, 1])
+
+        # Plot all the vectors in frame A
+        ax1 = fig.add_subplot(131, projection='3d')
+        origin = np.array([1, 1, 1])
+        plot_arrow(ax1, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax1, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax1, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax1, origin, a1, 'purple', linewidth=3, length=0.8, label='FE_ref')
+        plot_arrow(ax1, origin, a2, 'blue', linewidth=2, length=0.8, label='x_pose')
+        plot_arrow(ax1, origin, a3, 'green', linewidth=2, length=0.8, label='y_pose')
+        plot_arrow(ax1, origin, a4, 'red', linewidth=2, length=0.8, label='z_pose')
+
+        # Plot all the vectors in frame B
+        ax2 = fig.add_subplot(132, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax2, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax2, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax2, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax2, origin, b1, 'purple', linewidth=1, length=1.1, label='FE_opt')
+        plot_arrow(ax2, origin, b2, 'blue', linewidth=1, length=1.1, label='x')
+        plot_arrow(ax2, origin, b3, 'green', linewidth=1, length=1.1, label='y')
+        plot_arrow(ax2, origin, b4, 'red', linewidth=1, length=1.1, label='z')
+
+        # Apply the estimated rotation to the second set of vectors
+        b1_rot = qmt.rotate(virtual_IMU_quat, b1)
+        b2_rot = qmt.rotate(virtual_IMU_quat, b2)
+        b3_rot = qmt.rotate(virtual_IMU_quat, b3)
+        b4_rot = qmt.rotate(virtual_IMU_quat, b4)
+
+        # Plot all the a vectors in frame A, and the rotated b vectors in frame A
+        ax3 = fig.add_subplot(133, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax3, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax3, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax3, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax3, origin, a1, 'purple', linewidth=3, length=0.8, label='')
+        plot_arrow(ax3, origin, a2, 'blue', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, a3, 'green', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, a4, 'red', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, b1_rot, 'purple', linewidth=1, length=1.1, label='FE')
+        plot_arrow(ax3, origin, b2_rot, 'blue', linewidth=1, length=1.1, label='x')
+        plot_arrow(ax3, origin, b3_rot, 'green', linewidth=1, length=1.1, label='y')
+        plot_arrow(ax3, origin, b4_rot, 'red', linewidth=1, length=1.1, label='z')
+
+        axes = [ax1, ax2, ax3]
+
+        for ax in axes:
+            # Set the limits
+            ax.set_xlim([0, 2])
+            ax.set_ylim([0, 2])
+            ax.set_zlim([0, 2])
+            ax.invert_zaxis()
+            ax.invert_xaxis()
+            # Adjust the view angle so that the y-axis points upwards
+            ax.view_init(elev=0, azim=180)
+            # Remove ticks and tick labels
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_zticks([])
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.set_zticklabels([])
+
+        # Show the plot
+        plt.show()
 
     return virtual_IMU
 
@@ -714,19 +801,106 @@ def get_IMU_cal_rad_method_1(PS_axis_in_radius_IMU, debug):
     b = [b1, b2, b3, b4]
     w = [w1, w2, w3, w4]
 
-    # Run the align_vectors() optimisation
-    rot, rssd = R.align_vectors(a, b, weights=w)
-    virtual_IMU = rot
-
     # Alternative function
-    # alt_virtual_IMU = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=True)
-    # print('Alternative virtual IMU offset:', alt_virtual_IMU)
+    virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
+    print('Alternative virtual IMU offset:', virtual_IMU_quat)
+
+    # Convert the virtual IMU offset to a scipy R
+    virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])
+
 
     if debug:
         print("The estimated PS axis in the forearm IMU frame is:", PS_axis_in_radius_IMU)
         print("The model's PS axis in the radius frame is: ", PS_axis_in_radius)
         print("The initial estimate of virtual IMU offset from manual alignment is: \n", manual_virtual_IMU.as_matrix())
-        print("The optimal virtual IMU offset is: \n", rot.as_matrix())
+        print("The optimal virtual IMU offset is: \n", virtual_IMU.as_matrix())
+
+        """ PLOT THE OPTIMISATION """
+
+        # Function to plot an arrow in 3D
+        def plot_arrow(ax, start, direction, color, linewidth, length, label):
+            ax.plot([start[0], start[0] + direction[0] * length],
+                    [start[1], start[1] + direction[1] * length],
+                    [start[2], start[2] + direction[2] * length], color=color, linewidth=linewidth)
+            if label != None:
+                ax.text(start[0] + direction[0] * length * 1.1, start[1] + direction[1] * length * 1.1,
+                        start[2] + direction[2] * length * 1.1, label,
+                        color=color, fontsize=12)
+
+        # Create a new figure
+        fig = plt.figure()
+
+        # Define the unit vectors for the x, y, and z axes
+        x_axis = np.array([1, 0, 0])
+        y_axis = np.array([0, 1, 0])
+        z_axis = np.array([0, 0, 1])
+
+        # Plot all the vectors in frame A
+        ax1 = fig.add_subplot(131, projection='3d')
+        origin = np.array([1, 1, 1])
+        plot_arrow(ax1, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax1, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax1, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax1, origin, a1, 'purple', linewidth=3, length=0.8, label='PS_ref')
+        plot_arrow(ax1, origin, a2, 'blue', linewidth=2, length=0.8, label='x_man')
+        plot_arrow(ax1, origin, a3, 'green', linewidth=2, length=0.8, label='y_man')
+        plot_arrow(ax1, origin, a4, 'red', linewidth=2, length=0.8, label='z_man')
+
+        # Plot all the vectors in frame B
+        ax2 = fig.add_subplot(132, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax2, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax2, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax2, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax2, origin, b1, 'purple', linewidth=1, length=1.1, label='PS_opt')
+        plot_arrow(ax2, origin, b2, 'blue', linewidth=1, length=1.1, label='x')
+        plot_arrow(ax2, origin, b3, 'green', linewidth=1, length=1.1, label='y')
+        plot_arrow(ax2, origin, b4, 'red', linewidth=1, length=1.1, label='z')
+
+        # Apply the estimated rotation to the second set of vectors
+        b1_rot = qmt.rotate(virtual_IMU_quat, b1)
+        b2_rot = qmt.rotate(virtual_IMU_quat, b2)
+        b3_rot = qmt.rotate(virtual_IMU_quat, b3)
+        b4_rot = qmt.rotate(virtual_IMU_quat, b4)
+
+        # Plot all the a vectors in frame A, and the rotated b vectors in frame A
+        ax3 = fig.add_subplot(133, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax3, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax3, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax3, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax3, origin, a1, 'purple', linewidth=3, length=0.8, label='')
+        plot_arrow(ax3, origin, a2, 'blue', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, a3, 'green', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, a4, 'red', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, b1_rot, 'purple', linewidth=1, length=1.1, label='PS')
+        plot_arrow(ax3, origin, b2_rot, 'blue', linewidth=1, length=1.1, label='x')
+        plot_arrow(ax3, origin, b3_rot, 'green', linewidth=1, length=1.1, label='y')
+        plot_arrow(ax3, origin, b4_rot, 'red', linewidth=1, length=1.1, label='z')
+
+        axes = [ax1, ax2, ax3]
+
+        for ax in axes:
+            # Set the limits
+            ax.set_xlim([0, 2])
+            ax.set_ylim([0, 2])
+            ax.set_zlim([0, 2])
+            ax.invert_zaxis()
+            ax.invert_xaxis()
+            # Adjust the view angle so that the y-axis points upwards
+            ax.view_init(elev=0, azim=180)
+            # Remove ticks and tick labels
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_zticks([])
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.set_zticklabels([])
+
+        # Show the plot
+        plt.show()
 
     return virtual_IMU
 
