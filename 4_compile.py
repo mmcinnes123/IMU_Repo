@@ -19,7 +19,7 @@ trial_name = 'JA_Slow'
 #                          'METHOD_2_Alt_self': None,
 #                          'METHOD_3': None,
 #                          }
-calibration_name_dict = {'METHOD_4a': None}
+calibration_name_dict = {'METHOD_4a': None, 'METHOD_4b': None, 'METHOD_4c': None}
 
 
 

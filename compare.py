@@ -11,6 +11,10 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, calibration type: {calibration_name}')
 
+    if trial_name != 'JA_Slow':
+        print('Compare code written specifically for JA_Slow. Need to handle RoM code. Quitting.')
+        quit()
+
     """ SETTINGS """
     sample_rate = 100
 

@@ -188,6 +188,88 @@ def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 
 
+# Function to apply METHOD_4
+def get_IMU_offsets_METHOD_4b(subject_code, IMU_type):
+
+    pose_name = 'Alt_self'
+    pose_trial_name = 'CP'
+    opt_trial_name = 'JA_Slow'
+    opt_method = 'rot_noDelta'
+
+    # Get the IMU orientation data at calibration pose time
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, pose_trial_name, pose_name, IMU_type)
+    thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
+
+    # Get model body orientations in ground during default pose
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
+
+    # Get heading offset between IMU heading and model heading
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated1 = heading_offset_ori * thorax_IMU_ori1
+    humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
+    radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
+
+    """ FINDING FE AND PS FROM OPTIMISATION RESULT """
+
+    # Get the dict with the timings for FE and PS events
+    subject_event_dict = get_event_dict_from_file(subject_code)
+
+    # Get the estimated FE and PS axes from the optimisation
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
+                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_6(opt_FE_axis_in_humerus_IMU, debug=True)
+    radius_virtual_IMU = get_IMU_cal_rad_method_1(opt_PS_axis_in_radius_IMU, debug=False)
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
+
+# Function to apply METHOD_4
+def get_IMU_offsets_METHOD_4c(subject_code, IMU_type):
+
+    pose_name = 'Alt_self'
+    pose_trial_name = 'CP'
+    opt_trial_name = 'JA_Slow'
+    opt_method = 'rot_noDelta'
+
+    # Get the IMU orientation data at calibration pose time
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, pose_trial_name, pose_name, IMU_type)
+    thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
+
+    # Get model body orientations in ground during default pose
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
+
+    # Get heading offset between IMU heading and model heading
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated1 = heading_offset_ori * thorax_IMU_ori1
+    humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
+    radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
+
+    """ FINDING FE AND PS FROM OPTIMISATION RESULT """
+
+    # Get the dict with the timings for FE and PS events
+    subject_event_dict = get_event_dict_from_file(subject_code)
+
+    # Get the estimated FE and PS axes from the optimisation
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
+                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_7(opt_FE_axis_in_humerus_IMU, debug=False)
+    radius_virtual_IMU = get_IMU_cal_rad_method_1(opt_PS_axis_in_radius_IMU, debug=False)
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
+
 
 """ AUXILIARY FUNCTIONS USED IN CALIBRATION PROCESS """
 
@@ -597,7 +679,7 @@ def get_IMU_cal_hum_method_4(humerus_IMU_ori_at_t1, humerus_ori_at_t1,
     return virtual_IMU
 
 
-# Function to define the humerus IMU offset based on an estimated elbow flexion axis
+# Function to define the humerus IMU offset based on an estimated elbow flexion axis, supplemented by pose-based calibration
 # Note: this is based on the fixed carry angle defined in the model
 def get_IMU_cal_hum_method_5(FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, humerus_ori, debug):
 
@@ -654,7 +736,6 @@ def get_IMU_cal_hum_method_5(FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, h
 
     # Alternative function
     virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
-    print('Alternative virtual IMU offset:', virtual_IMU_quat)
 
     # Convert the virtual IMU offset to a scipy R
     virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])
@@ -754,6 +835,291 @@ def get_IMU_cal_hum_method_5(FE_axis_in_humerus_IMU, humerus_IMU_ori_rotated1, h
     return virtual_IMU
 
 
+# Function to define the humerus IMU offset based on an estimated elbow flexion axis, supplemented by manual-calibration
+# Note: this is based on the fixed carry angle defined in the model
+def get_IMU_cal_hum_method_6(FE_axis_in_humerus_IMU, debug):
+
+    """ GET MODEL EF AXIS IN HUMERUS FRAME """
+
+    # Based on how the hu joint is defined in the model, the XYZ euler ori offset of the parent frame,
+    # relative to humerus frame is:
+    hu_parent_rel2_hum_R = R.from_euler('XYZ', [0, 0, 0.32318], degrees=False)
+
+    # Based on how the hu joint is defined in the model, relative to the hu joint parent frame,
+    # the vector of hu rotation axis (EL_x) is:
+    FE_axis_rel2_hu_parent = [0.969, -0.247, 0]
+
+    # Get the vector of hu rotation axis, relative to the humerus frame
+    FE_axis_in_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
+
+    """ GET THE POSE-BASED IMU OFFSET TO CONSTRAIN RESULTS """
+
+    # Get the body-IMU offset for each body, based on the pose-based method (mirroring OpenSims built-in calibration)
+    manual_virtual_IMU = get_IMU_cal_MANUAL('Humerus')
+
+    # Get the individual axes of the pose-based virtual IMU frame
+    y_comp_of_manual_based_offset = manual_virtual_IMU.as_matrix()[:, 1]
+
+    """ FIND OPTIMAL VIRTUAL IMU OFFSET BASED ON THE INPUTS """
+
+    # We are trying to find a rotational offset between two frames, A - the model's humerus, and B - the humerus IMU
+    # The scipy align_vectors() function finds a rotational offset between two frames which optimally aligns two sets of
+    # vectors defined in those frames: a, and b.
+    # The largest weight is given to the first pair of vectors, because we want to strictly enforce that the estimated
+    # elbow flexion axis is aligned with the model elbow flexion axis.
+    # The other pairs of vectors are included to constrain the undefined DoF which would be present if we only used the
+    # elbow flexion axis vectors. These pairs try to align the humerus IMU frame with the initial estimate of virtual
+    # IMU frame from the pose-based calibration
+
+    # Specify the first pairs of vectors which should be aligned, with the highest weighting
+    a1 = FE_axis_in_humerus
+    b1 = FE_axis_in_humerus_IMU
+    w1 = 10000
+
+    # Specify the other pairs of vectors, using the initial guess at the IMU offset based on pose
+    a2 = y_comp_of_manual_based_offset   # i.e. the axis of the pose-based virtual IMU frame
+    b2 = [0, 1, 0]    # i.e. the x, y, z axis of the IMU frame
+    w2 = 1         # These are weighted much lower because we want to prioritise the flexion axis estimation
+
+    # Compile the arrays
+    a = [a1, a2]
+    b = [b1, b2]
+    w = [w1, w2]
+
+    # Alternative function
+    virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
+
+    # Convert the virtual IMU offset to a scipy R
+    virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])
+
+    if debug:
+        print("The estimated FE axis in the humerus IMU frame is:", FE_axis_in_humerus_IMU)
+        print("The model's EF axis in the humerus frame is: ", FE_axis_in_humerus)
+        print("The initial estimate of virtual IMU offset from manual calibration is: \n", manual_virtual_IMU.as_matrix())
+        print("The optimal virtual IMU offset is: \n", virtual_IMU.as_matrix())
+
+        """ PLOT THE OPTIMISATION """
+
+        # Function to plot an arrow in 3D
+        def plot_arrow(ax, start, direction, color, linewidth, length, label):
+            ax.plot([start[0], start[0] + direction[0]*length],
+                    [start[1], start[1] + direction[1]*length],
+                    [start[2], start[2] + direction[2]*length], color=color, linewidth=linewidth)
+            if label != None:
+                ax.text(start[0] + direction[0]*length*1.1, start[1] + direction[1]*length*1.1, start[2] + direction[2]*length*1.1, label,
+                        color=color, fontsize=12)
+
+        # Create a new figure
+        fig = plt.figure()
+
+        # Define the unit vectors for the x, y, and z axes
+        x_axis = np.array([1, 0, 0])
+        y_axis = np.array([0, 1, 0])
+        z_axis = np.array([0, 0, 1])
+
+        # Plot all the vectors in frame A
+        ax1 = fig.add_subplot(131, projection='3d')
+        origin = np.array([1, 1, 1])
+        plot_arrow(ax1, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax1, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax1, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax1, origin, a1, 'purple', linewidth=3, length=0.8, label='FE_ref')
+        plot_arrow(ax1, origin, a2, 'blue', linewidth=2, length=0.8, label='y_man')
+
+        # Plot all the vectors in frame B
+        ax2 = fig.add_subplot(132, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax2, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax2, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax2, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax2, origin, b1, 'purple', linewidth=1, length=1.1, label='FE_opt')
+        plot_arrow(ax2, origin, b2, 'blue', linewidth=1, length=1.1, label='y')
+
+        # Apply the estimated rotation to the second set of vectors
+        b1_rot = qmt.rotate(virtual_IMU_quat, b1)
+        b2_rot = qmt.rotate(virtual_IMU_quat, b2)
+
+        # Plot all the a vectors in frame A, and the rotated b vectors in frame A
+        ax3 = fig.add_subplot(133, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax3, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax3, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax3, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax3, origin, a1, 'purple', linewidth=3, length=0.8, label='')
+        plot_arrow(ax3, origin, a2, 'blue', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, b1_rot, 'purple', linewidth=1, length=1.1, label='FE')
+        plot_arrow(ax3, origin, b2_rot, 'blue', linewidth=1, length=1.1, label='y')
+
+        axes = [ax1, ax2, ax3]
+
+        for ax in axes:
+            # Set the limits
+            ax.set_xlim([0, 2])
+            ax.set_ylim([0, 2])
+            ax.set_zlim([0, 2])
+            ax.invert_zaxis()
+            ax.invert_xaxis()
+            # Adjust the view angle so that the y-axis points upwards
+            ax.view_init(elev=0, azim=180)
+            # Remove ticks and tick labels
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_zticks([])
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.set_zticklabels([])
+
+        # Show the plot
+        plt.show()
+
+    return virtual_IMU
+
+
+
+# Function to define the humerus IMU offset based on an estimated elbow flexion axis, supplemented by manual-calibration#
+# But rather than trying to align the IMU y-axis exactly with the humerus -Y axis, we use the fact that on average,
+# the top of everyone's IMU tiled slightly anteriorly, and laterally. So we use the average y-axis vector from everyone's
+# OMC IMUs
+# Note: this is based on the fixed carry angle defined in the model
+def get_IMU_cal_hum_method_7(FE_axis_in_humerus_IMU, debug):
+
+    """ GET MODEL EF AXIS IN HUMERUS FRAME """
+
+    # Based on how the hu joint is defined in the model, the XYZ euler ori offset of the parent frame,
+    # relative to humerus frame is:
+    hu_parent_rel2_hum_R = R.from_euler('XYZ', [0, 0, 0.32318], degrees=False)
+
+    # Based on how the hu joint is defined in the model, relative to the hu joint parent frame,
+    # the vector of hu rotation axis (EL_x) is:
+    FE_axis_rel2_hu_parent = [0.969, -0.247, 0]
+
+    # Get the vector of hu rotation axis, relative to the humerus frame
+    FE_axis_in_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
+
+    """ GET THE POSE-BASED IMU OFFSET TO CONSTRAIN RESULTS """
+
+    # State the average direction of everyone's humerus y-axis
+    y_comp_of_average_IMU_dir = np.array([-0.08123923, -0.99161521, -0.10049612])
+
+    """ FIND OPTIMAL VIRTUAL IMU OFFSET BASED ON THE INPUTS """
+
+    # We are trying to find a rotational offset between two frames, A - the model's humerus, and B - the humerus IMU
+    # The scipy align_vectors() function finds a rotational offset between two frames which optimally aligns two sets of
+    # vectors defined in those frames: a, and b.
+    # The largest weight is given to the first pair of vectors, because we want to strictly enforce that the estimated
+    # elbow flexion axis is aligned with the model elbow flexion axis.
+    # The other pairs of vectors are included to constrain the undefined DoF which would be present if we only used the
+    # elbow flexion axis vectors. These pairs try to align the humerus IMU frame with the initial estimate of virtual
+    # IMU frame from the pose-based calibration
+
+    # Specify the first pairs of vectors which should be aligned, with the highest weighting
+    a1 = FE_axis_in_humerus
+    b1 = FE_axis_in_humerus_IMU
+    w1 = 10000
+
+    # Specify the other pairs of vectors, using the initial guess at the IMU offset based on pose
+    a2 = y_comp_of_average_IMU_dir   # i.e. the axis of the pose-based virtual IMU frame
+    b2 = [0, 1, 0]    # i.e. the x, y, z axis of the IMU frame
+    w2 = 1         # These are weighted much lower because we want to prioritise the flexion axis estimation
+
+    # Compile the arrays
+    a = [a1, a2]
+    b = [b1, b2]
+    w = [w1, w2]
+
+    # Alternative function
+    virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
+
+    # Convert the virtual IMU offset to a scipy R
+    virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])
+
+    if debug:
+        print("The estimated FE axis in the humerus IMU frame is:", FE_axis_in_humerus_IMU)
+        print("The model's EF axis in the humerus frame is: ", FE_axis_in_humerus)
+        print("The optimal virtual IMU offset is: \n", virtual_IMU.as_matrix())
+
+        """ PLOT THE OPTIMISATION """
+
+        # Function to plot an arrow in 3D
+        def plot_arrow(ax, start, direction, color, linewidth, length, label):
+            ax.plot([start[0], start[0] + direction[0]*length],
+                    [start[1], start[1] + direction[1]*length],
+                    [start[2], start[2] + direction[2]*length], color=color, linewidth=linewidth)
+            if label != None:
+                ax.text(start[0] + direction[0]*length*1.1, start[1] + direction[1]*length*1.1, start[2] + direction[2]*length*1.1, label,
+                        color=color, fontsize=12)
+
+        # Create a new figure
+        fig = plt.figure()
+
+        # Define the unit vectors for the x, y, and z axes
+        x_axis = np.array([1, 0, 0])
+        y_axis = np.array([0, 1, 0])
+        z_axis = np.array([0, 0, 1])
+
+        # Plot all the vectors in frame A
+        ax1 = fig.add_subplot(131, projection='3d')
+        origin = np.array([1, 1, 1])
+        plot_arrow(ax1, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax1, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax1, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax1, origin, a1, 'purple', linewidth=3, length=0.8, label='FE_ref')
+        plot_arrow(ax1, origin, a2, 'blue', linewidth=2, length=0.8, label='y_man')
+
+        # Plot all the vectors in frame B
+        ax2 = fig.add_subplot(132, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax2, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax2, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax2, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax2, origin, b1, 'purple', linewidth=1, length=1.1, label='FE_opt')
+        plot_arrow(ax2, origin, b2, 'blue', linewidth=1, length=1.1, label='y')
+
+        # Apply the estimated rotation to the second set of vectors
+        b1_rot = qmt.rotate(virtual_IMU_quat, b1)
+        b2_rot = qmt.rotate(virtual_IMU_quat, b2)
+
+        # Plot all the a vectors in frame A, and the rotated b vectors in frame A
+        ax3 = fig.add_subplot(133, projection='3d')
+        origin = np.array([1, 1, 1])
+        # Plot the x, y, and z axes as arrows with custom width
+        plot_arrow(ax3, origin, x_axis, 'black', linewidth=3, length=1.3, label='X')
+        plot_arrow(ax3, origin, y_axis, 'black', linewidth=3, length=1.3, label='Y')
+        plot_arrow(ax3, origin, z_axis, 'black', linewidth=3, length=1.3, label='Z')
+        plot_arrow(ax3, origin, a1, 'purple', linewidth=3, length=0.8, label='')
+        plot_arrow(ax3, origin, a2, 'blue', linewidth=2, length=0.8, label='')
+        plot_arrow(ax3, origin, b1_rot, 'purple', linewidth=1, length=1.1, label='FE')
+        plot_arrow(ax3, origin, b2_rot, 'blue', linewidth=1, length=1.1, label='y')
+
+        axes = [ax1, ax2, ax3]
+
+        for ax in axes:
+            # Set the limits
+            ax.set_xlim([0, 2])
+            ax.set_ylim([0, 2])
+            ax.set_zlim([0, 2])
+            ax.invert_zaxis()
+            ax.invert_xaxis()
+            # Adjust the view angle so that the y-axis points upwards
+            ax.view_init(elev=0, azim=180)
+            # Remove ticks and tick labels
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_zticks([])
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            ax.set_zticklabels([])
+
+        # Show the plot
+        plt.show()
+
+    return virtual_IMU
+
+
+
 # Function to define the humerus IMU offset based on an estimated elbow flexion axis
 # Note: this is based on the fixed carry angle defined in the model
 def get_IMU_cal_rad_method_1(PS_axis_in_radius_IMU, debug):
@@ -803,7 +1169,6 @@ def get_IMU_cal_rad_method_1(PS_axis_in_radius_IMU, debug):
 
     # Alternative function
     virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
-    print('Alternative virtual IMU offset:', virtual_IMU_quat)
 
     # Convert the virtual IMU offset to a scipy R
     virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])

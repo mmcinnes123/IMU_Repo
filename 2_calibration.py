@@ -9,6 +9,8 @@ from helpers_calibration import get_IMU_offsets_METHOD_1
 from helpers_calibration import get_IMU_offsets_METHOD_2
 from helpers_calibration import get_IMU_offsets_METHOD_3
 from helpers_calibration import get_IMU_offsets_METHOD_4a
+from helpers_calibration import get_IMU_offsets_METHOD_4b
+from helpers_calibration import get_IMU_offsets_METHOD_4c
 from helpers_calibration import set_default_model_pose
 from constants import template_model_file
 
@@ -70,22 +72,30 @@ def run_method(method_name, subject_code, IMU_type):
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_4a(subject_code, IMU_type)
 
+        elif method_name == 'METHOD_4b':
+            thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+                get_IMU_offsets_METHOD_4b(subject_code, IMU_type)
+
+        elif method_name == 'METHOD_4c':
+            thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+                get_IMU_offsets_METHOD_4c(subject_code, IMU_type)
+
         else:
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = None, None, None
             print('Method not defined properly.')
             quit()
 
-        # # # Create the calibrated model, applying the calculated offsets to the default model
-        # apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
-        #                    calibrated_model_dir)
+        # # Create the calibrated model, applying the calculated offsets to the default model
+        apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
+                           calibrated_model_dir)
 
 
 """ RUN THE CALIBRATION """
 
-# subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
-subject_list = ['P11']
+subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+# subject_list = ['P11']
 IMU_type_list = ['Perfect']
-method_name_list = ['METHOD_4a']
+method_name_list = ['METHOD_4c']
 # method_name_list = ['OSIM_Alt_self', 'OSIM_N_self', 'ALL_MANUAL', 'METHOD_1_self', 'METHOD_2_self', 'METHOD_4a']
 
 for subject_code in subject_list:
