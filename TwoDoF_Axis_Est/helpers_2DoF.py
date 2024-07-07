@@ -39,7 +39,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     IMU2_trimmed = IMU2_np[start_ind:end_ind]
     IMU3_trimmed = IMU3_np[start_ind:end_ind]
 
-    # Run the rot method
+    # Run the optimisation function
     from TwoDoF_Axis_Est.joint_axis_est_2d import jointAxisEst2D
 
     params = dict(method=opt_method)
@@ -328,7 +328,7 @@ def get_J1_J2_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, debug_p
     return avg_ang_vel
 
 
-def visulalise_3D_vec_on_IMU(vec1, vec2, vec3):
+def visulalise_opt_result_vec_on_IMU(vec1, vec2, vec3):
 
     # scale vec2 so it displays better
     vec2 = 6*vec2
@@ -357,7 +357,7 @@ def visulalise_3D_vecs_on_IMU(vecs1, rate):
     imu_letter = 'F'
 
     # Test visualising vector
-    gyr = vecs1
+    gyr = vecs1*10
     N = len(gyr)
     # acc = [vec2 for _ in range(N)]
     # mag = [vec3 for _ in range(N)]
@@ -408,3 +408,47 @@ def get_event_dict_from_file(subject_code):
     event_dict = eval(event_dict_str)
 
     return event_dict
+
+def filter_gyr_data(gyr, cutoff, rate, plot):
+
+    # Check cutoff freq is not near Nyquist freq (= half the sampling rate)
+    if 2 * cutoff <= 0.95 * rate:  # do not filter if (almost) at Nyquist frequency
+
+        # Design the butterworth filter parameters
+        order = 2
+        norm_cut_off = cutoff * 2 / rate
+        b, a = signal.butter(order, norm_cut_off)
+
+        """ If there are sections of missing data, filter the segments separately """
+
+        valid_bool_3d = ~np.isnan(gyr)     # Check if there's nan data and create a boolean mask of valid entries
+        np.set_printoptions(threshold=np.inf)
+        valid_bool = valid_bool_3d.any(axis=1)
+
+        if np.all(valid_bool):
+
+            # If there's no nans, just filter all the data
+            gyr_filt = signal.filtfilt(b, a, gyr, axis=0)
+
+        else:
+
+            gyr_filt = np.full_like(gyr, np.nan)   # Create an array the same size as gyr, full of nans
+            interval_inds = np.where(np.diff(valid_bool))[0] + 1     # get indices where ~np.isnan() turns from True to False
+            segments = np.split(gyr, interval_inds)      # Split the data into valid and non-valid sections
+            valid_bool_segments = np.split(valid_bool, interval_inds)      # Split the boolean mask into valid/non-valid segments
+
+            interval_inds = np.concatenate((np.array(([0])), interval_inds))
+
+            # Apply the filter to each valid segment
+            for segment, valid_bool_segment, interval_ind in zip(segments, valid_bool_segments, interval_inds):
+                if np.all(valid_bool_segment) and len(valid_bool_segment) > 9:       # If the valid_segment is full of 'True' bools (and is longer than the filter pad)
+                    filtered_segment = signal.filtfilt(b, a, segment, axis=0)
+                    gyr_filt[interval_ind:(interval_ind+len(filtered_segment))] = filtered_segment     # Fill the nan array with the filtered data in the right place
+
+    if plot:
+        print('Plotting gyro data before filter:')
+        plot_gyr_data(gyr, rate)
+        print('Plotting gyro data after filter:')
+        plot_gyr_data(gyr_filt, rate)
+
+    return gyr_filt

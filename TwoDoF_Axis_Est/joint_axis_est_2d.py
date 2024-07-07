@@ -12,6 +12,7 @@ from TwoDoF_Axis_Est.helpers_2DoF import plot_gyr_data
 from TwoDoF_Axis_Est.helpers_2DoF import visualise_quat_data
 from TwoDoF_Axis_Est.helpers_2DoF import get_ang_vels_from_quats
 from TwoDoF_Axis_Est.helpers_2DoF import visulalise_3D_vecs_on_IMU
+from TwoDoF_Axis_Est.helpers_2DoF import filter_gyr_data
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
@@ -19,7 +20,6 @@ def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/1562292
 
 
 def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plot=False):
-    # TODO: docs, debug plot
 
     # Update the parameters (settings) with default values if they haven't been specified in the input
     defaults = dict(method='rot', gyrCutoff=5, downsampleRate=20)
@@ -65,12 +65,23 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         gyr2_E2 = qmt.rotate(q2, gyr2[ind])
 
     # Apply a butterworth low pass filter to the angular velocity data
-    # (The gyrCutoff is the cut-off frequency used to filter the angular rates (used in the rotation constraint))
+    # (The gyrCutoff is the cut-off frequency used to filter the angular rates)
     if gyrCutoff is not None:  # apply Butterworth low pass filter
-        if 2 * gyrCutoff <= 0.95 * downsampleRate:  # do not filter if (almost) at Nyquist frequency
-            b, a = signal.butter(2, gyrCutoff * 2 / downsampleRate)
-            gyr1_E1 = signal.filtfilt(b, a, gyr1_E1, axis=0)
-            gyr2_E2 = signal.filtfilt(b, a, gyr2_E2, axis=0)
+        gyr1_E1 = filter_gyr_data(gyr1_E1, gyrCutoff, downsampleRate, plot=False)
+        gyr2_E2 = filter_gyr_data(gyr2_E2, gyrCutoff, downsampleRate, plot=False)
+
+    # Remove rows with nans from quat and gyr data
+    nan_rows = np.isnan(q1).any(axis=1) | np.isnan(q2).any(axis=1) | np.isnan(gyr1_E1).any(axis=1) | np.isnan(gyr2_E2).any(axis=1)
+    perc_removed = 100 * np.sum(nan_rows)/len(q1)
+    if perc_removed > 5:
+        print(f'WARNING: {perc_removed:.1f}% data was missing from the available optimisation period.')
+    if perc_removed > 20:
+        print(f'QUITTING: {perc_removed:.1f}% of the optimisation data was missing')
+        quit()
+    q1 = q1[~nan_rows]
+    q2 = q2[~nan_rows]
+    gyr1_E1 = gyr1_E1[~nan_rows]
+    gyr2_E2 = gyr2_E2[~nan_rows]
 
     # Define the dict of data to be used in the optimisation function
     d = dict(quat1=q1, quat2=q2, gyr1_E1=gyr1_E1, gyr2_E2=gyr2_E2)

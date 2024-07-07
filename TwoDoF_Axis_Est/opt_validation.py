@@ -3,7 +3,8 @@
 from helpers_2DoF import get_J1_J2_from_calibrated_OMC_model
 from helpers_2DoF import get_J1_J2_from_opt
 from helpers_2DoF import get_J1_J2_from_isolate_move
-from helpers_2DoF import visulalise_3D_vec_on_IMU
+from helpers_2DoF import visulalise_opt_result_vec_on_IMU
+from helpers_2DoF import visulalise_opt_result_vec_on_IMU
 from helpers_2DoF import get_event_dict_from_file
 
 import qmt
@@ -34,7 +35,7 @@ IMU_type_for_opt_list = ['Perfect']
 opt_method_list = ['rot_noDelta']
 
 # List of subjects
-subject_list = [f'P{i}' for i in range(11, 12)]
+subject_list = [f'P{i}' for i in range(21, 22)]
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -112,8 +113,8 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
             print(f'Finished analysis for {subject_code}.')
 
             # Visualise 3D animation of the results
-            # visulalise_3D_vec_on_IMU(opt_PS, OMC_PS, None)
-            visulalise_3D_vec_on_IMU(OMC_FE, opt_FE, None)
+            # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
+            visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
 
             """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
             # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
@@ -122,7 +123,7 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
 
 """ COMPILE ALL RESULTS """
 
-# Print all results to csv
+# # Print all results to csv
 # all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
 
 
