@@ -16,8 +16,8 @@ from tkinter.filedialog import askopenfilename, askdirectory
 """ SETTINGS """
 
 # Quick Settings
-subject_code_list = [f'P{i}' for i in range(1, 23)]
-# subject_code_list = ['P17']
+subject_code_list = [f'P{i}' for i in range(16, 23)]
+# subject_code_list = ['P15']
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 

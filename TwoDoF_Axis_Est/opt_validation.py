@@ -114,7 +114,7 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
 
             # Visualise 3D animation of the results
             # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
-            visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+            # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
 
             """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
             # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,

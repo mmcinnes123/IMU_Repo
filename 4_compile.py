@@ -10,7 +10,8 @@ import os
 # Quick Settings
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 list_of_subjects = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
-IMU_type_list = ['Perfect']
+# list_of_subjects = [f'P{i}' for i in range(1, 23)]    # Missing FE/PS data
+IMU_type_list = ['Perfect', 'Real']
 trial_name = 'JA_Slow'
 # calibration_name_dict = {'OSIM_N_self': None,
 #                          'OSIM_Alt_self': None,
@@ -19,7 +20,7 @@ trial_name = 'JA_Slow'
 #                          'METHOD_2_Alt_self': None,
 #                          'METHOD_3': None,
 #                          }
-calibration_name_dict = {'METHOD_4a': None, 'METHOD_4b': None, 'METHOD_4c': None}
+calibration_name_dict = {'OSIM_Alt_self': None, 'OSIM_Alt_asst': None, 'METHOD_4a': None, 'METHOD_4b': None, 'METHOD_5': None}
 
 
 
@@ -42,18 +43,20 @@ for IMU_type in IMU_type_list:
                                      comparison_folder, file_name)
 
             # Read RMSEs from the CSV file
-            with open(file_path, 'r') as file:
-                Results_df = pd.read_csv(file, index_col=0, header=0, sep=',', dtype={1: np.float64, 2: np.float64})
+            if os.path.exists(file_path):
 
-            for row in range(len(Results_df)):
-                new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_name],
-                                        'CalibrationName': [calibration_name], 'IMU_type': [IMU_type],
-                                        'JA': Results_df.index[row],
-                                        'RMSE': Results_df.loc[Results_df.index[row], 'RMSE'],
-                                        'R': Results_df.loc[Results_df.index[row], 'R'],
-                                        'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
-                                        'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
-                all_data = pd.concat([all_data, new_row], ignore_index=True)
+                with open(file_path, 'r') as file:
+                    Results_df = pd.read_csv(file, index_col=0, header=0, sep=',', dtype={1: np.float64, 2: np.float64})
+
+                for row in range(len(Results_df)):
+                    new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_name],
+                                            'CalibrationName': [calibration_name], 'IMU_type': [IMU_type],
+                                            'JA': Results_df.index[row],
+                                            'RMSE': Results_df.loc[Results_df.index[row], 'RMSE'],
+                                            'R': Results_df.loc[Results_df.index[row], 'R'],
+                                            'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
+                                            'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
+                    all_data = pd.concat([all_data, new_row], ignore_index=True)
 
 all_data.to_csv(os.path.join(directory, 'R Analysis', 'AllResults_forR.csv'))
 

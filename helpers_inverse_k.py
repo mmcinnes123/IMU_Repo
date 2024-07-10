@@ -7,6 +7,8 @@ def run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_fi
                sensor_to_opensim_rotations, results_directory, trim_bool,
                start_time, end_time, IK_output_file_name, visualize_tracking):
 
+    osim.Model.setDebugLevel(-2)  # Stop warnings about missing geometry vtp files
+
     # Instantiate an InverseKinematicsTool
     imuIK = osim.IMUInverseKinematicsTool(IMU_IK_settings_file)
 
@@ -24,13 +26,14 @@ def run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_fi
     thorax_imu_weight = osim.OrientationWeight('thorax_imu', 1.0)
     humerus_imu_weight = osim.OrientationWeight('humerus_r_imu', 0.1)
     radius_imu_weight = osim.OrientationWeight('radius_r_imu', 1.0)
-    print('WARNING: Humerus IMU weight set to 0.1')
     imuIK.upd_orientation_weights().cloneAndAppend(thorax_imu_weight)
     imuIK.upd_orientation_weights().cloneAndAppend(humerus_imu_weight)
     imuIK.upd_orientation_weights().cloneAndAppend(radius_imu_weight)
 
     # Run IK
+    print('Running IMU IK...')
     imuIK.run(visualize_tracking)
+    print('IMU IK run finished.')
 
     # Update the settings .xml file
     imuIK.printToXML(results_directory + "\\" + IMU_IK_settings_file)

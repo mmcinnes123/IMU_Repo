@@ -35,6 +35,7 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
         end_time = end_time
 
     """ MAIN """
+    print(f'Running analysis for {subject_code}, {calibration_name}, {trial_name}.')
 
     run_analyze_tool(analyze_settings_template_file, IK_results_dir, calibrated_model_file, coord_file_for_analysis, start_time, end_time)
 
