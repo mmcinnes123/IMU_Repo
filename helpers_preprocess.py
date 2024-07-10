@@ -78,12 +78,13 @@ def write_movements_and_calibration_stos(input_file_path, cal_pose_time_dict, IM
     # Read data from TMM .txt report
     IMU1_df, IMU2_df, IMU3_df = read_data_frame_from_file(input_file_path)
 
-    # If IMU data last row is nans, remove that row
+    # If IMU data last (or 2nd last) row has nans, remove rows
     def remove_last_row_if_nans(df):
-        # Check if the last row has any NaNs
-        if df.iloc[-1].isnull().any():
-            # Remove the last row if it contains NaNs
-            df = df.iloc[:-1]
+        for _ in range(2):
+            # Check if the last row has any NaNs
+            if df.iloc[-1].isnull().any():
+                # Remove the last row if it contains NaNs
+                df = df.iloc[:-1]
         return df
     IMU1_df = remove_last_row_if_nans(IMU1_df)
     IMU2_df = remove_last_row_if_nans(IMU2_df)
