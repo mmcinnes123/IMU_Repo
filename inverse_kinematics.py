@@ -5,13 +5,14 @@
 
 from constants import IMU_IK_settings_file
 from helpers_inverse_k import run_osim_IMU_IK
+from helpers_inverse_k import get_event_dict_from_file
 
 import os
 import opensim as osim
 
 
 
-def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end_time, IK_trim_bool, IMU_type):
+def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end_time, start_at_pose_bool, IK_trim_bool, IMU_type):
 
     """ SETTINGS """
 
@@ -36,6 +37,10 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
     osim.Logger.removeFileSink()
     osim.Logger.addFileSink(IK_results_dir + r'\IMU_IK.log')
 
+    # if not IK_trim_bool:
+    #     # Set the IK start time to
+    #
+    #     # Update the trim bool so that
 
     """ MAIN """
 
@@ -45,10 +50,16 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
         print("Quitting.")
         quit()
 
+    if start_at_pose_bool:
+        # Get the time at which the alt pose is performed, to start the IK from there
+        subject_event_dict = get_event_dict_from_file(subject_code)
+        pose_time = subject_event_dict[trial_name]['Alt_self']
+        IK_start_time = pose_time
+
     # Run the IMU IK based on settings inputs above
     print(f'Running IMU IK for {subject_code}, {calibration_name}, {trial_name}.')
     run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file_path, sensor_to_opensim_rotations,
-               IK_results_dir, IK_trim_bool, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
+               IK_results_dir, start_at_pose_bool, IK_trim_bool, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
 
 
 """ TEST """
