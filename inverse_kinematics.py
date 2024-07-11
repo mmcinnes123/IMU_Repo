@@ -41,7 +41,7 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
 
     # Check that the calibrated model has been created
     if os.path.exists(calibrated_model_file) == False:
-        print(f"You haven't created the calibrated model for IMU_type: {IMU_type}, calibration_name: {calibration_name} yet")
+        print(f"You haven't created the calibrated model for subject {subject_code}, IMU_type: {IMU_type}, calibration_name: {calibration_name} yet")
         print("Quitting.")
         quit()
 

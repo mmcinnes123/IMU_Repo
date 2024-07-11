@@ -57,6 +57,8 @@ for IMU_type in IMU_type_list:
                                             'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
                                             'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
                     all_data = pd.concat([all_data, new_row], ignore_index=True)
+            else:
+                print(f'File for {calibration_name}, {IMU_type} IMUs, {trial_name}, {subject_code} does not exist.')
 
 all_data.to_csv(os.path.join(directory, 'R Analysis', 'AllResults_forR.csv'))
 
