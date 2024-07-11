@@ -12,8 +12,11 @@ import os
 
 
 list_of_subjects = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+# list_of_subjects = ['P15']    # Missing FE/PS data
 calibration_name_dict = {'OSIM_Alt_self': None, 'OSIM_Alt_asst': None, 'METHOD_4a': None, 'METHOD_4b': None, 'METHOD_5': None}
+# calibration_name_dict = {'METHOD_5': None}
 IMU_type_list = ['Perfect', 'Real']
+# IMU_type_list = ['Perfect']
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 trial_name = 'JA_Slow'
 
@@ -38,12 +41,13 @@ for subject_code in list_of_subjects:
 
                 # print('Reading coordinates from .mot files...')
                 coords_table = osim.TimeSeriesTable(IK_results_mot)
-
+                all_GH_coords = []
                 for coord in ['GH_y', 'GH_z', 'GH_x']:
+                    all_GH_coords.append(coords_table.getDependentColumn(coord).to_numpy())
+                all_GH_coords = np.array(all_GH_coords)
 
-                    IMU_angle = coords_table.getDependentColumn(coord).to_numpy()
-                    if np.any((IMU_angle > coord_limit) | (IMU_angle < -coord_limit)):
-                        print(f'Values above {coord_limit} for file: {IK_results_mot}')
+                if np.any((all_GH_coords > coord_limit) | (all_GH_coords < -coord_limit)):
+                    print(f'Values above {coord_limit} for file: {IK_results_mot}')
 
 
 

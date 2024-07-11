@@ -51,6 +51,16 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     OMC_table = osim.TimeSeriesTable(OMC_mot_file)
     IMU_table = osim.TimeSeriesTable(IMU_mot_file)
 
+    # Check that the IMU solution seems sensible by checking GH coords are within a certain range
+    GH_coord_limit = 180
+    all_GH_coords = []
+    for coord in ['GH_y', 'GH_z', 'GH_x']:
+        all_GH_coords.append(IMU_table.getDependentColumn(coord).to_numpy())
+    all_GH_coords = np.array(all_GH_coords)
+    if np.any((all_GH_coords > GH_coord_limit) | (all_GH_coords < -GH_coord_limit)):
+        print(f'WARNING: IMU mot file has GH values above {GH_coord_limit}. Compare not run for file: {IMU_mot_file}')
+        return
+
     # Set start and end time if trim_bool is false
     if trim_bool == False:
         start_time = 0
