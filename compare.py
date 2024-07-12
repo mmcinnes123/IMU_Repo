@@ -2,9 +2,21 @@
 # Inputs are: two .mot files
 # Outputs are: .png plots of each joint of interest
 
+from helpers_compare import check_sensible_GHs
+from helpers_compare import convert_osim_table_to_df
+from helpers_compare import get_body_quats_from_analysis_sto
+from helpers_compare import trim_df
+from helpers_compare import get_HT_angles
+from helpers_compare import get_range_dict
+from helpers_compare import find_heading_offset
+from helpers_compare import plot_compare_any_JAs
+from helpers_compare import plot_compare_body_oris
+
 import pandas as pd
-from helpers_compare import *
+import math
 from tkinter.filedialog import askopenfilename, askdirectory
+import os
+import opensim as osim
 
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type, test):
@@ -16,8 +28,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         quit()
 
     """ SETTINGS """
-    sample_rate = 100
-
     # Define some file names
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     JA_range_dict_file = os.path.join(parent_dir, subject_code + '_JA_range_dict.txt')
@@ -43,7 +53,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     # Make results folder if it doesn't exist yet
     os.makedirs(results_dir, exist_ok=True)
 
-
     """ READ IN DATA """
 
     # Read in coordinates from IK results .mot files
@@ -51,153 +60,90 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     OMC_table = osim.TimeSeriesTable(OMC_mot_file)
     IMU_table = osim.TimeSeriesTable(IMU_mot_file)
 
+    # Set start and end time based on the length of the IMU data if trim_bool is false
+    if not trim_bool:
+        start_time = math.floor(IMU_table.getIndependentColumn()[0])
+        end_time = math.floor(IMU_table.getIndependentColumn()[-1])
+
     # Check that the IMU solution seems sensible by checking GH coords are within a certain range
-    GH_coord_limit = 180
-    all_GH_coords = []
-    for coord in ['GH_y', 'GH_z', 'GH_x']:
-        all_GH_coords.append(IMU_table.getDependentColumn(coord).to_numpy())
-    all_GH_coords = np.array(all_GH_coords)
-    if np.any((all_GH_coords > GH_coord_limit) | (all_GH_coords < -GH_coord_limit)):
-        print(f'WARNING: IMU mot file has GH values above {GH_coord_limit}. Compare not run for file: {IMU_mot_file}')
-        return
+    check_sensible_GHs(IMU_mot_file, IMU_table, GH_coord_limit=180)
 
-    # Set start and end time if trim_bool is false
-    if trim_bool == False:
-        start_time = 0
-        end_time = (IMU_table.getNumRows() - 1) / sample_rate
+    # Turn the osim coords tables into dataframes
+    OMC_coords = convert_osim_table_to_df(OMC_table)
+    IMU_coords = convert_osim_table_to_df(IMU_table)
 
-    # Read in body orientations from newly created csv files (as trimmed np arrays (Nx4))
-    print('Getting model body orientations from .sto files...')
-    thorax_IMU, humerus_IMU, radius_IMU = get_body_quats_from_analysis_sto(IMU_analysis_sto_path, start_time, end_time)
-    thorax_OMC, humerus_OMC, radius_OMC = get_body_quats_from_analysis_sto(OMC_analysis_sto_path, start_time, end_time)
-    heading_offset = find_heading_offset(thorax_OMC, thorax_IMU)
+    # Read in the orientation data of the model bodies from the analysis sto results file
+    IMU_body_quats = get_body_quats_from_analysis_sto(IMU_analysis_sto_path, start_time, end_time)
+    OMC_body_quats = get_body_quats_from_analysis_sto(OMC_analysis_sto_path, start_time, end_time)
 
-    # Trim tables based on time of interest
-    OMC_table.trim(start_time, end_time)
-    IMU_table.trim(start_time, end_time)
+    # Trim the dataframes based on the specified start and end times
+    OMC_coords = trim_df(OMC_coords, start_time, end_time)
+    IMU_coords = trim_df(IMU_coords, start_time, end_time)
+    OMC_body_quats = trim_df(OMC_body_quats, start_time, end_time)
+    IMU_body_quats = trim_df(IMU_body_quats, start_time, end_time)
 
-    # Account for discrepancies between trimming function/time values
-    n = OMC_table.getNumRows() - IMU_table.getNumRows()     # Check if tables are different lengths
-    OMC_table, IMU_table = trim_tables_if_diff_lengths(n, OMC_table, IMU_table)    # Trim the tables to the same length
-
-    # Trim the body ori data to same length for ease of plotting
-    thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC = \
-        trim_body_ori_data_to_same_length(n, thorax_IMU, humerus_IMU, radius_IMU, thorax_OMC, humerus_OMC, radius_OMC)
-
-    time = np.array(OMC_table.getIndependentColumn())  # Get the time data
-
-    """ ANALYSE ELBOW AND THORAX COORDS """
-
-
-    # Instantiate error dicts to write results into
-    RMSE_results_dict = {'thorax_ori': None, 'humerus_ori': None, 'radius_ori': None,
-                         'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
-                         'elbow_flexion': None, 'elbow_pronation': None,
-                         'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
-    R_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
-                      'elbow_flexion': None, 'elbow_pronation': None,
-                      'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
-    peakROM_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
-                      'elbow_flexion': None, 'elbow_pronation': None,
-                      'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
-    troughROM_results_dict = {'thorax_forward_tilt': None, 'thorax_lateral_tilt': None, 'thorax_rotation': None,
-                      'elbow_flexion': None, 'elbow_pronation': None,
-                      'HT_abd': None, 'HT_flexion': None, 'HT_rotation': None}
-
-    # Define a dict with keys and values used to read sto columns, for reading in all osim cordinates
-    OSim_coords_joint_ref_dict = {'thorax_forward_tilt': 'TH_x', 'thorax_lateral_tilt': 'TH_z', 'thorax_rotation': 'TH_y',
-                                  'elbow_flexion': 'EL_x', 'elbow_pronation': 'PS_y'}
+    # Check all dataframes are the same length
+    assert len(OMC_coords) == len(IMU_coords) == len(OMC_body_quats) == len(IMU_body_quats), 'Data frames not same length'
 
     """ GET HT ANGLES """
 
-    # Calculate the projected vector angles based on the body orientations of thorax and humerus
-    abduction_OMC, flexion_OMC, rotation_elbow_down_OMC, rotation_elbow_up_OMC = \
-        get_vec_angles_from_two_CFs(thorax_OMC, humerus_OMC)
-    abduction_IMU, flexion_IMU, rotation_elbow_down_IMU, rotation_elbow_up_IMU = \
-        get_vec_angles_from_two_CFs(thorax_IMU, humerus_IMU)
+    # Get projected vector humero-thoracic joint angles from the model body orientations
+    IMU_HT_angles = get_HT_angles(IMU_body_quats)
+    OMC_HT_angles = get_HT_angles(OMC_body_quats)
 
-    OMC_angle_dict = {'HT_abd': abduction_OMC, 'HT_flexion': flexion_OMC, 'HT_rotation': rotation_elbow_down_OMC}
-    IMU_angle_dict = {'HT_abd': abduction_IMU, 'HT_flexion': flexion_IMU, 'HT_rotation': rotation_elbow_down_IMU}
-    HT_joint_ref_dict = {'HT_abd': 'Shoulder_Abduction', 'HT_flexion': 'Shoulder_Flexion', 'HT_rotation': 'Shoulder_Rotation'}
+    # Join the coord and HT angles data together to make one data frame with all angles
+    rename_dict = {'TH_y': 'thorax_rotation', 'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt', 'EL_x': 'elbow_flexion', 'PS_y':'elbow_pronation'}
+    IMU_angles = IMU_coords[['TH_y', 'TH_x', 'TH_z', 'EL_x', 'PS_y']].copy().rename(columns=rename_dict)
+    IMU_angles = pd.concat([IMU_angles, IMU_HT_angles], axis=1)
+    OMC_angles = OMC_coords[['TH_y', 'TH_x', 'TH_z', 'EL_x', 'PS_y']].copy().rename(columns=rename_dict)
+    OMC_angles = pd.concat([OMC_angles, OMC_HT_angles], axis=1)
 
-
-    """ MAKE JA TIME RANGE DICT """
+    """ MAKE/GET THE JA TIME RANGE DICT """
 
     # Use interactive span selector to choose time range for each JA movement period
-    range_dict = get_range_dict(JA_range_dict_file, OSim_coords_joint_ref_dict, HT_joint_ref_dict,
-                                OMC_table, IMU_table, OMC_angle_dict, IMU_angle_dict, time)
+    range_dict = get_range_dict(JA_range_dict_file, IMU_angles, OMC_angles)
 
+    """ ANALYSE JOINT ANGLE ERRORS """
 
-    """ ANALYSE ELBOW AND THORAX COORDS """
+    # Instantiate an empty results df
+    results_df = pd.DataFrame(columns=['JA', 'RMSE', 'R', 'peakROM', 'troughROM'])
 
-    # Plot and calculate errors for all the coordinates in the states file
-    # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
-    print('Plotting results...')
-    for key, value in OSim_coords_joint_ref_dict.items():
-
-        # Extract coordinates from states table
-        OMC_angle = OMC_table.getDependentColumn(value).to_numpy()
-        IMU_angle = IMU_table.getDependentColumn(value).to_numpy()
-
-        # Calcualte error metrics and plot
+    # For each joint angle of interest, get the error metrics between IMU and OMC results
+    for joint_name in [col for col in IMU_angles.columns if col != 'time']:
         RMSE, R, mean_peak_error, mean_trough_error = \
-            plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, range_dict, joint_name=key)
-
-        # Add RMSE and R values into the results dicts
-        RMSE_results_dict[key] = RMSE
-        R_results_dict[key] = R
-        peakROM_results_dict[key] = mean_peak_error
-        troughROM_results_dict[key] = mean_trough_error
-
-
-    """ ANALYSE HT ANGLES """
-
-    # Plot and calculate errors for all the HT angles, calculated from relative body oris
-    # Iterate through the joint angles specified in the dict, calculating RMSE, R, and plotting results
-    for key, value in HT_joint_ref_dict.items():
-
-        OMC_angle = OMC_angle_dict[key]
-        IMU_angle = IMU_angle_dict[key]
-
-        # Calcualte error metrics and plot
-        RMSE, R, mean_peak_error, mean_trough_error = \
-            plot_compare_any_JAs(OMC_angle, IMU_angle, time, start_time, end_time, results_dir, range_dict, joint_name=key)
-
-        # Add RMSE and R values into the results dicts
-        RMSE_results_dict[key] = RMSE
-        R_results_dict[key] = R
-        peakROM_results_dict[key] = mean_peak_error
-        troughROM_results_dict[key] = mean_trough_error
-
+            plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
+                                 range_dict)
+        new_row = pd.DataFrame({'JA': joint_name, 'RMSE': [RMSE], 'R': [R], 'peakROM': [mean_peak_error], 'troughROM': [mean_trough_error]})
+        results_df = pd.concat([results_df, new_row], ignore_index=True)
 
     """ ANALYSE MODEL BODY ORIENTATIONS """
 
+    # Find the average heading offset between the IMU thorax body and the OMC thorax body frames
+    heading_offset = find_heading_offset(OMC_body_quats, IMU_body_quats, report=False)
+
+    # For each model body, calculate the angular distance error between IMU and OMC model
     RMSE_thorax_ori, RMSE_humerus_ori, RMSE_radius_ori = \
-        plot_compare_body_oris(thorax_OMC, humerus_OMC, radius_OMC, thorax_IMU, humerus_IMU, radius_IMU,
-                           heading_offset, time, start_time, end_time, results_dir)
+        plot_compare_body_oris(OMC_body_quats, IMU_body_quats,
+                           heading_offset, start_time, end_time, results_dir)
 
-    RMSE_results_dict['thorax_ori'] = RMSE_thorax_ori
-    RMSE_results_dict['humerus_ori'] = RMSE_humerus_ori
-    RMSE_results_dict['radius_ori'] = RMSE_radius_ori
-
+    # Add body orientation results to results df
+    new_row1 = pd.DataFrame({'JA': 'thorax_ori', 'RMSE': [RMSE_thorax_ori]})
+    new_row2 = pd.DataFrame({'JA': 'humerus_ori', 'RMSE': [RMSE_humerus_ori]})
+    new_row3 = pd.DataFrame({'JA': 'radius_ori', 'RMSE': [RMSE_radius_ori]})
+    results_df = pd.concat([results_df, new_row1, new_row2, new_row3])
 
 
     """ WRITE RESULTS """
 
-    final_RMSE_values_df = pd.DataFrame.from_dict(RMSE_results_dict, orient='index', columns=["RMSE"])
-    final_R_values_df = pd.DataFrame.from_dict(R_results_dict, orient='index', columns=["R"])
-    final_peakROM_values_df = pd.DataFrame.from_dict(peakROM_results_dict, orient='index', columns=["peakROM"])
-    final_troughROM_values_df = pd.DataFrame.from_dict(troughROM_results_dict, orient='index', columns=["troughROM"])
-    all_data = pd.concat((final_RMSE_values_df, final_R_values_df, final_peakROM_values_df, final_troughROM_values_df), axis=1)
+    all_data = results_df
 
     # Write final RMSE values to a csv
     print('Writing results to .csv.')
     all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
-                    mode='w', encoding='utf-8', na_rep='nan')
+                    mode='w', encoding='utf-8', na_rep='nan', index=False)
 
 
 # Run single test
 if __name__ == '__main__':
 
     run_IK_compare('P3', 'JA_Slow', 'METHOD_4_Opt', 0, 90, False, 'Perfect', test=True)
-

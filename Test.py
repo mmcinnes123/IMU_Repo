@@ -7,48 +7,46 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation as R
 import os
+import shutil
+
 
 # Check list of mot filse to see if weird singularity happened during IK which made GH coords be over 180deg
 
+dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 
-list_of_subjects = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
-# list_of_subjects = ['P15']    # Missing FE/PS data
-calibration_name_dict = {'OSIM_Alt_self': None, 'OSIM_Alt_asst': None, 'METHOD_4a': None, 'METHOD_4b': None, 'METHOD_5': None}
-# calibration_name_dict = {'METHOD_5': None}
-IMU_type_list = ['Perfect', 'Real']
-# IMU_type_list = ['Perfect']
-directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
-trial_name = 'JA_Slow'
+subject_code_list = [f'P{i}' for i in range(2, 23) if f'P{i}' not in ('P12', 'P21')]
 
-coord_limit = 180
+move_to_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\Old Range Dicts'
 
-# Get the results for each calibration method
-for subject_code in list_of_subjects:
+for subject_code in subject_code_list:
+    subject_dir = join(dir, subject_code)
+    range_dict_file_name = subject_code + '_JA_range_dict.txt'
+    range_dict_file = join(subject_dir, range_dict_file_name)
 
-    for IMU_type in IMU_type_list:
+    file_obj = open(range_dict_file, 'r')
+    range_dict_str = file_obj.read()
+    file_obj.close()
+    range_dict = eval(range_dict_str)
 
-        for calibration_name in calibration_name_dict:
+    for joint_name in range_dict.keys():
+        ind_val_1 = range_dict[joint_name][0]
+        ind_val_2 = range_dict[joint_name][1]
+        # Check the values are large, not time values
+        if ind_val_1 > 200:
+            ind_val_1_new = ind_val_1 / 100
+            ind_val_2_new = ind_val_2 / 100
 
-            # Define the file paths
-            IK_results_dir = join(directory, subject_code, IMU_type, 'IMU_IK_results_' + calibration_name, trial_name)
-            IK_results_mot = join(IK_results_dir, 'IMU_IK_results.mot')
+            new_list = [ind_val_1_new, ind_val_2_new]
 
-            OMC_results_dir = join(directory, subject_code, 'OMC', trial_name + '_IK_Results')
-            OMC_results_mot = join(OMC_results_dir, 'OMC_IK_results.mot')
+            # Update the range_dict
+            range_dict[joint_name] = new_list
 
-            # Read RMSEs from the CSV file
-            if os.path.exists(IK_results_mot):
+            # Save dict to .txt
+            file_obj = open(range_dict_file, 'w')
+            file_obj.write(str(range_dict))
+            file_obj.close()
 
-                # print('Reading coordinates from .mot files...')
-                coords_table = osim.TimeSeriesTable(IK_results_mot)
-                all_GH_coords = []
-                for coord in ['GH_y', 'GH_z', 'GH_x']:
-                    all_GH_coords.append(coords_table.getDependentColumn(coord).to_numpy())
-                all_GH_coords = np.array(all_GH_coords)
-
-                if np.any((all_GH_coords > coord_limit) | (all_GH_coords < -coord_limit)):
-                    print(f'Values above {coord_limit} for file: {IK_results_mot}')
-
-
+        else:
+            print('This range dict was already time values: ', range_dict_file)
 
 

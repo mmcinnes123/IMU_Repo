@@ -8,6 +8,7 @@ from constants import analyze_settings_template_file, sample_rate
 
 import opensim as osim
 import os
+import numpy as np
 
 def run_analysis(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type):
 
@@ -27,9 +28,8 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
     # Set end time by checking length of data
     if trim_bool == False:
         coords_table = osim.TimeSeriesTable(coord_file_for_analysis)
-        n_rows = coords_table.getNumRows()
-        start_time = 0
-        end_time = n_rows / sample_rate
+        start_time = np.round(coords_table.getIndependentColumn()[0], 2)
+        end_time = np.round(coords_table.getIndependentColumn()[-1], 2)
     else:
         start_time = start_time
         end_time = end_time
