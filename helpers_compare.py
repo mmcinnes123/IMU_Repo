@@ -25,8 +25,7 @@ def check_sensible_GHs(file_name, table, GH_coord_limit):
         all_GH_coords.append(table.getDependentColumn(coord).to_numpy())
     all_GH_coords = np.array(all_GH_coords)
     if np.any((all_GH_coords > GH_coord_limit) | (all_GH_coords < -GH_coord_limit)):
-        print(f'WARNING: IMU mot file has GH values above {GH_coord_limit}. Compare not run for file: {file_name}')
-        return
+        print(f'WARNING: IMU mot file has GH values above {GH_coord_limit} for file: {file_name}')
 
 
 # Turn the tables into dataframes
@@ -82,7 +81,7 @@ def get_body_quats_from_analysis_sto(analysis_sto_path, start_time, end_time):
 
 # Trim the dataframes based on start and end times
 def trim_df(df, start_time, end_time):
-    filtered_df = df[(np.round(df['time'], 2) >= start_time) & (np.round(df['time'], 2) <= end_time)]
+    filtered_df = df[(np.round(df['time'], 2) > start_time) & (np.round(df['time'], 2) < end_time)]
     return filtered_df
 
 
@@ -592,7 +591,7 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         # Make these values up into vectors projected on certain planes
         vec_x_on_XY = [mat_x_X, mat_x_Y]
         X_on_XY = [1, 0]
-        vec_x_on_ZX = [mat_x_X, mat_x_Z]
+        vec_x_on_ZX = [mat_x_Z, mat_x_X]
         X_on_ZX = [0, 1]
         vec_z_on_YZ = [mat_z_Y, mat_z_Z]
         Z_on_YZ = [0, 1]

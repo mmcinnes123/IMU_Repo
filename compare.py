@@ -21,7 +21,7 @@ import opensim as osim
 
 def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_time, trim_bool, IMU_type, test):
 
-    print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, calibration type: {calibration_name}')
+    print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, {calibration_name}, {IMU_type}')
 
     if trial_name != 'JA_Slow':
         print('Compare code written specifically for JA_Slow. Need to handle RoM code. Quitting.')
