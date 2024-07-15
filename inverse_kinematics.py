@@ -57,7 +57,7 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
         IK_start_time = pose_time
 
     # Run the IMU IK based on settings inputs above
-    print(f'Running IMU IK for {subject_code}, {calibration_name}, {trial_name}.')
+    print(f'Running IMU IK for {subject_code}, {calibration_name}, {trial_name}, {IMU_type}.')
     run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file_path, sensor_to_opensim_rotations,
                IK_results_dir, start_at_pose_bool, IK_trim_bool, IK_start_time, IK_end_time, IK_output_file_name, visualize_tracking)
 

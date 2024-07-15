@@ -20,9 +20,9 @@ trial_name = 'JA_Slow'
 #                          'METHOD_2_Alt_self': None,
 #                          'METHOD_3': None,
 #                          }
-calibration_name_dict = {'OSIM_Alt_self': None, 'OSIM_Alt_asst': None, 'METHOD_4a': None, 'METHOD_4b': None, 'METHOD_5': None}
+calibration_name_dict = {'OSIM_Alt_self': None, 'OSIM_Alt_asst': None, 'METHOD_4b': None, 'METHOD_5': None}
 
-
+folders_to_exclude = [r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P22\Real\IMU_IK_results_METHOD_4b\JA_Slow\Comparison_P22_METHOD_4b_JA_Slow']
 
 """ CREATING DATAFRAME FOR R"""
 
@@ -42,23 +42,26 @@ for IMU_type in IMU_type_list:
             file_path = os.path.join(directory, subject_code, IMU_type, 'IMU_IK_results_' + calibration_name, trial_name,
                                      comparison_folder, file_name)
 
-            # Read RMSEs from the CSV file
-            if os.path.exists(file_path):
+            # Exclude this from the analysis for now
+            if comparison_folder not in folders_to_exclude:
 
-                with open(file_path, 'r') as file:
-                    Results_df = pd.read_csv(file, index_col=0, header=0, sep=',', dtype={1: np.float64, 2: np.float64})
+                # Read RMSEs from the CSV file
+                if os.path.exists(file_path):
 
-                for row in range(len(Results_df)):
-                    new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_name],
-                                            'CalibrationName': [calibration_name], 'IMU_type': [IMU_type],
-                                            'JA': Results_df.index[row],
-                                            'RMSE': Results_df.loc[Results_df.index[row], 'RMSE'],
-                                            'R': Results_df.loc[Results_df.index[row], 'R'],
-                                            'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
-                                            'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
-                    all_data = pd.concat([all_data, new_row], ignore_index=True)
-            else:
-                print(f'File for {calibration_name}, {IMU_type} IMUs, {trial_name}, {subject_code} does not exist.')
+                    with open(file_path, 'r') as file:
+                        Results_df = pd.read_csv(file, index_col=0, header=0, sep=',', dtype={1: np.float64, 2: np.float64})
+
+                    for row in range(len(Results_df)):
+                        new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_name],
+                                                'CalibrationName': [calibration_name], 'IMU_type': [IMU_type],
+                                                'JA': Results_df.index[row],
+                                                'RMSE': Results_df.loc[Results_df.index[row], 'RMSE'],
+                                                'R': Results_df.loc[Results_df.index[row], 'R'],
+                                                'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
+                                                'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
+                        all_data = pd.concat([all_data, new_row], ignore_index=True)
+                else:
+                    print(f'File for {calibration_name}, {IMU_type} IMUs, {trial_name}, {subject_code} does not exist.')
 
 all_data.to_csv(os.path.join(directory, 'R Analysis', 'AllResults_forR.csv'))
 
