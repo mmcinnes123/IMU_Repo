@@ -9,13 +9,13 @@ from compare import run_IK_compare
 trial_name = 'JA_Slow'      # Choose which trial to run IK
 
 # calibration_list = ['OSIM_N_self', 'OSIM_Alt_self', 'ALL_MANUAL', 'METHOD_1_Alt_self', 'METHOD_2_Alt_self', 'METHOD_3']     # Used to find the calibrated model file
-# calibration_list = ['OSIM_Alt_self', 'OSIM_Alt_asst', 'METHOD_4b', 'METHOD_5']     # Used to find the calibrated model file
-calibration_list = ['METHOD_5']     # Used to find the calibrated model file
+calibration_list = ['OSIM_Alt_self', 'OSIM_Alt_asst', 'METHOD_4b', 'METHOD_5']     # Used to find the calibrated model file
+# calibration_list = ['METHOD_5']     # Used to find the calibrated model file
 
-IMU_type_list = ['Real']        # Options: 'Perfect' or 'Real'
+IMU_type_list = ['Perfect']        # Options: 'Perfect' or 'Real'
 
 # subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
-subject_list = ['P22']    # Missing FE/PS data
+subject_list = ['P23']    # Missing FE/PS data
 
 IK_start_at_pose_bool = True
 IK_trim_bool = False

@@ -9,7 +9,7 @@ import os
 
 # Quick Settings
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
-list_of_subjects = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+list_of_subjects = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
 # list_of_subjects = [f'P{i}' for i in range(1, 23)]    # Missing FE/PS data
 IMU_type_list = ['Perfect', 'Real']
 trial_name = 'JA_Slow'

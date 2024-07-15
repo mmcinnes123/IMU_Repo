@@ -7,7 +7,8 @@ parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 base_dir = os.path.join(parent_dir, 'SubjectEventFiles')
 
 # List of subjects
-subjects = [f'P{i}' for i in range(7, 23)]
+# subjects = [f'P{i}' for i in range(7, 23)]
+subjects = ['P1', 'P2', 'P23']
 
 # List of events (modify this list according to your specific events)
 CP_events = ['N_self', 'N_asst', 'Alt_self', 'Alt_asst', 'Alt2_self']
@@ -36,7 +37,7 @@ for subject in subjects:
             del subject_trials_dict['ADL']
 
     # For these subjects, use a pose from JA_Slow to represent the Alt2_self pose, since it wasn't performed in CP
-    if subject in ['P1', 'P2', 'P3']:
+    if subject in ['P3']:
         # Add Alt2_self to JA_Slow dict and JA_fast dict
         subject_trials_dict['CP'].remove('Alt2_self')
         subject_trials_dict['JA_Slow'].append('Alt2_self')
