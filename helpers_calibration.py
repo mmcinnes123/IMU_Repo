@@ -1366,7 +1366,7 @@ def get_IMU_cal_rad_method_2(PS_axis_in_radius_IMU, radius_IMU_ori_rotated1, rad
     if debug:
         print("The estimated PS axis in the forearm IMU frame is:", PS_axis_in_radius_IMU)
         print("The model's PS axis in the radius frame is: ", PS_axis_in_radius)
-        print("The initial estimate of virtual IMU offset from manual alignment is: \n", manual_virtual_IMU.as_matrix())
+        print("The initial estimate of virtual IMU offset from pose-based alignment is: \n", pose_based_virtual_IMU.as_matrix())
         print("The optimal virtual IMU offset is: \n", virtual_IMU.as_matrix())
 
         """ PLOT THE OPTIMISATION """

@@ -1,11 +1,2 @@
-INFO:root:Using IMU type: Perfect, with data from trial: JA_Slow, and optimisation method: rot_noDelta.
-INFO:root:Results for Subject P21
-INFO:root:OMC FE axis in humerus cluster frame: [-0.15476092 -0.07417002  0.98514865]
-INFO:root:OMC PS axis in forearm cluster frame: [ 0.01646021 -0.98429643 -0.17575012]
-INFO:root:Opt SD in third DoF: 4.287092293588637
-INFO:root:Opt FE axis in humerus IMU frame: [ 0.44523225 -0.02303918  0.89511867]
-INFO:root:Opt PS axis in forearm IMU frame: [-0.0832123  -0.99485573 -0.05777364]
-INFO:root:Error between opt_FE and OMC_FE (deg): 35.4480764285713
-INFO:root:Error between opt_PS and OMC_PS (deg): 8.87855135778632
 INFO:qmt.utils.webapp:cancelling 2 outstanding tasks
 INFO:qmt.utils.webapp:cancelled
