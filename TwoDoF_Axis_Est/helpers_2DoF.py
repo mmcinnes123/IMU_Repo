@@ -385,7 +385,10 @@ def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
     q_change = qmt.posScalar(q_change)
 
     # Get ang vel from array of q_change (equivalent to equation A42)
-    ang_vels = qmt.quatToRotVec(q_change) * sample_rate
+    angle = qmt.quatAngle(q_change)
+    axis = qmt.quatAxis(q_change)
+    rotvec = angle[..., None] * axis
+    ang_vels = rotvec / (1/sample_rate)
 
     if debug_plot:
         print("Animating input quaternion data...")
