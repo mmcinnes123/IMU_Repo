@@ -51,7 +51,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         # Use the down-sampled orientation data to calculate angular velocities
         # Note: these are already in the IMUs reference frame, not in the local frame as real gyro data would be
         gyr1_E1 = get_ang_vels_from_quats(q1, downsampleRate, debug_plot=False)
-        gyr2_E2 = get_ang_vels_from_quats(q2, downsampleRate, debug_plot=True)
+        gyr2_E2 = get_ang_vels_from_quats(q2, downsampleRate, debug_plot=False)
 
         # And remove the last row from the ori data to match the size of the gyro data
         q1 = q1[:-1]
@@ -125,20 +125,35 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         out['beta'] = qmt.wrapToPi(parameters['beta'])
 
     if debug:
+
         # Calculate the variation in the 3rd degree of freedom over the sample period, as a measure of error
 
+        # Get ori of a body, in sensor 1 frame, which has a z axis aligned with J1
         z_ax = np.array([0, 0, 1])
         b1_s1_ang = np.arccos(np.dot(z_ax, parameters['j1']))
         b1_s1_ax = _cross1d(z_ax, parameters['j1'])
-        q_b1_s1 = qmt.quatFromAngleAxis(b1_s1_ang, b1_s1_ax)    # Get ori of a body which has a z axis aligned with J1
+        q_b1_s1 = qmt.quatFromAngleAxis(b1_s1_ang, b1_s1_ax)
 
+        # Get ori of a body, in sensor 2 frame, which has a y axis aligned with J2
         y_ax = np.array([0, 1, 0])
         b2_s2_ang = np.arccos(np.dot(y_ax, parameters['j2']))
         b2_s2_ax = _cross1d(y_ax, parameters['j2'])
-        q_b2_s2 = qmt.quatFromAngleAxis(b2_s2_ang, b2_s2_ax)    # Get ori of a body which has a 2 axis aligned with J2
+        q_b2_s2 = qmt.quatFromAngleAxis(b2_s2_ang, b2_s2_ax)
 
-        q2_1 = _qmult(_qinv(q1), q2)     # Relative sensor ori
-        q_joint = _qmult(_qmult(_qinv(q_b1_s1), q2_1), q_b2_s2)    # Relative body ori
+        if 'delta' in parameters:
+
+            # If heading offset is an output, apply this offset to express S2 in e1 frame:
+            delta = parameters['delta']
+            q_e1_e2 = qmt.quatFromAngleAxis(delta, np.array([0, 1, 0]))     # Rotation between global frames is around vertical y-axis
+            q_2_e1 = _qmult(q_e1_e2, q2)
+
+            # Get the relative ori of the bodies
+            q_joint = _qmult(_qinv(_qmult(q1, q_b1_s1)), _qmult(q_2_e1, q_b2_s2))
+
+        else:   # Just use q2, since S1 and S2 are assumed to have a shared reference frame
+
+            # Get the relative ori of the bodies
+            q_joint = _qmult(_qinv(_qmult(q1, q_b1_s1)), _qmult(q2, q_b2_s2))
 
         third_DoF_angle_eul = qmt.eulerAngles(q_joint, 'zxy', intrinsic=True, plot=False)
         SD_third_DoF = np.nanstd(np.rad2deg(third_DoF_angle_eul[:,1]))
@@ -161,8 +176,6 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         visulalise_3D_vecs_on_IMU(gyr2_2, downsampleRate)
         print('Visualising ang vel of IMU2 in IMU1 frame')
         visulalise_3D_vecs_on_IMU(gyr2_1, downsampleRate)
-
-
 
     return out
 
