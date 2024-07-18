@@ -43,7 +43,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt, opt_method
     from TwoDoF_Axis_Est.joint_axis_est_2d import jointAxisEst2D
 
     params = dict(method=opt_method)
-    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=False)
+    opt_results = jointAxisEst2D(IMU2_trimmed, IMU3_trimmed, None, None, sample_rate, params=params, debug=True, plot=True)
     FE = opt_results['j1']
     PS = opt_results['j2']
 
@@ -357,7 +357,7 @@ def visulalise_3D_vecs_on_IMU(vecs1, rate):
     imu_letter = 'F'
 
     # Test visualising vector
-    gyr = vecs1*10
+    gyr = vecs1*0.5
     N = len(gyr)
     # acc = [vec2 for _ in range(N)]
     # mag = [vec3 for _ in range(N)]
