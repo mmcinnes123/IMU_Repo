@@ -41,7 +41,12 @@ def err_func(d, theta1, phi1, var1, theta2, phi2, var2, delta):
     j1_est = axisFromThetaPhi(theta1, phi1, var1)
     j2_est = axisFromThetaPhi(theta2, phi2, var2)
 
-    q_E2_E1 = np.array([np.cos(delta / 2), 0, 0, np.sin(delta / 2)], float)
+    # Specify which axes represents global vertical
+    which_axis_up = 'Y'
+    if which_axis_up == 'Z':
+        q_E2_E1 = np.array([np.cos(delta / 2), 0, 0, np.sin(delta / 2)], float)
+    elif which_axis_up == 'Y':
+        q_E2_E1 = np.array([np.cos(delta / 2), 0, np.sin(delta / 2), 0], float)
 
     q2_e1_est = _qmult(q_E2_E1, q2)
     j1_e1 = _rotate(q1, j1_est)
@@ -156,10 +161,10 @@ def get_input_data_from_file(subject_code, IMU_type_for_opt, start_time, end_tim
 
 subject_code = 'P23'
 IMU_type_for_opt = 'Perfect'
-# start_time = 38
-start_time = 28
-# end_time = 46
-end_time = 37
+# start_time = 28
+# end_time = 37
+start_time = 38
+end_time = 46
 # start_time = 12
 # end_time = 24
 trial_for_opt = 'CP'
@@ -212,7 +217,7 @@ from plotly.subplots import make_subplots
 # Range of values to plot
 theta1_values = np.linspace(-np.pi, np.pi, 100)
 phi1_values = np.linspace(-np.pi, np.pi, 100)
-delta_values = np.linspace(-np.pi/2, np.pi/2, 100)
+delta_values = np.linspace(-np.pi, np.pi, 100)
 
 #
 # # Varying theta1 and delta
@@ -275,14 +280,14 @@ fig.update_layout(scene=dict(
     xaxis_title='phi1',
     yaxis_title='delta',
     zaxis_title='Cost'
-), title_text=f'Varying phi1 and Delta')
+), title_text=f'Varying Phi1 and Delta (Heading Offset: {np.round(delta*180/np.pi, 0)} deg)')
 
 
 fig.show()
 
 save_fig_path = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\R Analysis\R 2DoF Opt'
-save_file = join(save_fig_path, 'phi1vsDelta_ADL.html')
-# fig.write_html(save_file)
+save_file = join(save_fig_path, 'Phi1vsDelta_ArmElv.html')
+fig.write_html(save_file)
 
 
 

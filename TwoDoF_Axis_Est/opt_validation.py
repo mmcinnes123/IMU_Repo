@@ -28,14 +28,14 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
 trial_for_opt = 'JA_Slow'
-# IMU_type_for_opt_list = ['Real', 'Perfect']
-# opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+IMU_type_for_opt_list = ['Real', 'Perfect']
+opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
 
-IMU_type_for_opt_list = ['Perfect']
-opt_method_list = ['rot']
+# IMU_type_for_opt_list = ['Perfect']
+# opt_method_list = ['rot']
 
 # List of subjects
-subject_list = [f'P{i}' for i in range(11, 12)]
+subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -74,6 +74,8 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
             if 'delta' in opt_results:
                 heading_offset = abs(opt_results['delta']*180/np.pi)
                 logging.info(f'Opt heading offset (deg): {heading_offset}')
+                print('Heading offset (rad): ', opt_results['delta'])
+                print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
             else:
                 heading_offset = None
             if 'SD_third_DoF' in opt_results['debug']:
@@ -83,7 +85,7 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
                 SD_third_DoF = None
 
             print('Cost: ', opt_results['debug']['cost'])
-            print('Heading offset (rad): ', opt_results['delta'])
+
             # print('x: ', opt_results['debug']['x'])
 
             """ COMPARE """
@@ -124,7 +126,7 @@ for IMU_type_for_opt in IMU_type_for_opt_list:
 
 """ COMPILE ALL RESULTS """
 
-# # Print all results to csv
-# all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
+# Print all results to csv
+all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
 
 

@@ -233,7 +233,7 @@ def axisFromThetaPhi(theta, phi, var):
     elif var == 2:
         j = np.array([np.cos(theta), np.sin(theta)*np.sin(phi), np.sin(theta)*np.cos(phi)], float)
     elif var == 3:
-        j = np.array([np.sin(theta)*np.cos(phi), np.cos(theta), np.sin(theta)*np.sin(phi)], float)
+        j = np.array([np.sin(theta)*np.sin(phi), np.cos(theta), np.sin(theta)*np.cos(phi)], float)
     else:
         raise ValueError('invalid axis var')
     return j
@@ -248,7 +248,7 @@ def axisToThetaPhi(j, var):
         phi = np.arctan2(j[1], j[2])
     elif var == 3:
         theta = np.arccos(j[1])
-        phi = np.arctan2(j[2], j[0])
+        phi = np.arctan2(j[0], j[2])
     else:
         raise ValueError('invalid axis var')
     return theta, phi
@@ -393,7 +393,14 @@ class AxisEst2DRotConstraint(AbstractAxisEst2DObjectiveFunction):
         j1_est = axisFromThetaPhi(theta1, phi1, var1)
         j2_est = axisFromThetaPhi(theta2, phi2, var2)
 
-        q_E2_E1 = np.array([np.cos(delta/2), 0, 0, np.sin(delta/2)], float)
+        # Specify which axes represents global vertical
+        which_axis_up = 'Y'
+        if which_axis_up == 'Z':
+            q_E2_E1 = np.array([np.cos(delta/2), 0, 0, np.sin(delta/2)], float)
+            e_ver_vec = np.array([0, 0, 1], float)
+        elif which_axis_up == 'Y':
+            q_E2_E1 = np.array([np.cos(delta/2), 0, np.sin(delta/2), 0], float)
+            e_ver_vec = np.array([0, 1, 0], float)
 
         q2_e1_est = _qmult(q_E2_E1, q2)
         j1_e1 = _rotate(q1, j1_est)
@@ -410,13 +417,12 @@ class AxisEst2DRotConstraint(AbstractAxisEst2DObjectiveFunction):
         dj1_theta, dj1_phi = axisGradient(theta1, phi1, var1)
         dj2_theta, dj2_phi = axisGradient(theta2, phi2, var2)
 
-        e_z = np.array([0, 0, 1], float)
         dj2_delta = (-j2_e2 * np.sin(delta)
-                     + _cross(e_z[None, :], j2_e2) * np.cos(delta)
-                     + e_z[None, :] * (inner1d(e_z, j2_e2)*np.sin(delta))[:, None])
+                     + _cross(e_ver_vec[None, :], j2_e2) * np.cos(delta)
+                     + e_ver_vec[None, :] * (inner1d(e_ver_vec, j2_e2) * np.sin(delta))[:, None])
         dwd_delta = -(-w2_e2 * np.sin(delta)
-                      + _cross(e_z[None, :], w2_e2) * np.cos(delta)
-                      + e_z[None, :] * (inner1d(e_z, w2_e2) * np.sin(delta))[:, None])
+                      + _cross(e_ver_vec[None, :], w2_e2) * np.cos(delta)
+                      + e_ver_vec[None, :] * (inner1d(e_ver_vec, w2_e2) * np.sin(delta))[:, None])
         d_ax_orig_delta = _cross(j1_e1, dj2_delta)
         d_ax_delta = d_ax_orig_delta / ax_norm - ax_orig * inner1d(ax_orig, d_ax_orig_delta)[:, None] / ax_norm ** 3
         d_delta = inner1d(dwd_delta, ax) + inner1d(w_d, d_ax_delta)
