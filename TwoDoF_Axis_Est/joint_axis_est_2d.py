@@ -232,6 +232,8 @@ def axisFromThetaPhi(theta, phi, var):
         j = np.array([np.sin(theta)*np.cos(phi), np.sin(theta)*np.sin(phi), np.cos(theta)], float)
     elif var == 2:
         j = np.array([np.cos(theta), np.sin(theta)*np.sin(phi), np.sin(theta)*np.cos(phi)], float)
+    elif var == 3:
+        j = np.array([np.sin(theta)*np.cos(phi), np.cos(theta), np.sin(theta)*np.sin(phi)], float)
     else:
         raise ValueError('invalid axis var')
     return j
@@ -244,6 +246,9 @@ def axisToThetaPhi(j, var):
     elif var == 2:
         theta = np.arccos(j[0])
         phi = np.arctan2(j[1], j[2])
+    elif var == 3:
+        theta = np.arccos(j[1])
+        phi = np.arctan2(j[2], j[0])
     else:
         raise ValueError('invalid axis var')
     return theta, phi
