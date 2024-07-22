@@ -27,102 +27,112 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 # Data to use for the optimisation
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
-trial_for_opt = 'JA_Slow'
 IMU_type_for_opt_list = ['Real', 'Perfect']
-opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-
 # IMU_type_for_opt_list = ['Perfect']
-# opt_method_list = ['rot']
+opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+# opt_method_list = ['rot']   # Options: 'rot', 'ori', 'rot_noDelta'
+# trial_for_opt = 'ADL'
+# event_to_start = 'kettle1_start'
+# event_to_end = 'drink1_end'
+trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
+
 
 # List of subjects
-subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
+# subject_list = ['P23']    # Missing FE/PS data
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
 all_data = pd.DataFrame()
 
-for IMU_type_for_opt in IMU_type_for_opt_list:
+for trial_for_opt in trial_dict:
+    event_to_start = trial_dict[trial_for_opt][0]
+    event_to_end = trial_dict[trial_for_opt][1]
 
-    for opt_method in opt_method_list:
+    for IMU_type_for_opt in IMU_type_for_opt_list:
 
-        logging.info(f'Using IMU type: {IMU_type_for_opt}, with data from trial: {trial_for_opt}, '
-                     f'and optimisation method: {opt_method}.')
+        for opt_method in opt_method_list:
 
-        for subject_code in subject_list:
+            logging.info(f'Using IMU type: {IMU_type_for_opt}, with data from trial: {trial_for_opt}, '
+                         f'and optimisation method: {opt_method}.')
 
-            logging.info(f'Results for Subject {subject_code}')
-            print(f'Running analysis for {subject_code}.')
+            for subject_code in subject_list:
 
-            # Define some files
-            parent_dir = join(directory, subject_code)
-            OMC_dir = join(parent_dir, 'OMC')
-            model_file = join(OMC_dir, 'das3_scaled_and_placed.osim')
+                logging.info(f'Results for Subject {subject_code}')
+                print(f'Running analysis for {subject_code}.')
 
-            # Get the dict with the timings for FE and PS events
-            subject_event_dict = get_event_dict_from_file(subject_code)
+                # Define some files
+                parent_dir = join(directory, subject_code)
+                OMC_dir = join(parent_dir, 'OMC')
+                model_file = join(OMC_dir, 'das3_scaled_and_placed.osim')
 
-            """ FINDING REFERENCE J1 AXIS IN HUMERUS CLUSTER FRAME """
-            OMC_FE, OMC_PS = get_J1_J2_from_calibrated_OMC_model(model_file, debug=False)
-            logging.info(f'OMC FE axis in humerus cluster frame: {OMC_FE}')
-            logging.info(f'OMC PS axis in forearm cluster frame: {OMC_PS}')
+                # Get the dict with the timings for FE and PS events
+                subject_event_dict = get_event_dict_from_file(subject_code)
 
-            """ FINDING FE AND PS FROM OPTIMISATION RESULT """
-            opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt, trial_for_opt,
-                                                             opt_method, subject_event_dict, sample_rate, debug=False)
+                """ FINDING REFERENCE J1 AXIS IN HUMERUS CLUSTER FRAME """
+                OMC_FE, OMC_PS = get_J1_J2_from_calibrated_OMC_model(model_file, debug=False)
+                logging.info(f'OMC FE axis in humerus cluster frame: {OMC_FE}')
+                logging.info(f'OMC PS axis in forearm cluster frame: {OMC_PS}')
 
-            # Log optional outputs
-            if 'delta' in opt_results:
-                heading_offset = abs(opt_results['delta']*180/np.pi)
-                logging.info(f'Opt heading offset (deg): {heading_offset}')
-                print('Heading offset (rad): ', opt_results['delta'])
-                print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
-            else:
-                heading_offset = None
-            if 'SD_third_DoF' in opt_results['debug']:
-                SD_third_DoF = opt_results['debug']['SD_third_DoF']
-                logging.info(f'Opt SD in third DoF (deg): {SD_third_DoF}')
-            else:
-                SD_third_DoF = None
+                """ FINDING FE AND PS FROM OPTIMISATION RESULT """
+                opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt,
+                                                                 opt_method, trial_for_opt, subject_event_dict,
+                                                                 event_to_start, event_to_end,
+                                                                 sample_rate, debug=False)
 
-            print('Cost: ', opt_results['debug']['cost'])
+                # Log optional outputs
+                if 'delta' in opt_results:
+                    heading_offset = abs(opt_results['delta']*180/np.pi)
+                    logging.info(f'Opt heading offset (deg): {heading_offset}')
+                    print('Heading offset (rad): ', opt_results['delta'])
+                    print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
+                else:
+                    heading_offset = None
+                if 'SD_third_DoF' in opt_results['debug']:
+                    SD_third_DoF = opt_results['debug']['SD_third_DoF']
+                    logging.info(f'Opt SD in third DoF (deg): {SD_third_DoF}')
+                else:
+                    SD_third_DoF = None
 
-            # print('x: ', opt_results['debug']['x'])
+                print('Cost: ', opt_results['debug']['cost'])
 
-            """ COMPARE """
+                # print('x: ', opt_results['debug']['x'])
 
-            # Constrain the Opt FE axis to point in same direction as OMC reference
-            if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):   # Constrain based on the z-component, expected to be largest
-                opt_FE = -opt_FE
-            if np.sign(opt_PS[1]) == np.sign(-OMC_PS[1]):   # Constrain based on the y-component, expected to be largest
-                opt_PS = -opt_PS
+                """ COMPARE """
 
-            logging.info(f'Opt FE axis in humerus IMU frame: {opt_FE}')
-            logging.info(f'Opt PS axis in forearm IMU frame: {opt_PS}')
+                # Constrain the Opt FE axis to point in same direction as OMC reference
+                if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):   # Constrain based on the z-component, expected to be largest
+                    opt_FE = -opt_FE
+                if np.sign(opt_PS[1]) == np.sign(-OMC_PS[1]):   # Constrain based on the y-component, expected to be largest
+                    opt_PS = -opt_PS
 
-            FE_opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180 / np.pi
-            PS_opt_error = qmt.angleBetween2Vecs(OMC_PS, opt_PS) * 180 / np.pi
-            logging.info(f'Error between opt_FE and OMC_FE (deg): {FE_opt_error}')
-            logging.info(f'Error between opt_PS and OMC_PS (deg): {PS_opt_error}')
+                logging.info(f'Opt FE axis in humerus IMU frame: {opt_FE}')
+                logging.info(f'Opt PS axis in forearm IMU frame: {opt_PS}')
 
-            # Log the results
-            new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
-                                    'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
-                                    'HeadingOffset': [heading_offset], 'FEOptError': [FE_opt_error],
-                                    'PSOptError': [PS_opt_error], 'SD_third_DoF': [SD_third_DoF]})
-            all_data = pd.concat([all_data, new_row], ignore_index=True)
+                FE_opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180 / np.pi
+                PS_opt_error = qmt.angleBetween2Vecs(OMC_PS, opt_PS) * 180 / np.pi
+                logging.info(f'Error between opt_FE and OMC_FE (deg): {FE_opt_error}')
+                logging.info(f'Error between opt_PS and OMC_PS (deg): {PS_opt_error}')
 
-            print(f'FE Error: {FE_opt_error}')
-            print(f'PS Error: {PS_opt_error}')
-            print(f'Finished analysis for {subject_code}.')
+                # Log the results
+                new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
+                                        'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
+                                        'HeadingOffset': [heading_offset], 'FEOptError': [FE_opt_error],
+                                        'PSOptError': [PS_opt_error], 'SD_third_DoF': [SD_third_DoF]})
+                all_data = pd.concat([all_data, new_row], ignore_index=True)
 
-            # Visualise 3D animation of the results
-            # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
-            # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+                print(f'FE Error: {FE_opt_error}')
+                print(f'PS Error: {PS_opt_error}')
+                print(f'Finished analysis for {subject_code}.')
 
-            """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
-            # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
-            #                                              subject_time_dict, sample_rate, debug=False)
-            # logging.info(f'Iso FE axis in humerus IMU frame: {iso_FE}')
+                # Visualise 3D animation of the results
+                # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
+                # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+
+                """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
+                # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
+                #                                              subject_time_dict, sample_rate, debug=False)
+                # logging.info(f'Iso FE axis in humerus IMU frame: {iso_FE}')
 
 """ COMPILE ALL RESULTS """
 

@@ -8,7 +8,8 @@ base_dir = os.path.join(parent_dir, 'SubjectEventFiles')
 
 # List of subjects
 # subjects = [f'P{i}' for i in range(7, 23)]
-subjects = ['P1', 'P2', 'P23']
+subjects = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
+# subjects = ['P23']
 
 # List of events (modify this list according to your specific events)
 CP_events = ['N_self', 'N_asst', 'Alt_self', 'Alt_asst', 'Alt2_self']
@@ -26,51 +27,98 @@ if not os.path.exists(base_dir):
 
 # Iterate over each subject
 for subject in subjects:
-    print(f"\nEntering data for {subject}.")
 
-    # Alter the trials dict based on each subject
-    subject_trials_dict = deepcopy(trials_dict)
-
-    # ADL data missing for P6 and P7
-    if subject in ['P6', 'P7']:
-        if 'ADL' in subject_trials_dict:
-            del subject_trials_dict['ADL']
-
-    # For these subjects, use a pose from JA_Slow to represent the Alt2_self pose, since it wasn't performed in CP
-    if subject in ['P3']:
-        # Add Alt2_self to JA_Slow dict and JA_fast dict
-        subject_trials_dict['CP'].remove('Alt2_self')
-        subject_trials_dict['JA_Slow'].append('Alt2_self')
-
-    # Dictionary to hold the events and times for the current subject
-    subject_events_times = {}
-
-    # Iterate through trials
-    for trial, event_dict in subject_trials_dict.items():
-        print(f"\n\tEntering data for {trial}.\n")
-
-        events_times = {}
-
-        # Iterate over each event
-        for event in event_dict:
-
-            # Prompt the user to enter the time for the current event
-            time_input = input(f"\tEnter time for {event}: ")
-            if time_input.lower() == 'none':
-                time = None
-            else:
-                time = int(time_input)
-
-            # Store the event and time in the subject's dictionary
-            events_times[event] = time
-
-        subject_events_times[trial] = events_times
-
-    # Save the subject's data to a text file
     file_path = os.path.join(base_dir, f"{subject}_event_dict.txt")
-    file_obj = open(file_path, 'w')
-    file_obj.write(str(subject_events_times))
-    file_obj.close()
+
+    if not os.path.exists(file_path):
+
+        """ CREATING NEW EVENT DICT FILE """
+
+        print(f"\nCreating new event dict file for {subject}.")
+        print(f"\nEntering data for {subject}.")
+
+        # Alter the trials dict based on each subject
+        subject_trials_dict = deepcopy(trials_dict)
+
+        # ADL data missing for P6 and P7
+        if subject in ['P6', 'P7']:
+            if 'ADL' in subject_trials_dict:
+                del subject_trials_dict['ADL']
+
+        # For these subjects, use a pose from JA_Slow to represent the Alt2_self pose, since it wasn't performed in CP
+        if subject in ['P3']:
+            # Add Alt2_self to JA_Slow dict and JA_fast dict
+            subject_trials_dict['CP'].remove('Alt2_self')
+            subject_trials_dict['JA_Slow'].append('Alt2_self')
+
+        # Dictionary to hold the events and times for the current subject
+        subject_events_times = {}
+
+        # Iterate through trials
+        for trial, event_dict in subject_trials_dict.items():
+            print(f"\n\tEntering data for {trial}.\n")
+
+            events_times = {}
+
+            # Iterate over each event
+            for event in event_dict:
+
+                # Prompt the user to enter the time for the current event
+                time_input = input(f"\tEnter time for {event}: ")
+                if time_input.lower() == 'none':
+                    time = None
+                else:
+                    time = int(time_input)
+
+                # Store the event and time in the subject's dictionary
+                events_times[event] = time
+
+            subject_events_times[trial] = events_times
+
+        # Save the subject's data to a text file
+        file_obj = open(file_path, 'w')
+        file_obj.write(str(subject_events_times))
+        file_obj.close()
+
+    elif os.path.exists(file_path):
+
+        """ AMENDING EXISTING EVENT DICT FILE """
+
+        print(f"\nAmending event dict file for {subject}.")
+
+        # Read the dict
+        file_obj = open(file_path, 'r')
+        subject_events_times_str = file_obj.read()
+        file_obj.close()
+        subject_events_times = eval(subject_events_times_str)
+
+        # Make an amendment to the dict
+
+        new_events = {'ADL': ['kettle1_start', 'kettle1_end', 'drink1_start', 'drink1_end']}
+
+        for trial in new_events.keys():
+            print(f"\n\tEntering data for {trial}.\n")
+
+            for event in new_events[trial]:
+
+                if event in subject_events_times[trial]:
+
+                    print(f'Warning, this event ({event}) already exists for trial {trial}, subject {subject}. '
+                          f'Value : {subject_events_times[trial][event]}. Being replaced.')
+
+                # Prompt the user to enter the time for the current event
+                time_input = input(f"\tEnter time for {event}: ")
+                if time_input.lower() == 'none':
+                    time = None
+                else:
+                    time = int(time_input)
+
+                subject_events_times[trial][event] = time
+
+        # Save the subject's data to a text file
+        file_obj = open(file_path, 'w')
+        file_obj.write(str(subject_events_times))
+        file_obj.close()
 
     print(f"Data for {subject} saved.")
 
