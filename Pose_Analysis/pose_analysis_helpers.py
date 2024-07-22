@@ -102,21 +102,21 @@ def get_default_model_pose_dict(pose_name):
                            'elbow_pronation': np.array([90]),
                            'HT_abd': np.array([0]),
                            'HT_flex': np.array([0]),
-                           'HT_rot': np.array([90])}
+                           'HT_rot': np.array([0])}
 
     elif pose_name in ['Alt_self', 'Alt_asst']:
         model_pose_dict = {'elbow_flexion': np.array([90]),
                            'elbow_pronation': np.array([90]),
                            'HT_abd': np.array([0]),
                            'HT_flex': np.array([0]),
-                           'HT_rot': np.array([90])}
+                           'HT_rot': np.array([0])}
 
     elif pose_name == 'Alt2_self':
         model_pose_dict = {'elbow_flexion': np.array([90]),
                            'elbow_pronation': np.array([90]),
                            'HT_abd': np.array([0]),
                            'HT_flex': np.array([90]),
-                           'HT_rot': np.array([90])}
+                           'HT_rot': np.array([0])}
     else:
         model_pose_dict = None
         print('Pose name does not match one listed here.')
