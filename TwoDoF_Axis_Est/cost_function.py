@@ -24,20 +24,26 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 
 """ SETTINGS """
 
-subject_code = 'P23'
+# subject_code = 'P23'
 IMU_type_for_opt = 'Perfect'
 # Arm down - CP
-start_time = 28
-end_time = 37
-trial_for_opt = 'CP'
+# start_time = 28
+# end_time = 37
+# trial_for_opt = 'CP'
 # Arm elv = CP
 # start_time = 38
 # end_time = 46
 # trial_for_opt = 'CP'
-# ADP
+# ADL
 # start_time = 12
 # end_time = 24
 # trial_for_opt = 'ADL'
+
+subject_code = 'P5'
+start_time = 52
+end_time = 72
+trial_for_opt = 'ADL'
+
 
 sample_rate = 100          # This is the sample rate of the data going into the function
 opt_method = 'rot'
@@ -126,7 +132,7 @@ if plot_cost_vs_theta1_vs_delta:
     fig.write_html(save_file)
 
 # Varying phi1 and delta
-plot_cost_vs_phi1_vs_delta = False
+plot_cost_vs_phi1_vs_delta = True
 if plot_cost_vs_phi1_vs_delta:
     fig = make_subplots(rows=1, cols=1, specs=[[{'type': 'surface'}]])
     phi1_grid, delta_grid = np.meshgrid(phi1_values, delta_values)
@@ -139,7 +145,7 @@ if plot_cost_vs_phi1_vs_delta:
         row=1, col=1)
     # Add a countour plot
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
-                                      highlightcolor="limegreen", project_z=True, start=cost_grid.min(), end=cost_grid.max(), size=0.2))
+                                      highlightcolor="limegreen", project_z=True, start=cost_grid.min(), end=cost_grid.max(), size=0.05))
     # Plot a marker at the actual solution
     solution_cost = rot_err_func(data, theta1, phi1, var1, theta2, phi2, var2, delta)
     fig.add_trace(go.Scatter3d(
@@ -147,7 +153,7 @@ if plot_cost_vs_phi1_vs_delta:
         y=[delta],
         z=[solution_cost],
         mode='markers',
-        marker=dict(size=5, color='red', symbol='cross'),
+        marker=dict(size=10, color='red', symbol='cross'),
         name='Solution Point'
     ))
     fig.update_layout(scene=dict(
@@ -157,13 +163,13 @@ if plot_cost_vs_phi1_vs_delta:
     ), title_text=f'Varying Phi1 and Delta (Heading Offset: {np.round(delta*180/np.pi, 0)} deg)')
 
     fig.show()
-    save_file = join(save_fig_path, 'Phi1vsDelta_ArmElv.html')
-    fig.write_html(save_file)
+    save_file = join(save_fig_path, 'Phi1vsDelta_ArmDown.html')
+    # fig.write_html(save_file)
 
 
 """ GET THE WHOLE SOLUTION SPACE """
 
-run_sol_space = True
+run_sol_space = False
 if run_sol_space:
 
     # Define the range of values for each variable

@@ -6,6 +6,8 @@ from helpers_2DoF import get_J1_J2_from_isolate_move
 from helpers_2DoF import visulalise_opt_result_vec_on_IMU
 from helpers_2DoF import visulalise_opt_result_vec_on_IMU
 from helpers_2DoF import get_event_dict_from_file
+from joint_axis_est_2d import axisToThetaPhi
+
 
 import qmt
 import opensim as osim
@@ -27,23 +29,26 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 # Data to use for the optimisation
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
-IMU_type_for_opt_list = ['Real', 'Perfect']
-# IMU_type_for_opt_list = ['Perfect']
-opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-# opt_method_list = ['rot']   # Options: 'rot', 'ori', 'rot_noDelta'
-# trial_for_opt = 'ADL'
-# event_to_start = 'kettle1_start'
-# event_to_end = 'drink1_end'
-trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
+
+# IMU_type_for_opt_list = ['Real', 'Perfect']
+IMU_type_for_opt_list = ['Perfect']
+
+# opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+opt_method_list = ['rot']   # Options: 'rot', 'ori', 'rot_noDelta'
+
+# trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
+trial_dict = {'JA_Slow': ['FE_start', 'PS_end']}
 
 
 # List of subjects
-subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
-# subject_list = ['P23']    # Missing FE/PS data
+# subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
+subject_list = ['P13']    # Missing FE/PS data
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
 all_data = pd.DataFrame()
+alt_all_data = pd.DataFrame()
+
 
 for trial_for_opt in trial_dict:
     event_to_start = trial_dict[trial_for_opt][0]
@@ -82,12 +87,14 @@ for trial_for_opt in trial_dict:
 
                 # Log optional outputs
                 if 'delta' in opt_results:
-                    heading_offset = abs(opt_results['delta']*180/np.pi)
+                    heading_offset = opt_results['delta']*180/np.pi
+                    abs_heading_offset = abs(heading_offset)
                     logging.info(f'Opt heading offset (deg): {heading_offset}')
                     print('Heading offset (rad): ', opt_results['delta'])
                     print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
                 else:
                     heading_offset = None
+                    abs_heading_offset = None
                 if 'SD_third_DoF' in opt_results['debug']:
                     SD_third_DoF = opt_results['debug']['SD_third_DoF']
                     logging.info(f'Opt SD in third DoF (deg): {SD_third_DoF}')
@@ -114,12 +121,39 @@ for trial_for_opt in trial_dict:
                 logging.info(f'Error between opt_FE and OMC_FE (deg): {FE_opt_error}')
                 logging.info(f'Error between opt_PS and OMC_PS (deg): {PS_opt_error}')
 
-                # Log the results
-                new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
-                                        'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
-                                        'HeadingOffset': [heading_offset], 'FEOptError': [FE_opt_error],
-                                        'PSOptError': [PS_opt_error], 'SD_third_DoF': [SD_third_DoF]})
-                all_data = pd.concat([all_data, new_row], ignore_index=True)
+                # Investigate theta phi variation
+                opt_FE_theta, opt_FE_phi = axisToThetaPhi(opt_FE, var=3)
+                OMC_FE_theta, OMC_FE_phi = axisToThetaPhi(OMC_FE, var=3)
+                FE_theta_diff = np.rad2deg(OMC_FE_theta - opt_FE_theta)
+                FE_phi_diff = np.rad2deg(OMC_FE_phi - opt_FE_phi)
+
+                opt_PS_theta, opt_PS_phi = axisToThetaPhi(opt_PS, var=3)
+                OMC_PS_theta, OMC_PS_phi = axisToThetaPhi(OMC_PS, var=3)
+                PS_theta_diff = np.rad2deg(abs(OMC_PS_theta - opt_PS_theta))
+                PS_phi_diff = np.rad2deg(abs(OMC_PS_phi - opt_PS_phi))
+
+                metric_dict = {'HeadingOffset': [heading_offset], 'AbsHeadingOffset': [abs_heading_offset], 'SD_third_DoF': [SD_third_DoF],
+                               'FEOptError': [FE_opt_error], 'FEOptError_theta': [FE_theta_diff], 'FEOptError_phi': [FE_phi_diff],
+                               'PSOptError': [PS_opt_error], 'PSOptError_theta': [PS_theta_diff], 'PSOptError_phi': [PS_phi_diff]}
+
+                for metric, metric_value in metric_dict.items():
+
+                    new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
+                                            'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
+                                            'Metric': metric, 'Metric_value': metric_value
+                                            })
+                    # Log the results
+                    all_data = pd.concat([all_data, new_row], ignore_index=True)
+
+                alt_new_row = pd.DataFrame({'Subject': [subject_code], 'Trial': [trial_for_opt],
+                                            'IMUtype': [IMU_type_for_opt], 'OptMethod': [opt_method],
+                                            'HeadingOffset': [heading_offset], 'AbsHeadingOffset': [abs_heading_offset],
+                                            'SD_third_DoF': [SD_third_DoF],
+                                            'FEOptError': [FE_opt_error], 'FEOptError_theta': [FE_theta_diff], 'FEOptError_phi': [FE_phi_diff],
+                                            'PSOptError': [PS_opt_error], 'PSOptError_theta': [PS_theta_diff], 'PSOptError_phi': [PS_phi_diff]
+                                            })
+
+                alt_all_data = pd.concat([alt_all_data, alt_new_row], ignore_index=True)
 
                 print(f'FE Error: {FE_opt_error}')
                 print(f'PS Error: {PS_opt_error}')
@@ -127,7 +161,7 @@ for trial_for_opt in trial_dict:
 
                 # Visualise 3D animation of the results
                 # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
-                # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+                visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
 
                 """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
                 # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
@@ -137,6 +171,8 @@ for trial_for_opt in trial_dict:
 """ COMPILE ALL RESULTS """
 
 # Print all results to csv
-all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
+# all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
+# alt_all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv'))
+
 
 
