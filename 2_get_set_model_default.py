@@ -39,7 +39,8 @@ def set_GH_coords_for_given_HT_angles():
       """
 
     # Set the HT abduction angle
-    abd = 13
+    # abd = 13
+    abd = 0
 
     # Get the default state of the model
     model_file = 'das3.osim'

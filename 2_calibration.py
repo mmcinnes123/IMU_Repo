@@ -29,6 +29,8 @@ def run_method(method_name, subject_code, IMU_type):
 
         if method_name == 'OSIM_N_self':
             pose_name = 'N_self'
+        elif method_name == 'OSIM_N_asst':
+            pose_name = 'N_asst'
         elif method_name == 'OSIM_Alt_self':
             pose_name = 'Alt_self'
         elif method_name == 'OSIM_Alt_asst':
@@ -98,13 +100,20 @@ def run_method(method_name, subject_code, IMU_type):
 
 """ RUN THE CALIBRATION """
 
-# subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
-subject_list = ['P1', 'P2', 'P23']    # Missing FE/PS data
+subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+# subject_list = ['P1', 'P2', 'P23']    # Missing FE/PS data
 IMU_type_list = ['Real', 'Perfect']
-method_name_list = ['OSIM_Alt_self', 'OSIM_Alt_asst', 'METHOD_4b', 'METHOD_5']
+method_name_list = ['OSIM_N_self']
 # method_name_list = ['OSIM_Alt_self', 'OSIM_N_self', 'ALL_MANUAL', 'METHOD_1_self', 'METHOD_2_self', 'METHOD_4a']
 
-for subject_code in subject_list:
+for method_name in method_name_list:
+
+    if method_name.startswith('OSIM'):
+        check_default_pose = input(f"\tUsing pose: {method_name}, has the model default pose been set correctly "
+                                   f"(HT angles = 0 for N-pose, and set to average for Alt-pose): ")
+        if check_default_pose == 'No':
+            quit()
+
     for IMU_type in IMU_type_list:
-        for method_name in method_name_list:
+        for subject_code in subject_list:
             run_method(method_name, subject_code, IMU_type)
