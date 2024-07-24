@@ -1,4 +1,4 @@
-
+import os.path
 
 from helpers_2DoF import get_J1_J2_from_calibrated_OMC_model
 from helpers_2DoF import get_J1_J2_from_opt
@@ -41,8 +41,8 @@ trial_dict = {'JA_Slow': ['FE_start', 'PS_end']}
 
 
 # List of subjects
-# subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
-subject_list = ['P13']    # Missing FE/PS data
+subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
+# subject_list = ['P8', 'P13']    # Missing FE/PS data
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -63,7 +63,6 @@ for trial_for_opt in trial_dict:
 
             for subject_code in subject_list:
 
-                logging.info(f'Results for Subject {subject_code}')
                 print(f'Running analysis for {subject_code}.')
 
                 # Define some files
@@ -76,8 +75,6 @@ for trial_for_opt in trial_dict:
 
                 """ FINDING REFERENCE J1 AXIS IN HUMERUS CLUSTER FRAME """
                 OMC_FE, OMC_PS = get_J1_J2_from_calibrated_OMC_model(model_file, debug=False)
-                logging.info(f'OMC FE axis in humerus cluster frame: {OMC_FE}')
-                logging.info(f'OMC PS axis in forearm cluster frame: {OMC_PS}')
 
                 """ FINDING FE AND PS FROM OPTIMISATION RESULT """
                 opt_FE, opt_PS, opt_results = get_J1_J2_from_opt(subject_code, IMU_type_for_opt,
@@ -89,37 +86,36 @@ for trial_for_opt in trial_dict:
                 if 'delta' in opt_results:
                     heading_offset = opt_results['delta']*180/np.pi
                     abs_heading_offset = abs(heading_offset)
-                    logging.info(f'Opt heading offset (deg): {heading_offset}')
-                    print('Heading offset (rad): ', opt_results['delta'])
-                    print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
                 else:
                     heading_offset = None
                     abs_heading_offset = None
                 if 'SD_third_DoF' in opt_results['debug']:
                     SD_third_DoF = opt_results['debug']['SD_third_DoF']
-                    logging.info(f'Opt SD in third DoF (deg): {SD_third_DoF}')
                 else:
                     SD_third_DoF = None
 
-                print('Cost: ', opt_results['debug']['cost'])
-
-                # print('x: ', opt_results['debug']['x'])
-
                 """ COMPARE """
 
-                # Constrain the Opt FE axis to point in same direction as OMC reference
-                if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):   # Constrain based on the z-component, expected to be largest
-                    opt_FE = -opt_FE
-                if np.sign(opt_PS[1]) == np.sign(-OMC_PS[1]):   # Constrain based on the y-component, expected to be largest
+                # Choose the direction of the PS axis based on the direction of the OMC result
+                if np.sign(opt_PS[1]) == np.sign(-OMC_PS[1]):  # Constrain based on the y-component, expected to be largest
                     opt_PS = -opt_PS
 
-                logging.info(f'Opt FE axis in humerus IMU frame: {opt_FE}')
-                logging.info(f'Opt PS axis in forearm IMU frame: {opt_PS}')
+                # Choose the direction of the FE axis based on the direction of the OMC result
+                if 'delta' not in opt_results:
+                    if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):   # Constrain based on the z-component, expected to be largest
+                        opt_FE = -opt_FE
+                else:
+                    # For more extreme cases where the difference between the opt and OMC FE result is large, and the heading offset is large
+                    if (abs(heading_offset) > 90) and (np.sign(heading_offset) == 1):  # If the heading offset is large and positive
+                        if np.sign(opt_FE[0]) == 1:     # But FE estimate is in the positive x region
+                            opt_FE = -opt_FE    # Change the direction of the FE axis estimate
+                    else:
+                        if np.sign(opt_FE[2]) == np.sign(-OMC_FE[2]):  # Constrain to half space in positive z direction based on opt result
+                            opt_FE = -opt_FE
 
+                # Find the single angle difference between he OMC axis estimates and the optimisation estiamtes
                 FE_opt_error = qmt.angleBetween2Vecs(OMC_FE, opt_FE) * 180 / np.pi
                 PS_opt_error = qmt.angleBetween2Vecs(OMC_PS, opt_PS) * 180 / np.pi
-                logging.info(f'Error between opt_FE and OMC_FE (deg): {FE_opt_error}')
-                logging.info(f'Error between opt_PS and OMC_PS (deg): {PS_opt_error}')
 
                 # Investigate theta phi variation
                 opt_FE_theta, opt_FE_phi = axisToThetaPhi(opt_FE, var=3)
@@ -155,24 +151,113 @@ for trial_for_opt in trial_dict:
 
                 alt_all_data = pd.concat([alt_all_data, alt_new_row], ignore_index=True)
 
+                # Visualise 3D animation of the results
+                # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
+                # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+
+                # Log results
+                logging.info(f'Results for Subject {subject_code}')
+                logging.info(f'OMC FE axis in humerus cluster frame: {OMC_FE}')
+                logging.info(f'OMC PS axis in forearm cluster frame: {OMC_PS}')
+                if 'delta' in opt_results:
+                    logging.info(f'Opt heading offset (deg): {heading_offset}')
+                logging.info(f'Opt SD in third DoF (deg): {SD_third_DoF}')
+                logging.info(f'Opt FE axis in humerus IMU frame: {opt_FE}')
+                logging.info(f'Opt PS axis in forearm IMU frame: {opt_PS}')
+                logging.info(f'Error between opt_FE and OMC_FE (deg): {FE_opt_error}')
+                logging.info(f'Error between opt_PS and OMC_PS (deg): {PS_opt_error}')
+
+                # Print results
+                if 'delta' in opt_results:
+                    print('Heading offset (rad): ', opt_results['delta'])
+                    print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
+                print('Cost: ', opt_results['debug']['cost'])
+                # print('x: ', opt_results['debug']['x'])
+
                 print(f'FE Error: {FE_opt_error}')
                 print(f'PS Error: {PS_opt_error}')
                 print(f'Finished analysis for {subject_code}.')
-
-                # Visualise 3D animation of the results
-                # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
-                visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
 
                 """ FINDING FE AND PS FROM ISOLATED JOINT MOVEMENT """
                 # iso_FE, iso_PS = get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt,
                 #                                              subject_time_dict, sample_rate, debug=False)
                 # logging.info(f'Iso FE axis in humerus IMU frame: {iso_FE}')
 
+
 """ COMPILE ALL RESULTS """
 
-# Print all results to csv
-# all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv'))
-# alt_all_data.to_csv(join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv'))
 
+def update_file(file_path, new_data):
+
+    existing_df = pd.read_csv(file_path)
+
+    # Step 3: Update the existing DataFrame with values from the new DataFrame
+    for idx, new_row in new_data.iterrows():
+        # Define the condition for matching rows
+        condition = (
+                (existing_df['Subject'] == new_row['Subject']) &
+                (existing_df['Trial'] == new_row['Trial']) &
+                (existing_df['IMUtype'] == new_row['IMUtype']) &
+                (existing_df['OptMethod'] == new_row['OptMethod']) &
+                (existing_df['Metric'] == new_row['Metric'])
+        )
+
+        # Find the index of the row to update
+        index_to_update = existing_df[condition].index
+
+        # If the index exists, update the Metric_value
+        if not index_to_update.empty:
+            existing_df.loc[index_to_update, 'Metric_value'] = new_row['Metric_value']
+
+    # Step 4: Write the updated DataFrame back to the CSV file
+    existing_df.to_csv(file_path, index=False)
+
+
+def update_alt_file(file_path, new_data):
+
+    existing_df = pd.read_csv(file_path)
+
+    # Step 3: Update the existing DataFrame with values from the new DataFrame
+    for idx, new_row in new_data.iterrows():
+        # Define the condition for matching rows
+        condition = (
+                (existing_df['Subject'] == new_row['Subject']) &
+                (existing_df['Trial'] == new_row['Trial']) &
+                (existing_df['IMUtype'] == new_row['IMUtype']) &
+                (existing_df['OptMethod'] == new_row['OptMethod'])
+        )
+
+        # Find the index of the row to update
+        index_to_update = existing_df[condition].index
+
+        # If the index exists, update the Metric_value
+        if not index_to_update.empty:
+            existing_df.loc[index_to_update, 'HeadingOffset'] = new_row['HeadingOffset']
+            existing_df.loc[index_to_update, 'AbsHeadingOffset'] = new_row['AbsHeadingOffset']
+            existing_df.loc[index_to_update, 'SD_third_DoF'] = new_row['SD_third_DoF']
+            existing_df.loc[index_to_update, 'FEOptError'] = new_row['FEOptError']
+            existing_df.loc[index_to_update, 'FEOptError_theta'] = new_row['FEOptError_theta']
+            existing_df.loc[index_to_update, 'FEOptError_phi'] = new_row['FEOptError_phi']
+            existing_df.loc[index_to_update, 'PSOptError'] = new_row['PSOptError']
+            existing_df.loc[index_to_update, 'PSOptError_theta'] = new_row['PSOptError_theta']
+            existing_df.loc[index_to_update, 'PSOptError_phi'] = new_row['PSOptError_phi']
+
+    # Step 4: Write the updated DataFrame back to the CSV file
+    existing_df.to_csv(file_path, index=False)
+
+
+# Print all results to csv/ update row-by-row if the file already exists
+results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv')
+alt_results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv')
+
+if os.path.exists(results_file_path):
+    update_file(results_file_path, all_data)
+else:
+    all_data.to_csv(results_file_path)
+
+if os.path.exists(alt_results_file_path):
+    update_alt_file(alt_results_file_path, alt_all_data)
+else:
+    alt_all_data.to_csv(alt_results_file_path)
 
 

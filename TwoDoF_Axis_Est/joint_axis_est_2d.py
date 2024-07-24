@@ -119,6 +119,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     )
 
     if 'delta' in parameters:
+        print('Delta before wrap: ', parameters['delta'])
         out['delta'] = qmt.wrapToPi(parameters['delta'])
 
     if 'beta' in parameters:
