@@ -24,30 +24,30 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 
 """ SETTINGS """
 
-# subject_code = 'P23'
+subject_code = 'P23'
 IMU_type_for_opt = 'Perfect'
-# Arm down - CP
-# start_time = 28
-# end_time = 37
-# trial_for_opt = 'CP'
-# Arm elv = CP
-# start_time = 38
-# end_time = 46
-# trial_for_opt = 'CP'
-# ADL
-# start_time = 12
-# end_time = 24
-# trial_for_opt = 'ADL'
-
-subject_code = 'P5'
-start_time = 52
-end_time = 72
-trial_for_opt = 'ADL'
-
-
 sample_rate = 100          # This is the sample rate of the data going into the function
 opt_method = 'rot'
 save_fig_path = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\R Analysis\R 2DoF Opt'
+
+# Chose the movement data to use for the optimisation/cost function
+movement = 'ADL'
+
+if movement == 'ArmDown':
+    start_time = 28
+    end_time = 37
+    trial_for_opt = 'CP'
+
+if movement == 'ArmElev':
+    start_time = 38
+    end_time = 46
+    trial_for_opt = 'CP'
+
+if movement == 'ADL':
+    start_time = 12
+    end_time = 24
+    trial_for_opt = 'ADL'
+
 
 # Get the quaternion data from the TMM .txt file, based on start and end time
 quat1, quat2 = get_input_data_from_file(subject_code, IMU_type_for_opt, start_time, end_time, trial_for_opt, sample_rate)
@@ -96,75 +96,107 @@ theta1_values = np.linspace(-np.pi, np.pi, 100)
 phi1_values = np.linspace(-np.pi, np.pi, 100)
 delta_values = np.linspace(-np.pi, np.pi, 100)
 
-# Varying theta1 and delta
-plot_cost_vs_theta1_vs_delta = False
-if plot_cost_vs_theta1_vs_delta:
-    fig = make_subplots(rows=1, cols=1, specs=[[{'type': 'surface'}]])
-    theta1_grid, delta_grid = np.meshgrid(theta1_values, delta_values)
-    cost_grid = np.zeros_like(theta1_grid)
-    for i in range(theta1_grid.shape[0]):
-        for j in range(theta1_grid.shape[1]):
-            cost_grid[i, j] = rot_err_func(data, theta1_grid[i, j], phi1, var1, theta2, phi2, var2, delta_grid[i, j])
-    fig.add_trace(
-        go.Surface(z=cost_grid, x=theta1_grid, y=delta_grid, colorscale='Viridis'),
-        row=1, col=1)
-    # Add a countour plot
-    fig.update_traces(contours_z=dict(show=True, usecolormap=True,
-                                      highlightcolor="limegreen", project_z=True, start=cost_grid.min(), end=cost_grid.max(), size=0.2))
-    # Plot a marker at the actual solution
-    solution_cost = rot_err_func(data, theta1, phi1, var1, theta2, phi2, var2, delta)
-    fig.add_trace(go.Scatter3d(
-        x=[theta1],
-        y=[delta],
-        z=[solution_cost],
-        mode='markers',
-        marker=dict(size=5, color='red', symbol='cross'),
-        name='Solution Point'
-    ))
-    fig.update_layout(scene=dict(
-        xaxis_title='theta1',
-        yaxis_title='delta',
-        zaxis_title='Cost'
-    ), title_text=f'Varying Theta1 and Delta')
-
-    fig.show()
-    save_file = join(save_fig_path, 'Theta1vsDelta_ArmElv.html')
-    fig.write_html(save_file)
-
 # Varying phi1 and delta
 plot_cost_vs_phi1_vs_delta = True
 if plot_cost_vs_phi1_vs_delta:
-    fig = make_subplots(rows=1, cols=1, specs=[[{'type': 'surface'}]])
+
+    # Get all the values to plot
     phi1_grid, delta_grid = np.meshgrid(phi1_values, delta_values)
     cost_grid = np.zeros_like(phi1_grid)
     for i in range(phi1_grid.shape[0]):
         for j in range(phi1_grid.shape[1]):
             cost_grid[i, j] = rot_err_func(data, theta1, phi1_grid[i, j], var1, theta2, phi2, var2, delta_grid[i, j])
-    fig.add_trace(
-        go.Surface(z=cost_grid, x=phi1_grid, y=delta_grid, colorscale='Viridis'),
-        row=1, col=1)
-    # Add a countour plot
-    fig.update_traces(contours_z=dict(show=True, usecolormap=True,
-                                      highlightcolor="limegreen", project_z=True, start=cost_grid.min(), end=cost_grid.max(), size=0.05))
-    # Plot a marker at the actual solution
+
+    # Make the figure
+    fig = make_subplots(rows=1, cols=2, specs=[[{'type': 'surface'}, {'type': 'contour'}]],
+                        subplot_titles=("3D Surface Plot", "2D Contour Plot"))
+
+    # Add the 3D surface
+    fig.add_trace(go.Surface(z=cost_grid, x=phi1_grid, y=delta_grid, colorscale='Viridis'),
+                  row=1, col=1)
+
+    # Add a contour plot
+    fig.update_traces(contours_z=dict(show=True, usecolormap=True, highlightcolor="limegreen",
+                                      project_z=True, start=cost_grid.min(), end=cost_grid.max(), size=0.05))
+
+    # Add a marker at the solution point
     solution_cost = rot_err_func(data, theta1, phi1, var1, theta2, phi2, var2, delta)
     fig.add_trace(go.Scatter3d(
         x=[phi1],
         y=[delta],
         z=[solution_cost],
         mode='markers',
-        marker=dict(size=10, color='red', symbol='cross'),
-        name='Solution Point'
-    ))
+        marker=dict(size=16, color='red', symbol='cross'),
+        textposition='top center',  # Position of the label
+        hoverinfo='text',  # Show only text on hover
+        name='Solution Point',
+        showlegend=False))
+
+    # Add an annotation to the marker
+    fig.update_layout(scene=dict(annotations=[dict(
+                                                    showarrow=False,
+                                                    x=phi1,
+                                                    y=delta,
+                                                    z=solution_cost,
+                                                    text=f"Solution Point",
+                                                    xanchor="left",
+                                                    yanchor="bottom",
+                                                    font=dict(color='#fde725', size=16))]))
+
+    # Add 2D contour plot
+    fig.add_trace(go.Contour(z=cost_grid, x=phi1_grid[0], y=delta_grid[:, 0], colorscale='Viridis', showscale=False), row=1, col=2)
+
+    # Add red cross to the 2D contour plot
+    fig.add_trace(go.Scatter(
+            x=[phi1],
+            y=[delta],
+            mode='markers',
+            marker=dict(color='red', size=13, symbol='cross'),
+            name='Red Cross',
+            hoverinfo='text',  # Show only text on hover
+            showlegend=False),
+        row=1, col=2)
+
+    # Add annotation to the red cross on the 2D contour plot
+    fig.add_annotation(
+        x=phi1,
+        y=delta,
+        text=f"Solution Point <br>&nbsp;&nbsp;Delta: {round(delta*180/np.pi, 1)}&deg; "
+             f"<br>&nbsp;&nbsp;Phi: {round(phi1*180/np.pi, 1)}&deg;",
+        showarrow=False,
+        xanchor='left',
+        yanchor='top',
+        # ax=20,
+        # ay=-30,
+        font=dict(color='#fde725', size=16),
+        align='left',
+        row=1,
+        col=2)
+
+    # Update axis titles for 2D plot
+    fig.update_xaxes(title_text="Phi [rad]", titlefont=dict(size=18), tickfont=dict(size=16), row=1, col=2)
+    fig.update_yaxes(title_text="Delta [rad]", titlefont=dict(size=18), tickfont=dict(size=16), row=1, col=2)
+
+    # Update 3D plots axis titles and ticks
     fig.update_layout(scene=dict(
-        xaxis_title='phi1',
-        yaxis_title='delta',
-        zaxis_title='Cost'
-    ), title_text=f'Varying Phi1 and Delta (Heading Offset: {np.round(delta*180/np.pi, 0)} deg)')
+        xaxis_title=f'Phi [rad]',
+        yaxis_title=f'Delta [rad]',
+        zaxis_title='Cost',
+        xaxis=dict(
+            title=dict(font=dict(size=18)),
+            tickfont=dict(size=14)),
+        yaxis=dict(
+            title=dict(font=dict(size=18)),
+            tickfont=dict(size=14))),
+        title=dict(
+            text='Cost Function - Functional Movement',
+            font=dict(size=24),
+            x=0.5,
+            xanchor='center'))
 
     fig.show()
-    save_file = join(save_fig_path, 'Phi1vsDelta_ArmDown.html')
-    # fig.write_html(save_file)
+    save_file = join(save_fig_path, 'Phi1vsDelta_' + movement + '.html')
+    fig.write_html(save_file)
 
 
 """ GET THE WHOLE SOLUTION SPACE """
