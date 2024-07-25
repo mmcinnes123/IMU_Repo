@@ -334,7 +334,7 @@ def get_J1_J2_directly_from_ang_vels(quatsIMU1, quatsIMU2, rate, params, debug_p
 def visulalise_opt_result_vec_on_IMU(vec1, vec2, vec3):
 
     # scale vec2 so it displays better
-    vec2 = 6*vec2
+    vec2 = 8*vec2
 
     if vec3 is None:
         vec3 = [0, 0, 0]

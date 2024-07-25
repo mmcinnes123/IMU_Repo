@@ -37,7 +37,7 @@ IMU_type_for_opt_list = ['Perfect']
 opt_method_list = ['rot']   # Options: 'rot', 'ori', 'rot_noDelta'
 
 # trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
-trial_dict = {'ADL': ['FE_start', 'PS_end']}
+trial_dict = {'JA_Slow': ['FE_start', 'PS_end']}
 
 
 # List of subjects
@@ -81,7 +81,7 @@ for trial_for_opt in trial_dict:
                                                                  opt_method, trial_for_opt, subject_event_dict,
                                                                  event_to_start, event_to_end,
                                                                  sample_rate, debug=False)
-
+                #
                 # Log optional outputs
                 if 'delta' in opt_results:
                     heading_offset = opt_results['delta']*180/np.pi

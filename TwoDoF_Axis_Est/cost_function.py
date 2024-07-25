@@ -28,7 +28,7 @@ subject_code = 'P23'
 IMU_type_for_opt = 'Perfect'
 sample_rate = 100          # This is the sample rate of the data going into the function
 opt_method = 'rot'
-save_fig_path = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\R Analysis\R 2DoF Opt'
+save_fig_path = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\R Analysis\R 2DoF Opt\3D Contour Plots'
 
 # Chose the movement data to use for the optimisation/cost function
 movement = 'ADL'
