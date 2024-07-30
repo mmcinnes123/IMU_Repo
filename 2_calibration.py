@@ -93,9 +93,9 @@ def run_method(method_name, subject_code, IMU_type):
             print('Method not defined properly.')
             quit()
 
-        # # Create the calibrated model, applying the calculated offsets to the default model
-        apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
-                           calibrated_model_dir)
+        # # # Create the calibrated model, applying the calculated offsets to the default model
+        # apply_cal_to_model(thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU, template_model_file,
+        #                    calibrated_model_dir)
 
 
 """ RUN THE CALIBRATION """
@@ -106,14 +106,17 @@ IMU_type_list = ['Real', 'Perfect']
 method_name_list = ['OSIM_N_self']
 # method_name_list = ['OSIM_Alt_self', 'OSIM_N_self', 'ALL_MANUAL', 'METHOD_1_self', 'METHOD_2_self', 'METHOD_4a']
 
-for method_name in method_name_list:
+# for method_name in method_name_list:
+#
+#     if method_name.startswith('OSIM'):
+#         check_default_pose = input(f"\tUsing pose: {method_name}, has the model default pose been set correctly "
+#                                    f"(HT angles = 0 for N-pose, and set to average for Alt-pose): ")
+#         if check_default_pose == 'No':
+#             quit()
+#
+#     for IMU_type in IMU_type_list:
+#         for subject_code in subject_list:
+#             run_method(method_name, subject_code, IMU_type)
 
-    if method_name.startswith('OSIM'):
-        check_default_pose = input(f"\tUsing pose: {method_name}, has the model default pose been set correctly "
-                                   f"(HT angles = 0 for N-pose, and set to average for Alt-pose): ")
-        if check_default_pose == 'No':
-            quit()
 
-    for IMU_type in IMU_type_list:
-        for subject_code in subject_list:
-            run_method(method_name, subject_code, IMU_type)
+run_method(method_name='METHOD_4b', subject_code='P23', IMU_type='Perfect')

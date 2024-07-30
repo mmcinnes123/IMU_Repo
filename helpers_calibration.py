@@ -175,10 +175,13 @@ def get_IMU_offsets_METHOD_4a(subject_code, IMU_type):
 
     # Get the dict with the timings for FE and PS events
     subject_event_dict = get_event_dict_from_file(subject_code)
+    event_to_start = 'FE_start'
+    event_to_end = 'PS_end'
 
     # Get the estimated FE and PS axes from the optimisation
-    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
-                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = \
+        get_J1_J2_from_opt(subject_code, IMU_type, opt_method, opt_trial_name,
+                           subject_event_dict, event_to_start, event_to_end, sample_rate, debug=False)
 
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
@@ -216,10 +219,13 @@ def get_IMU_offsets_METHOD_4b(subject_code, IMU_type):
 
     # Get the dict with the timings for FE and PS events
     subject_event_dict = get_event_dict_from_file(subject_code)
+    event_to_start = 'FE_start'
+    event_to_end = 'PS_end'
 
     # Get the estimated FE and PS axes from the optimisation
-    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
-                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = \
+        get_J1_J2_from_opt(subject_code, IMU_type, opt_method, opt_trial_name,
+                           subject_event_dict, event_to_start, event_to_end, sample_rate, debug=False)
 
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
@@ -257,10 +263,13 @@ def get_IMU_offsets_METHOD_4c(subject_code, IMU_type):
 
     # Get the dict with the timings for FE and PS events
     subject_event_dict = get_event_dict_from_file(subject_code)
+    event_to_start = 'FE_start'
+    event_to_end = 'PS_end'
 
     # Get the estimated FE and PS axes from the optimisation
-    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
-                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = \
+        get_J1_J2_from_opt(subject_code, IMU_type, opt_method, opt_trial_name,
+                           subject_event_dict, event_to_start, event_to_end, sample_rate, debug=False)
 
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
@@ -297,10 +306,13 @@ def get_IMU_offsets_METHOD_5(subject_code, IMU_type):
 
     # Get the dict with the timings for FE and PS events
     subject_event_dict = get_event_dict_from_file(subject_code)
+    event_to_start = 'FE_start'
+    event_to_end = 'PS_end'
 
     # Get the estimated FE and PS axes from the optimisation
-    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = get_J1_J2_from_opt(subject_code, IMU_type, opt_trial_name,
-                                                     opt_method, subject_event_dict, sample_rate, debug=False)
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = \
+        get_J1_J2_from_opt(subject_code, IMU_type, opt_method, opt_trial_name,
+                           subject_event_dict, event_to_start, event_to_end, sample_rate, debug=False)
 
     # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
     thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
@@ -913,7 +925,7 @@ def get_IMU_cal_hum_method_6(FE_axis_in_humerus_IMU, debug):
     # Specify the first pairs of vectors which should be aligned, with the highest weighting
     a1 = FE_axis_in_humerus
     b1 = FE_axis_in_humerus_IMU
-    w1 = 10000
+    w1 = 100
 
     # Specify the other pairs of vectors, using the initial guess at the IMU offset based on pose
     a2 = y_comp_of_manual_based_offset   # i.e. the axis of the pose-based virtual IMU frame
@@ -926,7 +938,7 @@ def get_IMU_cal_hum_method_6(FE_axis_in_humerus_IMU, debug):
     w = [w1, w2]
 
     # Alternative function
-    virtual_IMU_quat = qmt.quatFromVectorObservations(b, a, weights=w, debug=False, plot=debug)
+    virtual_IMU_quat, Wahba_debug = qmt.quatFromVectorObservations(b, a, weights=w, debug=True, plot=debug)
 
     # Convert the virtual IMU offset to a scipy R
     virtual_IMU = R.from_quat([virtual_IMU_quat[1], virtual_IMU_quat[2], virtual_IMU_quat[3], virtual_IMU_quat[0]])
@@ -936,6 +948,7 @@ def get_IMU_cal_hum_method_6(FE_axis_in_humerus_IMU, debug):
         print("The model's EF axis in the humerus frame is: ", FE_axis_in_humerus)
         print("The initial estimate of virtual IMU offset from manual calibration is: \n", manual_virtual_IMU.as_matrix())
         print("The optimal virtual IMU offset is: \n", virtual_IMU.as_matrix())
+        print("The optimal virtual IMU offset is: \n", virtual_IMU.as_quat())
 
         """ PLOT THE OPTIMISATION """
 
