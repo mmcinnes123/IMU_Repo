@@ -1,4 +1,5 @@
 # All the functions needed to run pose_analysis.py
+import os.path
 
 from helpers_compare import get_vec_angles_from_two_CFs
 
@@ -23,6 +24,8 @@ def get_trial_pose_time_dict_from_file(directory, subject_code):
 # Function to read an .mot file and get the relevant coordinates (joint angles) at a specific time
 def get_coords_from_mot_file(mot_file, pose_time):
 
+    assert os.path.exists(mot_file), f'{mot_file} does not exist.'
+
     # Read in coordinates from IK results .mot files
     print(f'Reading coordinates from {mot_file} file...')
     coords_table = osim.TimeSeriesTable(mot_file)
@@ -46,6 +49,8 @@ def get_coord_at_time_t(coords_table, pose_time, key):
 
 # Function to get the humero-thoracic joint angles from an .sto file, using the model body oris to calculate projected vectors
 def get_HT_angles_from_sto(analysis_sto_file, pose_time):
+
+    assert os.path.exists(analysis_sto_file), f'{analysis_sto_file} does not exist.'
 
     # Read the sto file and get the orientation of each body at pose_time (in quats)
     thorax_quats, humerus_quats, radius_quats = get_body_quats_from_analysis_sto(analysis_sto_file, pose_time)

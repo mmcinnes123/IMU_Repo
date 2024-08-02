@@ -1,6 +1,6 @@
-# This script analyses how successfully a subject performed each pose, relative to the 'perfect' default pose of the model
+# This script analyses how successfully a subject performed each pose, relative to the target (default)
+# pose of the model
 
-# Imports
 from pose_analysis_helpers import get_trial_pose_time_dict_from_file
 from pose_analysis_helpers import get_HT_angles_from_sto
 from pose_analysis_helpers import get_coords_from_mot_file
@@ -16,25 +16,27 @@ import numpy as np
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 
 
-""" MAIN """
+""" INDIVIDUAL RESULTS """
+# The following code reads the results of the OMC IK for each subject, extracts the joint angle values during each
+# pose (using a pre-saved event dict as a reference for the time of each pose in each trial) and compares the
+# measured joint angles with the target joint angles, then saves the value and the error to individual pose_results.csvs
 
 write_results = False
 if write_results:
 
     # Settings
-    subject_code_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]
-    # subject_code_list = ['P1']
+    subject_code_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 
     for subject_code in subject_code_list:
 
-        # Instantiate a subject results dict
+        # Initiate a subject results dict
         subject_results = pd.DataFrame()
 
         # Define some file paths
         parent_dir = join(directory, subject_code)
         OMC_dir = join(parent_dir, 'OMC')
 
-        # Get the dict which defines when each pose happened in each trial
+        # Get the dict with info about times at which each pose happened, in each trial (created previously)
         trial_pose_time_dict = get_trial_pose_time_dict_from_file(directory, subject_code)
 
         for trial_name in trial_pose_time_dict:
@@ -49,12 +51,8 @@ if write_results:
                     # Split the pose_name into a code, and whether it was assisted
                     pose_code, pose_type = split_pose_name(pose_name)
 
-                    if pose_time == None:
-                        print(f"No pose data for {subject_code}, {trial_name}, {pose_name}")
-                        elbow_flexion, elbow_pronation = [np.nan], [np.nan]
-                        HT_abd, HT_flex, HT_rot = [np.nan], [np.nan], [np.nan]
+                    if pose_time is not None:
 
-                    else:
                         # Find the directory with the IK results files
                         IK_results_dir = join(OMC_dir, trial_name + '_IK_Results')
                         mot_file = join(IK_results_dir, 'OMC_IK_results.mot')
@@ -65,6 +63,12 @@ if write_results:
 
                         # Get the values for HT joint angles from the sto file
                         HT_abd, HT_flex, HT_rot = get_HT_angles_from_sto(analysis_sto_file, pose_time)
+
+                    else:
+
+                        print(f"No pose data for {subject_code}, {trial_name}, {pose_name}")
+                        elbow_flexion, elbow_pronation = [np.nan], [np.nan]
+                        HT_abd, HT_flex, HT_rot = [np.nan], [np.nan], [np.nan]
 
                     # Compile the pose JAs into one dict
                     pose_dict = {'elbow_flexion': elbow_flexion,
@@ -77,6 +81,8 @@ if write_results:
                     model_pose_dict = get_default_model_pose_dict(pose_name)
 
                     for JA in pose_dict:
+
+                        # Get the difference between the actual pose and the target pose
                         JA_error = pose_dict[JA][0] - model_pose_dict[JA][0]
 
                         # Log the results
@@ -102,16 +108,14 @@ if write_results:
                            mode='w', encoding='utf-8', na_rep='nan')
 
 
-
-
-
 """ COMPILE ALL RESULTS """
+# The following code reads each individual's pose results .csv files and compiles all results into one .csv
 
-compile_results = False
+compile_results = True
 if compile_results:
 
     # Settings
-    subject_code_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]
+    subject_code_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 
     # Make an empty dict, based on the template above
     all_results = pd.DataFrame()
@@ -131,6 +135,6 @@ if compile_results:
 
     pd.set_option('display.width', None)
 
-    # Save all results to folder for analyis in R
+    # Save all results to folder for analysis in R
     all_results.to_csv(join(directory, 'R Analysis', 'R Pose', 'PoseResults_forR.csv'))
     print('Written all pose results to file in R Analysis')
