@@ -36,7 +36,7 @@ for subject_code in subject_code_list:
     trial_name_dict = get_trial_pose_time_dict_from_file(directory, subject_code)
 
     # Specify some file paths
-    parent_dir = directory + '\\' + subject_code
+    parent_dir = join(directory, subject_code)
     raw_data_dir = join(parent_dir, 'RawData')
     sto_files_dir = join(parent_dir, 'Preprocessed_Data')
     makedirs(sto_files_dir, exist_ok=True)

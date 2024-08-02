@@ -1,52 +1,47 @@
 
 
-import opensim as osim
-import numpy as np
-from os.path import join
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.spatial.transform import Rotation as R
+# import opensim as osim
+# import numpy as np
+# from os.path import join
+# import pandas as pd
+# import matplotlib.pyplot as plt
+# from scipy.spatial.transform import Rotation as R
 import os
-import shutil
+# import shutil
 
 
-# Check list of mot filse to see if weird singularity happened during IK which made GH coords be over 180deg
+# subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
+#
+# subject_list = ['P001', 'P002', 'P003', 'P004', 'P005', 'P006', 'P007', 'P008', 'P009', 'P010', 'P011', 'P012', 'P013',
+#                 'P014', 'P015', 'P016', 'P017', 'P018', 'P019', 'P020']
+
+subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+
+subject_code_remap = {'P1': 'P001',
+                      'P2': 'P002',
+                      'P3': 'P003',
+                      'P4': 'P004',
+                      'P5': 'P005',
+                      'P6': 'PX6',
+                      'P7': 'PX7',
+                      'P8': 'P006',
+                      'P9': 'P007',
+                      'P10': 'P008',
+                      'P11': 'P009',
+                      'P12': 'PX12',
+                      'P13': 'P010',
+                      'P14': 'P011',
+                      'P15': 'P012',
+                      'P16': 'P013',
+                      'P17': 'P014',
+                      'P18': 'P015',
+                      'P19': 'P016',
+                      'P20': 'P017',
+                      'P21': 'PX21',
+                      'P22': 'P018',
+                      'P23': 'P019',
+                      'P24': 'P020'
+                      }
 
 dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
-
-subject_code_list = [f'P{i}' for i in range(2, 23) if f'P{i}' not in ('P12', 'P21')]
-
-move_to_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\Old Range Dicts'
-
-for subject_code in subject_code_list:
-    subject_dir = join(dir, subject_code)
-    range_dict_file_name = subject_code + '_JA_range_dict.txt'
-    range_dict_file = join(subject_dir, range_dict_file_name)
-
-    file_obj = open(range_dict_file, 'r')
-    range_dict_str = file_obj.read()
-    file_obj.close()
-    range_dict = eval(range_dict_str)
-
-    for joint_name in range_dict.keys():
-        ind_val_1 = range_dict[joint_name][0]
-        ind_val_2 = range_dict[joint_name][1]
-        # Check the values are large, not time values
-        if ind_val_1 > 200:
-            ind_val_1_new = ind_val_1 / 100
-            ind_val_2_new = ind_val_2 / 100
-
-            new_list = [ind_val_1_new, ind_val_2_new]
-
-            # Update the range_dict
-            range_dict[joint_name] = new_list
-
-            # Save dict to .txt
-            file_obj = open(range_dict_file, 'w')
-            file_obj.write(str(range_dict))
-            file_obj.close()
-
-        else:
-            print('This range dict was already time values: ', range_dict_file)
-
 

@@ -34,7 +34,7 @@ sample_rate = 100          # This is the sample rate of the data going into the 
 IMU_type_for_opt_list = ['Perfect']
 
 # opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-opt_method_list = ['rot']   # Options: 'rot', 'ori', 'rot_noDelta'
+opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
 
 # trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
 trial_dict = {'JA_Slow': ['FE_start', 'PS_end']}
