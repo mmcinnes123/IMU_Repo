@@ -1,0 +1,11 @@
+[2024-08-05 10:26:42.637] [info] Loaded model Right-scaled from file C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P001\OMC\das3_scaled_and_placed.osim
+[2024-08-05 10:26:42.638] [warning] Couldn't find file 'ground_ribs.vtp'.
+[2024-08-05 10:26:42.638] [warning] Couldn't find file 'ground_spine.vtp'.
+[2024-08-05 10:26:42.638] [warning] Couldn't find file 'ground_skull.vtp'.
+[2024-08-05 10:26:42.638] [warning] Couldn't find file 'ground_jaw.vtp'.
+[2024-08-05 10:26:42.639] [warning] Couldn't find file 'rclavicle.vtp'.
+[2024-08-05 10:26:42.639] [warning] Couldn't find file 'rscapula.vtp'.
+[2024-08-05 10:26:42.639] [warning] Couldn't find file 'rhumerus.vtp'.
+[2024-08-05 10:26:42.639] [warning] Couldn't find file 'rulna.vtp'.
+[2024-08-05 10:26:42.639] [warning] Couldn't find file 'rradius.vtp'.
+[2024-08-05 10:26:42.639] [warning] Couldn't find file 'r_hand.vtp'.
