@@ -20,38 +20,34 @@ osim.Logger.setLevelString("Off")
 
 
 
-subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+def get_all_clus_in_body_frame(subject_list):
 
-# Initiate empty list with hum_cluster ori results
-hum_clus_all = {}
+    # Initiate empty list with hum_cluster ori results
+    hum_clus_all = {}
+    rad_clus_all = {}
 
-for subject_code in subject_list:
+    for subject_code in subject_list:
 
-    OMC_dir = join(dir, subject_code, 'OMC')
-    model_file = join(OMC_dir, 'das3_scaled_and_placed.osim')
+        OMC_dir = join(dir, subject_code, 'OMC')
+        model_file = join(OMC_dir, 'das3_scaled_and_placed.osim')
 
-    # Get the orientation of the 'perfect' IMU CF (cluster CF), in the body CF
-    hum_clus_in_hum, rad_clus_in_rad = get_IMU_in_body_frame(model_file)
+        # Get the orientation of the 'perfect' IMU CF (cluster CF), in the body CF
+        hum_clus_in_hum, rad_clus_in_rad = get_IMU_in_body_frame(model_file)
 
-    hum_clus_all[subject_code] = hum_clus_in_hum
+        hum_clus_all[subject_code] = hum_clus_in_hum
+        rad_clus_all[subject_code] = rad_clus_in_rad
+
+    return hum_clus_all, rad_clus_all
 
 
-def plot_humy_onZY(hum_clus_all):
-
-    # local_axis = 'y'
-    # global_axis_1 = 'Z'
-    # global_axis_2 = 'Y'
-
-    local_axis = 'y'
-    global_axis_1 = 'X'
-    global_axis_2 = 'Y'
+def plot_local_vec_on_global_plane(clus_all, local_axis, global_axis_1, global_axis_2):
 
     # Initiate dict with vecs
     vecs_dict = {}
 
-    for subject in hum_clus_all.keys():
+    for subject in clus_all.keys():
 
-        hum_clus_in_hum = hum_clus_all[subject]
+        hum_clus_in_hum = clus_all[subject]
 
         local_index = dict(x=0, y=1, z=2)[local_axis]
         global_index_1 = dict(X=0, Y=1, Z=2)[global_axis_1]
@@ -160,5 +156,9 @@ def plot_humy_onZY(hum_clus_all):
     fig.show()
 
 
+subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 
-plot_humy_onZY(hum_clus_all)
+hum_clus_all, rad_clus_all = get_all_clus_in_body_frame(subject_list)
+
+plot_local_vec_on_global_plane(hum_clus_all, local_axis='y', global_axis_1='Z', global_axis_2='Y')
+
