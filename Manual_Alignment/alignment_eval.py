@@ -40,7 +40,7 @@ def get_all_clus_in_body_frame(subject_list):
     return hum_clus_all, rad_clus_all
 
 
-def plot_local_vec_on_global_plane(clus_all, local_axis, global_axis_1, global_axis_2):
+def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1, global_axis_2):
 
     # Initiate dict with vecs
     vecs_dict = {}
@@ -130,7 +130,8 @@ def plot_local_vec_on_global_plane(clus_all, local_axis, global_axis_1, global_a
         xaxis=dict(
             title='',
             zeroline=True,
-            autorange='reversed',  # Invert the x-axis
+            # autorange='reversed',  # Invert the x-axis
+            range = [2, -2],
             showgrid=False,
             showline=False,
             showticklabels=False
@@ -144,7 +145,10 @@ def plot_local_vec_on_global_plane(clus_all, local_axis, global_axis_1, global_a
             showline=False,
             showticklabels=False
         ),
-        title=f'IMU {local_axis}-axis on the Humerus {global_axis_1}{global_axis_2} Plane',
+        title={
+            'text': f'{JA_name}: IMU {local_axis}-axis on the {global_axis_1}{global_axis_2} Plane',
+            'x': 0.5,
+            'xanchor': 'center'},
         showlegend=False,
         width=600,  # Adjust width to ensure equal scaling visually
         height=600,
@@ -153,12 +157,21 @@ def plot_local_vec_on_global_plane(clus_all, local_axis, global_axis_1, global_a
     )
 
     # Display the plot
-    fig.show()
+    # fig.show()
+    save_file = join(r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\R Analysis\Manual Alignment', JA_name + '.png')
+    fig.write_image(save_file)
 
 
 subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 
 hum_clus_all, rad_clus_all = get_all_clus_in_body_frame(subject_list)
 
-plot_local_vec_on_global_plane(hum_clus_all, local_axis='y', global_axis_1='Z', global_axis_2='Y')
+# Set the local axis to be the projected vector, and define the 2D plane with global_axis_1 (points left)
+# and global_axis_2 (points up)
+plot_local_vec_on_global_plane(hum_clus_all, JA_name='Shoulder Flexion', local_axis='y', global_axis_1='Z', global_axis_2='Y')
+# plot_local_vec_on_global_plane(hum_clus_all, JA_name='Shoulder Abduction', local_axis='y', global_axis_1='X', global_axis_2='Y')
+# plot_local_vec_on_global_plane(hum_clus_all, JA_name='Shoulder Rotation', local_axis='z', global_axis_1='X', global_axis_2='Z')
 
+# plot_local_vec_on_global_plane(rad_clus_all, JA_name='Elbow Flexion', local_axis='y', global_axis_1='Y', global_axis_2='X')
+# plot_local_vec_on_global_plane(rad_clus_all, JA_name='Elbow Abduction', local_axis='z', global_axis_1='Z', global_axis_2='Y')
+# plot_local_vec_on_global_plane(rad_clus_all, JA_name='Pronation/Supination', local_axis='z', global_axis_1='Z', global_axis_2='X')
