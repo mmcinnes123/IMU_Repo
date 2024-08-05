@@ -2,7 +2,7 @@
 # Input is Motion Monitor .txt report file
 # Output is .sto OpenSim file
 # It also uses a dictionary of specified times to create .sto files for each moment a calibration pose was performed
-# It also creates these outputs for multiple verions of the IMU data (e.g. 'real' and 'perfect' IMUs)
+# It also creates these outputs for multiple versions of the IMU data (e.g. 'real' and 'perfect' IMUs)
 
 from helpers_preprocess import write_movements_and_calibration_stos
 from helpers_preprocess import get_trial_pose_time_dict_from_file
@@ -16,8 +16,8 @@ from tkinter.filedialog import askopenfilename, askdirectory
 """ SETTINGS """
 
 # Quick Settings
-# subject_code_list = [f'P{i}' for i in range(16, 23)]
-subject_code_list = ['P1', 'P2', 'P23']    # Missing FE/PS data
+# subject_code_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+subject_code_list = ['P020']
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 IMU_type_dict = {'Real': ' - Report2 - IMU_Quats.txt', 'Perfect': ' - Report3 - Cluster_Quats.txt'}     # Edit this depending on what data you want to look at
 

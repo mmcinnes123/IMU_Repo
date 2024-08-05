@@ -22,7 +22,7 @@ import numpy as np
 
 """ SET GH MODEL COORDINATES """
 
-def set_GH_coords_for_given_HT_angles():
+def set_GH_coords_for_given_HT_angles(target_abd_angle):
 
     """
       Calculate the GH euler angles required to achieve 0 degree HT angles
@@ -39,8 +39,7 @@ def set_GH_coords_for_given_HT_angles():
       """
 
     # Set the HT abduction angle
-    # abd = 13
-    abd = 0
+    abd = target_abd_angle
 
     # Get the default state of the model
     model_file = 'das3.osim'
@@ -60,7 +59,6 @@ def set_GH_coords_for_given_HT_angles():
 
     # Calculate the required rotational offset of the humerus relative to the scapula frame
     R_h_in_s = R_s_in_t.inv() * R_h_in_t
-    print(R_h_in_s.as_matrix())
 
     # Decompose into 'YZY' Eulers, used to update the coordinates of the model.
     GH_Y_new, GH_Z_new, GH_X_new = R_h_in_s.as_euler('YZX')
@@ -81,6 +79,8 @@ def set_GH_coords_for_given_HT_angles():
     print("%.2f" % HT_1, "%.2f" % HT_2, "%.2f" % HT_3)
 
     model.printToXML(model_file)
+    print('Saved to model file: ', model_file)
+
 
 # Function to set the clamp range of a group of coords
 def set_coord_clamps():
@@ -110,5 +110,4 @@ def get_scipy_rel_ori(body1, body2, state):
     return scipy_R
 
 
-
-set_GH_coords_for_given_HT_angles()
+set_GH_coords_for_given_HT_angles(target_abd_angle=0)

@@ -37,11 +37,6 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
     osim.Logger.removeFileSink()
     osim.Logger.addFileSink(IK_results_dir + r'\IMU_IK.log')
 
-    # if not IK_trim_bool:
-    #     # Set the IK start time to
-    #
-    #     # Update the trim bool so that
-
     """ MAIN """
 
     # Check that the calibrated model has been created

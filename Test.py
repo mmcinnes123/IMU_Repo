@@ -7,7 +7,7 @@
 # import matplotlib.pyplot as plt
 # from scipy.spatial.transform import Rotation as R
 import os
-# import shutil
+import shutil
 
 
 # subject_list = [f'P{i}' for i in range(1, 23) if f'P{i}' not in ('P12', 'P21')]    # Missing FE/PS data
@@ -45,3 +45,23 @@ subject_code_remap = {'P1': 'P001',
 
 dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 
+
+for old_code, new_code in subject_code_remap.items():
+
+    real_dir = os.path.join(dir, new_code, 'Real')
+
+    alt_IK_results_dir = os.path.join(real_dir, 'Target_Pose_Abd13')
+
+    folders_to_move = ['IMU_IK_results_METHOD_5', 'IMU_IK_results_METHOD_4a', 'IMU_IK_results_OSIM_Alt_asst', 'IMU_IK_results_OSIM_Alt_self', 'IMU_IK_results_OSIM_N_self']
+
+    for folder in folders_to_move:
+
+        folder_path = os.path.join(real_dir, folder)
+
+        if os.path.exists(folder_path):
+
+            # Move it to the alt results folder
+            shutil.move(folder_path, alt_IK_results_dir)
+
+        else:
+            print(f'{folder} does not exist for subject {new_code}')

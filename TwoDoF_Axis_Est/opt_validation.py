@@ -30,19 +30,20 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
 
-# IMU_type_for_opt_list = ['Real', 'Perfect']
-IMU_type_for_opt_list = ['Perfect']
+IMU_type_for_opt_list = ['Real', 'Perfect']
+# IMU_type_for_opt_list = ['Perfect']
 
-# opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+# opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
 
-# trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
-trial_dict = {'JA_Slow': ['FE_start', 'PS_end']}
+trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink1_end']}
+# trial_dict = {'JA_Slow': ['FE_start', 'PS_end']}
 
 
 # List of subjects
+subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 # subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
-subject_list = ['P23']    # Missing FE/PS data
+# subject_list = ['P23']    # Missing FE/PS data
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -155,7 +156,7 @@ for trial_for_opt in trial_dict:
 
                 # Visualise 3D animation of the results
                 # visulalise_opt_result_vec_on_IMU(opt_PS, OMC_PS, None)
-                visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+                # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
 
                 # Log results
                 logging.info(f'Results for Subject {subject_code}')
@@ -248,18 +249,18 @@ def update_alt_file(file_path, new_data):
     existing_df.to_csv(file_path, index=False)
 
 
-# # Print all results to csv/ update row-by-row if the file already exists
-# results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv')
-# alt_results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv')
-#
-# if os.path.exists(results_file_path):
-#     update_file(results_file_path, all_data)
-# else:
-#     all_data.to_csv(results_file_path)
-#
-# if os.path.exists(alt_results_file_path):
-#     update_alt_file(alt_results_file_path, alt_all_data)
-# else:
-#     alt_all_data.to_csv(alt_results_file_path)
-#
-#
+# Print all results to csv/ update row-by-row if the file already exists
+results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv')
+alt_results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv')
+
+if os.path.exists(results_file_path):
+    update_file(results_file_path, all_data)
+else:
+    all_data.to_csv(results_file_path)
+
+if os.path.exists(alt_results_file_path):
+    update_alt_file(alt_results_file_path, alt_all_data)
+else:
+    alt_all_data.to_csv(alt_results_file_path)
+
+
