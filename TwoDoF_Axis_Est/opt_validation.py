@@ -42,7 +42,6 @@ trial_dict = {'JA_Slow': ['FE_start', 'PS_end'], 'ADL': ['kettle1_start', 'drink
 
 # List of subjects
 subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
-# subject_list = [f'P{i}' for i in range(1, 24) if f'P{i}' not in ('P12', 'P21', 'P6', 'P7')]    # Missing FE/PS data
 # subject_list = ['P010']    # Missing FE/PS data
 
 # Initiate dict to store the calculated error for each subject
@@ -249,18 +248,18 @@ def update_alt_file(file_path, new_data):
     existing_df.to_csv(file_path, index=False)
 
 
-# Print all results to csv/ update row-by-row if the file already exists
-results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv')
-alt_results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv')
-
-if os.path.exists(results_file_path):
-    update_file(results_file_path, all_data)
-else:
-    all_data.to_csv(results_file_path)
-
-if os.path.exists(alt_results_file_path):
-    update_alt_file(alt_results_file_path, alt_all_data)
-else:
-    alt_all_data.to_csv(alt_results_file_path)
+# # Print all results to csv/ update row-by-row if the file already exists
+# results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR.csv')
+# alt_results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR.csv')
+#
+# if os.path.exists(results_file_path):
+#     update_file(results_file_path, all_data)
+# else:
+#     all_data.to_csv(results_file_path)
+#
+# if os.path.exists(alt_results_file_path):
+#     update_alt_file(alt_results_file_path, alt_all_data)
+# else:
+#     alt_all_data.to_csv(alt_results_file_path)
 
 
