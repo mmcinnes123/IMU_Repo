@@ -13,6 +13,7 @@ from TwoDoF_Axis_Est.helpers_2DoF import visualise_quat_data
 from TwoDoF_Axis_Est.helpers_2DoF import get_ang_vels_from_quats
 from TwoDoF_Axis_Est.helpers_2DoF import visulalise_3D_vecs_on_IMU
 from TwoDoF_Axis_Est.helpers_2DoF import filter_gyr_data
+from TwoDoF_Axis_Est.helpers_2DoF import is_j2_close_to_expected
 
 
 def inner1d(a, b):  # avoid deprecation, cf. https://stackoverflow.com/a/15622926
@@ -98,19 +99,48 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
     x = None
     parameters = None
     cost = None
-    for initVal in initVals:
-        objFn = objFnCls(initVal)
-        objFn.setData(d)
-        solver = GNSolver(objFn)
-        for i in range(200):
-            deltaX = solver.step()
-            if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
-                break
 
-        if cost is None or solver.objFn.cost() < cost:  # Update the cost, x, and parameters if cost is less than for previous initVal
-            cost = solver.objFn.cost()
-            x = solver.objFn.getX()
-            parameters = solver.objFn.unpackX()     # The outputs j1, j2 and delta are stored in here
+    if method == 'rot_noDelta':
+
+        for initVal in initVals:
+            objFn = objFnCls(initVal)
+            objFn.setData(d)
+            solver = GNSolver(objFn)
+            for i in range(200):
+                deltaX = solver.step()
+                if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
+                    break
+
+            # Check the j2 solution which is closest to expected result, based on manual placement
+            j2_sol_temp = solver.objFn.unpackX()['j2']
+            j2_expected = np.array([0, 1, 0])
+            tolerance = 60
+            check_bool = is_j2_close_to_expected(j2_sol_temp, j2_expected, tolerance)
+
+            if check_bool:
+                if cost is None or solver.objFn.cost() < cost:  # Update the cost, x, and parameters if cost is less than for previous initVal
+                    cost = solver.objFn.cost()
+                    x = solver.objFn.getX()
+                    parameters = solver.objFn.unpackX()  # The outputs j1, j2 and delta are stored in here
+
+            # Repeat with another initVal
+
+        if cost is None:
+            print('No solution was found where j2 was within 60 degrees of [0, 1, 0]')
+
+    else:
+        for initVal in initVals:
+            objFn = objFnCls(initVal)
+            objFn.setData(d)
+            solver = GNSolver(objFn)
+            for i in range(200):
+                deltaX = solver.step()
+                if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
+                    break
+            if cost is None or solver.objFn.cost() < cost:  # Update the cost, x, and parameters if cost is less than for previous initVal
+                cost = solver.objFn.cost()
+                x = solver.objFn.getX()
+                parameters = solver.objFn.unpackX()     # The outputs j1, j2 and delta are stored in here
 
     # Extract the outputs of the optimisation: j1, j2, delta (heading offset), and for 'ori' method, beta (carry angle)
     out = dict(
@@ -178,6 +208,9 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
         visulalise_3D_vecs_on_IMU(gyr2_1, downsampleRate)
 
     return out
+
+
+
 
 
 def _cross(a, b):

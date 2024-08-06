@@ -96,6 +96,18 @@ def get_np_quats_from_txt_file(input_file):
     return IMU1_np, IMU2_np, IMU3_np
 
 
+def is_j2_close_to_expected(j2_sol_temp, j2_expected, tolerance):
+    angle_rel2_pos_expected = qmt.angleBetween2Vecs(j2_sol_temp, j2_expected)
+    angle_rel2_neg_expected = qmt.angleBetween2Vecs(j2_sol_temp, -j2_expected)
+    angle_rel2_expected = np.min([angle_rel2_pos_expected, angle_rel2_neg_expected])
+
+    # Only accept solution/update cost if j2 is close to expected j2 vec
+    tolerance_rad = np.deg2rad(tolerance)
+    if angle_rel2_expected < tolerance_rad:
+        return True
+    else:
+        return False
+
 def get_local_ang_vels_from_quats(quats, sample_rate, debug_plot):
     """ Function to calculate 3D angular velocity vectors (in the IMU's local frame, from IMU orientation quats."""
 
