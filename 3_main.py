@@ -10,11 +10,12 @@ trial_name = 'JA_Slow'      # Choose which trial to run IK
 
 # calibration_list = ['OSIM_N_self', 'OSIM_Alt_self', 'ALL_MANUAL', 'METHOD_1_Alt_self', 'METHOD_2_Alt_self', 'METHOD_3']     # Used to find the calibrated model file
 # calibration_list = ['OSIM_N_self', 'OSIM_N_asst', 'OSIM_Alt_asst', 'OSIM_Alt_self', 'METHOD_4b']     # Used to find the calibrated model file
-calibration_list = ['METHOD_4b']     # Used to find the calibrated model file
+calibration_list = ['METHOD_4d']     # Used to find the calibrated model file
 
 IMU_type_list = ['Real']        # Options: 'Perfect' or 'Real'
 
-subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+# subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+subject_list = [f'P{str(i).zfill(3)}' for i in range(14, 15)]
 # subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21) if f'P{str(i).zfill(3)}' not in 'P019']
 # subject_list = ['P018']
 

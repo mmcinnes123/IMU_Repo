@@ -12,14 +12,12 @@ directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 list_of_subjects = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 IMU_type_list = ['Real']
 trial_name = 'JA_Slow'
-# calibration_name_dict = {'OSIM_N_self': None,
-#                          'OSIM_Alt_self': None,
-#                          'ALL_MANUAL': None,
-#                          'METHOD_1_Alt_self': None,
-#                          'METHOD_2_Alt_self': None,
-#                          'METHOD_3': None,
-#                          }
-calibration_name_dict = {'OSIM_N_self': None, 'OSIM_N_asst': None, 'OSIM_Alt_self': None, 'OSIM_Alt_asst': None, 'METHOD_4b': None}
+calibration_name_dict = {'OSIM_N_self': None,
+                         'OSIM_N_asst': None,
+                         'OSIM_Alt_self': None,
+                         'OSIM_Alt_asst': None,
+                         'METHOD_4b': None,
+                         'METHOD_4d': None}
 
 # folders_to_exclude = [r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P22\Real\IMU_IK_results_METHOD_4b\JA_Slow\Comparison_P22_METHOD_4b_JA_Slow']
 folders_to_exclude = []

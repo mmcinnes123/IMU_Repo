@@ -235,6 +235,50 @@ def get_IMU_offsets_METHOD_4b(subject_code, IMU_type):
     return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
 
 
+
+# Function to apply METHOD_4
+def get_IMU_offsets_METHOD_4d(subject_code, IMU_type):
+
+    pose_name = 'Alt_self'
+    pose_trial_name = 'CP'
+    opt_trial_name = 'ADL'
+    opt_method = 'rot_noDelta'
+
+    # Get the IMU orientation data at calibration pose time
+    cal_oris_file_path_1 = get_cal_ori_file_path(subject_code, pose_trial_name, pose_name, IMU_type)
+    thorax_IMU_ori1, humerus_IMU_ori1, radius_IMU_ori1 = read_sto_quaternion_file(cal_oris_file_path_1)
+
+    # Get model body orientations in ground during default pose
+    thorax_ori, humerus_ori, radius_ori = get_model_body_oris_during_default_pose(template_model_file, pose_name)
+
+    # Get heading offset between IMU heading and model heading
+    heading_offset = get_heading_offset(thorax_ori, thorax_IMU_ori1, baseIMUHeading, debug=False)
+
+    # Apply the heading offset to the IMU orientations
+    heading_offset_ori = R.from_euler('y', heading_offset)  # Create a heading offset scipy rotation
+    thorax_IMU_ori_rotated1 = heading_offset_ori * thorax_IMU_ori1
+    humerus_IMU_ori_rotated1 = heading_offset_ori * humerus_IMU_ori1
+    radius_IMU_ori_rotated1 = heading_offset_ori * radius_IMU_ori1
+
+    """ FINDING FE AND PS FROM OPTIMISATION RESULT """
+
+    # Get the dict with the timings for FE and PS events
+    subject_event_dict = get_event_dict_from_file(subject_code)
+    event_to_start = 'kettle1_start'
+    event_to_end = 'drink1_end'
+
+    # Get the estimated FE and PS axes from the optimisation
+    opt_FE_axis_in_humerus_IMU, opt_PS_axis_in_radius_IMU, opt_results = \
+        get_J1_J2_from_opt(subject_code, IMU_type, opt_method, opt_trial_name,
+                           subject_event_dict, event_to_start, event_to_end, sample_rate, debug=False)
+
+    # Get the body-IMU offset for each body, based on the custom methods specified in cal_method_dict
+    thorax_virtual_IMU = get_IMU_cal_POSE_BASED(thorax_IMU_ori_rotated1, thorax_ori)
+    humerus_virtual_IMU = get_IMU_cal_hum_method_6(opt_FE_axis_in_humerus_IMU, debug=False)
+    radius_virtual_IMU = get_IMU_cal_rad_method_1(opt_PS_axis_in_radius_IMU, debug=False)
+
+    return thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU
+
 # Function to apply METHOD_4
 def get_IMU_offsets_METHOD_4c(subject_code, IMU_type):
 
