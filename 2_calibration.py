@@ -97,13 +97,11 @@ def run_method(method_name, subject_code, IMU_type):
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_4d(subject_code, IMU_type)
 
-        elif method_name == 'METHOD_7_ADL_both':
-            thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                get_IMU_offsets_METHOD_7_ADL_both(subject_code, IMU_type)
-
         elif method_name == 'METHOD_7_ISO_5reps':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                get_IMU_offsets_METHOD_7_ISO_5reps(subject_code, IMU_type)
+                get_IMU_offsets_METHOD_7(subject_code, IMU_type,
+                                         opt_trial_name='JA_Slow',
+                                         event_to_start='FE_start', event_to_end='PS_end')
 
         elif method_name == 'METHOD_7_ISO_1rep':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
@@ -111,11 +109,24 @@ def run_method(method_name, subject_code, IMU_type):
                                          opt_trial_name='JA_Slow',
                                          event_to_start='FE5_start', event_to_end='PS2_start')
 
+        elif method_name == 'METHOD_7_ADL_both':
+            opt_trial_name = 'ADL'
+            if subject_code == 'P008':
+                event_to_start = 'drink1_start'
+                event_to_end = 'kettle1_end'
+            else:
+                event_to_start = 'kettle1_start'
+                event_to_end = 'drink1_end'
+            thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
+                get_IMU_offsets_METHOD_7(subject_code, IMU_type,
+                                         opt_trial_name,
+                                         event_to_start, event_to_end)
+
         elif method_name == 'METHOD_7_ADL_drink':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_7(subject_code, IMU_type,
-                                         opt_trial_name='JA_Slow',
-                                         event_to_start='FE5_start', event_to_end='PS2_start')
+                                         opt_trial_name='ADL',
+                                         event_to_start='drink1_start', event_to_end='drink1_end')
 
         else:
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = None, None, None

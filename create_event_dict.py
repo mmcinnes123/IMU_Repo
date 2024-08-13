@@ -7,8 +7,8 @@ parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 base_dir = os.path.join(parent_dir, 'SubjectEventFiles')
 
 # List of subjects
-# subjects = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
-subjects = ['P020']
+subjects = [f'P{str(i).zfill(3)}' for i in range(8, 21)]
+# subjects = ['P001']
 
 # List of events (modify this list according to your specific events)
 CP_events = ['N_self', 'N_asst', 'Alt_self', 'Alt_asst', 'Alt2_self']
@@ -87,7 +87,7 @@ for subject in subjects:
         subject_events_times = eval(subject_events_times_str)
 
         # Add any new events here
-        new_events = {'ADL': ['drink_start']}   # Example of new events dict
+        new_events = {'JA_Slow': ['FE5_start', 'PS2_start']}   # Example of new events dict
 
         for trial in new_events.keys():
             print(f"\n\tEntering data for {trial}.\n")
@@ -104,7 +104,7 @@ for subject in subjects:
                 if time_input.lower() == 'none':
                     time = None
                 else:
-                    time = int(time_input)
+                    time = time_input
 
                 subject_events_times[trial][event] = time
 

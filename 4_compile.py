@@ -16,8 +16,8 @@ calibration_name_dict = {'OSIM_N_self': None,
                          'OSIM_N_asst': None,
                          'OSIM_Alt_self': None,
                          'OSIM_Alt_asst': None,
-                         'METHOD_4b': None,
-                         'METHOD_4d': None}
+                         'METHOD_4b_alt': None,
+                         'METHOD_4d_alt': None}
 
 # folders_to_exclude = [r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P22\Real\IMU_IK_results_METHOD_4b\JA_Slow\Comparison_P22_METHOD_4b_JA_Slow']
 folders_to_exclude = []

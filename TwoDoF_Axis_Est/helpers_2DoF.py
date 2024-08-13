@@ -33,12 +33,12 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, opt_method,
     IMU1_np, IMU2_np, IMU3_np = get_np_quats_from_txt_file(tmm_txt_file)
 
     # Get the start and end time for which to run the optimisation
-    start_time = subject_event_dict[trial_for_opt][event_to_start]
-    end_time = subject_event_dict[trial_for_opt][event_to_end]
+    start_time = float(subject_event_dict[trial_for_opt][event_to_start])
+    end_time = float(subject_event_dict[trial_for_opt][event_to_end])
 
     # Trim the IMU data based on the period of interest
-    start_ind = start_time * sample_rate
-    end_ind = end_time * sample_rate
+    start_ind = int(start_time * sample_rate)
+    end_ind = int(end_time * sample_rate)
     IMU2_trimmed = IMU2_np[start_ind:end_ind]
     IMU3_trimmed = IMU3_np[start_ind:end_ind]
 
