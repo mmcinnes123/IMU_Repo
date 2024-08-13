@@ -27,9 +27,9 @@ Define the settings for each JA of interest.
 sh_flex_settings = dict(JA_name='Shoulder Flexion', local_axis='y', global_axis_1='Z', global_axis_2='Y', target_global_axis='-Y')
 sh_abd_settings = dict(JA_name='Shoulder Abduction', local_axis='y', global_axis_1='X', global_axis_2='Y', target_global_axis='-Y')
 sh_rot_settings = dict(JA_name='Shoulder Rotation', local_axis='z', global_axis_1='X', global_axis_2='Z', target_global_axis='X')
-el_flex_settings = dict(JA_name='Elbow Flexion', local_axis='y', global_axis_1='Y', global_axis_2='X', target_global_axis='-Y')
-el_abd_settings = dict(JA_name='Elbow Abduction', local_axis='z', global_axis_1='Z', global_axis_2='Y', target_global_axis='Z')
-pro_sup_settings = dict(JA_name='Pronation/Supination', local_axis='z', global_axis_1='Z', global_axis_2='X', target_global_axis='Z')
+el_flex_settings = dict(JA_name='Elbow Flexion', local_axis='x', global_axis_1='Y', global_axis_2='X', target_global_axis='-X')
+el_abd_settings = dict(JA_name='Elbow Abduction', local_axis='y', global_axis_1='Z', global_axis_2='Y', target_global_axis='-Y')
+pro_sup_settings = dict(JA_name='Pronation/Supination', local_axis='x', global_axis_1='Z', global_axis_2='X', target_global_axis='-X')
 
 
 """ 

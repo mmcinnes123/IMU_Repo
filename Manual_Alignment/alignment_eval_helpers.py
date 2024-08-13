@@ -91,7 +91,7 @@ def get_vecs_and_error_between_local_and_global(clus_all, JA_name, local_axis, g
         vecs_dict[subject] = clus_vec_on_2D_plane
 
         # Get the angle between the vector and the target vector (always positive)
-        angle_between = angle_between_two_2D_vecs(target_vec, clus_vec_on_2D_plane)
+        angle_between = angle_between_2D_vecs_arctan(target_vec, clus_vec_on_2D_plane)
         error_angles_dict[subject] = angle_between
 
     return error_angles_dict, vecs_dict
@@ -101,7 +101,7 @@ def get_variation_in_error_angles(error_angles_dict):
 
     error_angles = np.array(list(error_angles_dict.values()))
 
-    error_angles_mean = np.mean(error_angles)
+    error_angles_mean = np.mean(abs(error_angles))
 
     error_anlges_SD = np.std(error_angles)
 
@@ -117,12 +117,12 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
     error_angles_mean, error_angles_SD = get_variation_in_error_angles(error_angles_dict)
 
     # Define the CF axes
-    axis_u = [0, 1]
-    axis_v = [1, 0]
+    target_axis_u = [0, -1.5]
+    target_axis_v = [1.5, 0]
     o_u = [0]
     o_v = [0]
     v_axis_label = global_axis_1
-    u_axis_label = global_axis_2
+    u_axis_label = '-' + global_axis_2
 
     vecs = np.array(list(vecs_dict.values()))
     vec_us = vecs[:, 0]
@@ -135,11 +135,11 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
     quiver_vecs = ff.create_quiver(vec_origins_u, vec_origins_v, vec_us, vec_vs, line_color='red', scale=1, arrow_scale=.1, angle=np.pi / 6,
                                    name='vec1', line=dict(width=1))
 
-    # Create the second quiver plot (blue)
-    quiver_U = ff.create_quiver(o_u, o_v, [axis_u[0]], [axis_u[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
-                                name='vec1', line=dict(width=1))
-    quiver_V = ff.create_quiver(o_u, o_v, [axis_v[0]], [axis_v[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
-                                name='vec1', line=dict(width=1))
+    # Create the second quiver plot (black)
+    target_quiver_U = ff.create_quiver(o_u, o_v, [target_axis_u[0]], [target_axis_u[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
+                                       name='vec1', line=dict(width=1))
+    target_quiver_V = ff.create_quiver(o_u, o_v, [target_axis_v[0]], [target_axis_v[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
+                                       name='vec1', line=dict(width=1))
 
 
     # Initialize the figure
@@ -150,11 +150,11 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
         fig.add_trace(trace)
 
     # Add the second quiver plot
-    for trace in quiver_U['data']:
+    for trace in target_quiver_U['data']:
         fig.add_trace(trace)
 
     # Add the third quiver plot
-    for trace in quiver_V['data']:
+    for trace in target_quiver_V['data']:
         fig.add_trace(trace)
 
     # Add annotations with custom labels
@@ -166,12 +166,12 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
         #     xshift=10, yshift=10  # Pixel offset from the point
         # ),
         dict(
-            x=axis_u[0], y=axis_u[1], xref="x", yref="y",
-            text=u_axis_label, showarrow=False, xanchor="center", yanchor="bottom",  # Offset position
+            x=target_axis_u[0], y=target_axis_u[1], xref="x", yref="y",
+            text=u_axis_label, showarrow=False, xanchor="center", yanchor="top",  # Offset position
             xshift=0, yshift=0  # Pixel offset from the point
         ),
         dict(
-            x=axis_v[0], y=axis_v[1], xref="x", yref="y",
+            x=target_axis_v[0], y=target_axis_v[1], xref="x", yref="y",
             text=v_axis_label, showarrow=False, xanchor="right", yanchor="middle",  # Offset position
             xshift=0, yshift=0  # Pixel offset from the point
         )
@@ -200,7 +200,7 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
             showticklabels=False
         ),
         title={
-            'text': f'{JA_name}: IMU {local_axis}-axis on the {global_axis_1}{global_axis_2} Plane',
+            'text': f'IMU {local_axis}-axis on the {global_axis_1}{global_axis_2} Plane',
             'x': 0.5,
             'xanchor': 'center'},
         showlegend=False,
@@ -223,3 +223,32 @@ def angle_between_two_2D_vecs(target_vec, vec2):
     angle_deg = np.rad2deg(angle)
 
     return angle_deg
+
+
+
+
+def angle_between_2D_vecs_arctan(target_vec, v2):
+    """
+    Calculate the signed angle between two 2D vectors using the cross product method.
+
+    Parameters:
+    v1 (np.array): The first vector as a numpy array [x1, y1].
+    v2 (np.array): The second vector as a numpy array [x2, y2].
+
+    Returns:
+    float: The angle between the vectors in degrees. Positive indicates counterclockwise, negative indicates clockwise.
+    """
+    # Calculate the cross product (2D scalar version)
+    cross_product = target_vec[0] * v2[1] - target_vec[1] * v2[0]
+
+    # Calculate the dot product
+    dot_product = np.dot(target_vec, v2)
+
+    # Calculate the angle using atan2 (returns angle in radians)
+    angle = np.arctan2(cross_product, dot_product)
+
+    angle_deg = np.rad2deg(angle)
+
+    return angle_deg
+
+
