@@ -136,5 +136,6 @@ if compile_results:
     pd.set_option('display.width', None)
 
     # Save all results to folder for analysis in R
-    all_results.to_csv(join(directory, 'R Analysis', 'R Pose', 'PoseResults_forR.csv'))
+    results_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results'
+    all_results.to_csv(join(results_dir, 'Pose_Results.csv'))
     print('Written all pose results to file in R Analysis')

@@ -71,5 +71,5 @@ for JA_settings in [el_flex_settings, el_abd_settings, pro_sup_settings]:
     all_results = pd.concat([all_results, new_row], ignore_index=True)
 
 # Save results to csv
-save_file_path = join(r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\R Analysis\Manual Alignment', 'Alignment_results.csv')
-all_results.to_csv(save_file_path, index=False)
+results_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results'
+all_results.to_csv(join(results_dir, 'Alignment_Results.csv'), index=False)

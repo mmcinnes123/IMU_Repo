@@ -30,11 +30,11 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
 
-# IMU_type_for_opt_list = ['Real', 'Perfect']
-IMU_type_for_opt_list = ['Real']
+IMU_type_for_opt_list = ['Real', 'Perfect']
+# IMU_type_for_opt_list = ['Real']
 
-# opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+opt_method_list = ['rot', 'ori', 'rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+# opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
 
 # Define a list of different periods of data to use
 JA_Slow_period_dict = {'ISO_5reps': ['FE_start', 'PS_end'],
@@ -42,16 +42,15 @@ JA_Slow_period_dict = {'ISO_5reps': ['FE_start', 'PS_end'],
                        # 'ISO_3reps': ['FE3_start', 'PS4_start'],
                        # 'ISO_2reps': ['FE4_start', 'PS3_start'],
                        'ISO_1rep': ['FE5_start', 'PS2_start']}
-# ADL_period_dict = {'ADL_both': ['kettle1_start', 'drink1_end'],
-#                    'ADL_kettle': ['kettle1_start', 'kettle1_end'],
-#                    'ADL_drink': ['drink1_start', 'drink1_end']}
-ADL_period_dict = {}
+ADL_period_dict = {'ADL_both': ['kettle1_start', 'drink1_end'],
+                   'ADL_kettle': ['kettle1_start', 'kettle1_end'],
+                   'ADL_drink': ['drink1_start', 'drink1_end']}
 
 trial_dict_dict = {'JA_Slow': JA_Slow_period_dict, 'ADL': ADL_period_dict}
 
 # List of subjects
-# subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
-subject_list = ['P001']
+subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+# subject_list = ['P001']
 
 # Initiate dict to store the calculated error for each subject
 opt_rel2_OMC_errors = {}
@@ -213,75 +212,14 @@ for trial_for_opt in trial_dict_dict:
                     # logging.info(f'Iso FE axis in humerus IMU frame: {iso_FE}')
 
 
-""" COMPILE ALL RESULTS """
-
-
-def update_file(file_path, new_data):
-
-    existing_df = pd.read_csv(file_path)
-
-    # Step 3: Update the existing DataFrame with values from the new DataFrame
-    for idx, new_row in new_data.iterrows():
-        # Define the condition for matching rows
-        condition = (
-                (existing_df['Subject'] == new_row['Subject']) &
-                (existing_df['Trial'] == new_row['Trial']) &
-                (existing_df['IMUtype'] == new_row['IMUtype']) &
-                (existing_df['OptMethod'] == new_row['OptMethod']) &
-                (existing_df['Metric'] == new_row['Metric'])
-        )
-
-        # Find the index of the row to update
-        index_to_update = existing_df[condition].index
-
-        # If the index exists, update the Metric_value
-        if not index_to_update.empty:
-            existing_df.loc[index_to_update, 'Metric_value'] = new_row['Metric_value']
-
-    # Step 4: Write the updated DataFrame back to the CSV file
-    existing_df.to_csv(file_path, index=False)
-
-
-def update_alt_file(file_path, new_data):
-
-    existing_df = pd.read_csv(file_path)
-
-    # Step 3: Update the existing DataFrame with values from the new DataFrame
-    for idx, new_row in new_data.iterrows():
-        # Define the condition for matching rows
-        condition = (
-                (existing_df['Subject'] == new_row['Subject']) &
-                (existing_df['Trial'] == new_row['Trial']) &
-                (existing_df['IMUtype'] == new_row['IMUtype']) &
-                (existing_df['OptMethod'] == new_row['OptMethod'])
-        )
-
-        # Find the index of the row to update
-        index_to_update = existing_df[condition].index
-
-        # If the index exists, update the Metric_value
-        if not index_to_update.empty:
-            existing_df.loc[index_to_update, 'HeadingOffset'] = new_row['HeadingOffset']
-            existing_df.loc[index_to_update, 'AbsHeadingOffset'] = new_row['AbsHeadingOffset']
-            existing_df.loc[index_to_update, 'SD_third_DoF'] = new_row['SD_third_DoF']
-            existing_df.loc[index_to_update, 'FEOptError'] = new_row['FEOptError']
-            existing_df.loc[index_to_update, 'FEOptError_theta'] = new_row['FEOptError_theta']
-            existing_df.loc[index_to_update, 'FEOptError_phi'] = new_row['FEOptError_phi']
-            existing_df.loc[index_to_update, 'PSOptError'] = new_row['PSOptError']
-            existing_df.loc[index_to_update, 'PSOptError_theta'] = new_row['PSOptError_theta']
-            existing_df.loc[index_to_update, 'PSOptError_phi'] = new_row['PSOptError_phi']
-
-    # Step 4: Write the updated DataFrame back to the CSV file
-    existing_df.to_csv(file_path, index=False)
-
+""" SAVE RESULTS TO CSV """
 
 # Print all results to csv/ update row-by-row if the file already exists
-results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'OptResultsForR_comp_period.csv')
-alt_results_file_path = join(directory, 'R Analysis', 'R 2DoF Opt', 'Alt_OptResultsForR_comp_period.csv')
+results_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results'
+results_file_path = join(results_dir, 'Opt_Results.csv')
+alt_results_file_path = join(results_dir, 'Alt_Opt_Results.csv')
 
-
-# all_data.to_csv(results_file_path)
-
-# alt_all_data.to_csv(alt_results_file_path)
+all_data.to_csv(results_file_path)
+alt_all_data.to_csv(alt_results_file_path)
 
 

@@ -16,8 +16,10 @@ calibration_name_dict = {'OSIM_N_self': None,
                          'OSIM_N_asst': None,
                          'OSIM_Alt_self': None,
                          'OSIM_Alt_asst': None,
-                         'METHOD_4b_alt': None,
-                         'METHOD_4d_alt': None}
+                         'METHOD_7_ISO_5reps': None,
+                         'METHOD_7_ISO_1rep': None,
+                         'METHOD_7_ADL_both': None
+                         }
 
 # folders_to_exclude = [r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\P22\Real\IMU_IK_results_METHOD_4b\JA_Slow\Comparison_P22_METHOD_4b_JA_Slow']
 folders_to_exclude = []
@@ -61,5 +63,6 @@ for IMU_type in IMU_type_list:
                 else:
                     print(f'File for {calibration_name}, {IMU_type} IMUs, {trial_name}, {subject_code} does not exist.')
 
-all_data.to_csv(os.path.join(directory, 'R Analysis', 'AllResults_forR.csv'))
+out_file_dir = os.path.join(r'C:\Users\r03mm22\Documents\Protocol_Testing\Results', 'Main_Results.csv')
+all_data.to_csv(out_file_dir)
 
