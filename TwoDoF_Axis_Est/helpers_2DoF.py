@@ -8,6 +8,7 @@ from scipy import signal
 import opensim as osim
 from scipy.spatial.transform import Rotation as R
 from os.path import join
+import plotly.graph_objects as go
 
 
 def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, opt_method,
@@ -221,7 +222,7 @@ def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
         print('\tRadius cluster in radius body frame: ', rad_clus_in_rad)
         print('\tPS axis in radius cluster frame: ', PS_in_rad_clus)
 
-    return FE_in_hum_clus, PS_in_rad_clus
+    return FE_in_hum_clus, PS_in_rad_clus, hum_clus_in_hum, rad_clus_in_rad
 
 
 def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, subject_time_dict, sample_rate, debug):
@@ -610,3 +611,199 @@ def get_input_data_from_file(subject_code, IMU_type_for_opt, start_time, end_tim
     return quat1, quat2
 
 
+def get_model_FE_in_hum():
+
+    # Based on how the hu joint is defined in the model, the XYZ euler ori offset of the parent frame,
+    # relative to humerus frame is:
+    hu_parent_rel2_hum_R = R.from_euler('XYZ', [0, 0, 0.32318], degrees=False)
+
+    # Based on how the hu joint is defined in the model, relative to the hu joint parent frame,
+    # the vector of hu rotation axis (EL_x) is:
+    FE_axis_rel2_hu_parent = [0.969, -0.247, 0]
+
+    # Get the vector of hu rotation axis, relative to the humerus frame
+    FE_axis_in_humerus = hu_parent_rel2_hum_R.apply(FE_axis_rel2_hu_parent)
+
+    return FE_axis_in_humerus
+
+
+def plot_FE_estimates(all_FE_axes_est, FE_axis_in_humerus):
+
+    # Create a 3D scatter plot for each vector
+    fig = go.Figure()
+
+    def plot_vec(vec):
+        origin = -vec
+        x_pair = [vec[0], origin[0]]
+        y_pair = [vec[1], origin[1]]
+        z_pair = [vec[2], origin[2]]
+        fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+markers', name='Vector 1',
+                                   marker=dict(size=5, color='blue'), line=dict(width=5, color='blue'),
+                                   opacity=0.53))
+
+    def plot_expected_vec(vec):
+        scale = 1.3
+        vec = scale * vec
+        origin = -vec
+        x_pair = [vec[0], origin[0]]
+        y_pair = [vec[1], origin[1]]
+        z_pair = [vec[2], origin[2]]
+        fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+markers', name='Vector 1',
+                                   marker=dict(size=5, color='red'), line=dict(width=5, color='red')))
+
+    def plot_CF_axis(axis, label):
+        x_pair = [0, axis[0]]
+        y_pair = [0, axis[1]]
+        z_pair = [0, axis[2]]
+        fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+text', name='Vector 1',
+                                   line=dict(width=5, color='grey'), text=["", label], textposition="top center"))
+
+    # Plot all estimates
+    for FE_est in all_FE_axes_est:
+        plot_vec(FE_est)
+
+    # Plot the expected vector
+    plot_expected_vec(FE_axis_in_humerus)
+
+    # Plot body coordinate frame axes
+    plot_CF_axis([2, 0, 0], 'X')
+    plot_CF_axis([0, 2, 0], 'Y')
+    plot_CF_axis([0, 0, 2], 'Z')
+
+    # Set the initial camera view
+    camera = dict(
+        eye=dict(x=0.5, y=0.5, z=-2.0),  # Camera position
+        center=dict(x=0, y=0, z=0),  # Look-at point
+        up=dict(x=0, y=1, z=0)  # Up vector
+    )
+    # Update layout to remove background, axis lines, ticks, and labels
+    fig.update_layout(
+        scene=dict(
+            camera=camera,
+            xaxis=dict(
+                showbackground=False,  # Hide the axis background
+                showgrid=False,  # Hide gridlines
+                zeroline=False,  # Hide axis line
+                showline=False,  # Hide the axis line itself
+                showticklabels=False,  # Hide the tick labels
+                title='',  # Remove the axis title
+            ),
+            yaxis=dict(
+                showbackground=False,
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+                showticklabels=False,
+                title='',
+            ),
+            zaxis=dict(
+                showbackground=False,
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+                showticklabels=False,
+                title='',
+            ),
+            # Optionally set the background color to transparent
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        title='FE plot',
+        margin=dict(l=0, r=0, b=0, t=0),  # Remove the plot margins
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+    )
+
+
+    # Show the plot
+    fig.show()
+
+
+def plot_PS_estimates(all_PS_axes_est, PS_axis_in_rad):
+
+    # Create a 3D scatter plot for each vector
+    fig = go.Figure()
+
+    def plot_vec(vec):
+        origin = -vec
+        x_pair = [vec[0], origin[0]]
+        y_pair = [vec[1], origin[1]]
+        z_pair = [vec[2], origin[2]]
+        fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+markers', name='Vector 1',
+                                   marker=dict(size=5, color='blue'), line=dict(width=5, color='blue'),
+                                   opacity=0.53))
+
+    def plot_expected_vec(vec):
+        scale = 1.3
+        vec = scale * vec
+        origin = -vec
+        x_pair = [vec[0], origin[0]]
+        y_pair = [vec[1], origin[1]]
+        z_pair = [vec[2], origin[2]]
+        fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+markers', name='Vector 1',
+                                   marker=dict(size=5, color='red'), line=dict(width=5, color='red')))
+
+    def plot_CF_axis(axis, label):
+        x_pair = [0, axis[0]]
+        y_pair = [0, axis[1]]
+        z_pair = [0, axis[2]]
+        fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+text', name='Vector 1',
+                                   line=dict(width=5, color='grey'), text=["", label], textposition="top center"))
+
+    # Plot all estimates
+    for FE_est in all_PS_axes_est:
+        plot_vec(FE_est)
+
+    # Plot the expected vector
+    plot_expected_vec(PS_axis_in_rad)
+
+    # Plot body coordinate frame axes
+    plot_CF_axis([2, 0, 0], 'X')
+    plot_CF_axis([0, 2, 0], 'Y')
+    plot_CF_axis([0, 0, 2], 'Z')
+
+    # Set the initial camera view
+    camera = dict(
+        eye=dict(x=0.5, y=-1.0, z=1.5),  # Camera position
+        center=dict(x=0, y=0, z=0),  # Look-at point
+        up=dict(x=1, y=0, z=0)  # Up vector
+    )
+    # Update layout to remove background, axis lines, ticks, and labels
+    fig.update_layout(
+        scene=dict(
+            camera=camera,
+            xaxis=dict(
+                showbackground=False,  # Hide the axis background
+                showgrid=False,  # Hide gridlines
+                zeroline=False,  # Hide axis line
+                showline=False,  # Hide the axis line itself
+                showticklabels=False,  # Hide the tick labels
+                title='',  # Remove the axis title
+            ),
+            yaxis=dict(
+                showbackground=False,
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+                showticklabels=False,
+                title='',
+            ),
+            zaxis=dict(
+                showbackground=False,
+                showgrid=False,
+                zeroline=False,
+                showline=False,
+                showticklabels=False,
+                title='',
+            ),
+            # Optionally set the background color to transparent
+            bgcolor='rgba(0,0,0,0)'
+        ),
+        title='PS plot',
+        margin=dict(l=0, r=0, b=0, t=0),  # Remove the plot margins
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+    )
+
+
+    # Show the plot
+    fig.show()
