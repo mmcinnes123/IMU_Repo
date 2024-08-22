@@ -656,7 +656,8 @@ def plot_FE_estimates(all_FE_axes_est, FE_axis_in_humerus):
         y_pair = [0, axis[1]]
         z_pair = [0, axis[2]]
         fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+text', name='Vector 1',
-                                   line=dict(width=5, color='grey'), text=["", label], textposition="top center"))
+                                   line=dict(width=5, color='rgba(0,0,0,0)'), text=["", label],
+                                   textposition="top center", textfont=dict(color='rgba(0,0,0,0)')))
 
     # Plot all estimates
     for FE_est in all_FE_axes_est:
@@ -747,7 +748,8 @@ def plot_PS_estimates(all_PS_axes_est, PS_axis_in_rad):
         y_pair = [0, axis[1]]
         z_pair = [0, axis[2]]
         fig.add_trace(go.Scatter3d(x=x_pair, y=y_pair, z=z_pair, mode='lines+text', name='Vector 1',
-                                   line=dict(width=5, color='grey'), text=["", label], textposition="top center"))
+                                   line=dict(width=5, color='rgba(0,0,0,0)'), text=["", label],
+                                   textposition="top center", textfont=dict(color='rgba(0,0,0,0)')))
 
     # Plot all estimates
     for FE_est in all_PS_axes_est:

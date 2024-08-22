@@ -200,7 +200,8 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
             showticklabels=False
         ),
         title={
-            'text': f'IMU {local_axis}-axis on the {global_axis_1}{global_axis_2} Plane',
+            'text': f'IMU {local_axis}-axis',
+            'font': {'size': 26, 'color': 'black'},
             'x': 0.5,
             'xanchor': 'center'},
         showlegend=False,
@@ -211,7 +212,7 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
     )
 
     # Display the plot
-    # fig.show()
+    fig.show()
 
     return error_angles_mean, error_angles_SD
 
