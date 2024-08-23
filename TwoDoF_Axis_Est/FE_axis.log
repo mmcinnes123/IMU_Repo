@@ -1,11 +1,9 @@
-INFO:root:Using IMU type: Perfect, with data from trial: JA_Slow, and optimisation method: rot_noDelta.
-INFO:qmt.utils.webapp:cancelling 2 outstanding tasks
-INFO:qmt.utils.webapp:cancelled
-INFO:root:Results for Subject P019
-INFO:root:OMC FE axis in humerus cluster frame: [ 0.07444413 -0.18394961  0.98009725]
-INFO:root:OMC PS axis in forearm cluster frame: [-0.10690635 -0.99309648  0.04825888]
-INFO:root:Opt SD in third DoF (deg): 2.351579196497494
-INFO:root:Opt FE axis in humerus IMU frame: [ 0.0710342  -0.20548069  0.97607983]
-INFO:root:Opt PS axis in forearm IMU frame: [-0.07775558 -0.9961791   0.03976524]
-INFO:root:Error between opt_FE and OMC_FE (deg): 1.2700829199756476
-INFO:root:Error between opt_PS and OMC_PS (deg): 1.748680654692275
+INFO:root:Using IMU type: Perfect, with data from trial: ADL, and optimisation method: rot_noDelta.
+INFO:root:Results for Subject P005
+INFO:root:OMC FE axis in humerus cluster frame: [-0.13908254 -0.23058285  0.963046  ]
+INFO:root:OMC PS axis in forearm cluster frame: [-0.18971035 -0.98094633 -0.04186613]
+INFO:root:Opt SD in third DoF (deg): 8.567858384017569
+INFO:root:Opt FE axis in humerus IMU frame: [-0.31924752 -0.15474387  0.93495206]
+INFO:root:Opt PS axis in forearm IMU frame: [-0.40833391 -0.59275877  0.69419051]
+INFO:root:Error between opt_FE and OMC_FE (deg): 11.333598389310243
+INFO:root:Error between opt_PS and OMC_PS (deg): 50.95968068608775

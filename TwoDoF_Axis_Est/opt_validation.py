@@ -173,7 +173,7 @@ def run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_
 
                         # Visualise 3D animation of the results
                         # visulalise_opt_result_vec_on_IMU(OMC_PS, opt_PS, None)
-                        visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
+                        # visulalise_opt_result_vec_on_IMU(OMC_FE, opt_FE, None)
 
                         # Log results
                         logging.info(f'Results for Subject {subject_code}')
@@ -192,7 +192,7 @@ def run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_
                             print('Heading offset (rad): ', opt_results['delta'])
                             print('Heading offset (deg): ', opt_results['delta'] * 180 / np.pi)
                         print('Cost: ', opt_results['debug']['cost'])
-                        # print('x: ', opt_results['debug']['x'])
+                        print('x: ', opt_results['debug']['x'])
 
                         print(f'FE Error: {FE_opt_error}')
                         print(f'PS Error: {PS_opt_error}')
@@ -206,7 +206,7 @@ def run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_
     return all_data, alt_all_data, vec_in_model_frames_data
 
 
-""" RUN VALIDATION AND SAVE RESULTS TO CSV """
+""" RUN ALL VALIDATION AND SAVE RESULTS TO CSV """
 #
 # subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 # IMU_type_for_opt_list = ['Real', 'Perfect']
@@ -233,27 +233,41 @@ def run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_
 
 """ PLOT VARIATION """
 
-# subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
-subject_list = ['P019']
+# # subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+# subject_list = ['P019']
+# IMU_type_for_opt_list = ['Perfect']
+# opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+# JA_Slow_period_dict = {'ISO_1rep': ['FE5_start', 'PS2_start']}
+# ADL_period_dict = {}
+#
+# all_data, alt_all_data, vec_in_model_frames_data = run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_Slow_period_dict, ADL_period_dict)
+#
+#
+# def plot_variation_in_opt_estimates(vec_data):
+#
+#     # Get FE and PS in model frames
+#     FE_axis_in_humerus = get_model_FE_in_hum()
+#     PS_axis_in_radius = np.array([0.182, 0.98227, -0.044946])
+#
+#     all_FE_axes_est = vec_data['opt_FE_in_hum'].to_numpy()
+#     all_PS_axes_est = vec_data['opt_PS_in_rad'].to_numpy()
+#
+    # plot_FE_estimates(all_FE_axes_est, FE_axis_in_humerus)
+#     plot_PS_estimates(all_PS_axes_est, PS_axis_in_radius)
+
+
+# plot_variation_in_opt_estimates(vec_in_model_frames_data)
+
+
+""" RUN INVESTIGATION """
+
+subject_list = ['P005']
 IMU_type_for_opt_list = ['Perfect']
 opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-JA_Slow_period_dict = {'ISO_1rep': ['FE5_start', 'PS2_start']}
-ADL_period_dict = {}
+# Define a list of different periods of data to use
+JA_Slow_period_dict = {}
+ADL_period_dict = {'ADL_both': ['kettle1_start', 'drink1_end']}
 
 all_data, alt_all_data, vec_in_model_frames_data = run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_Slow_period_dict, ADL_period_dict)
 
 
-def plot_variation_in_opt_estimates(vec_data):
-
-    # Get FE and PS in model frames
-    FE_axis_in_humerus = get_model_FE_in_hum()
-    PS_axis_in_radius = np.array([0.182, 0.98227, -0.044946])
-
-    all_FE_axes_est = vec_data['opt_FE_in_hum'].to_numpy()
-    all_PS_axes_est = vec_data['opt_PS_in_rad'].to_numpy()
-
-    plot_FE_estimates(all_FE_axes_est, FE_axis_in_humerus)
-    plot_PS_estimates(all_PS_axes_est, PS_axis_in_radius)
-
-
-# plot_variation_in_opt_estimates(vec_in_model_frames_data)

@@ -111,7 +111,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
                 if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
                     break
 
-            # Check the j2 solution which is closest to expected result, based on manual placement
+            # Check the j2 solution is in the region of the expected result, based on manual placement
             j2_sol_temp = solver.objFn.unpackX()['j2']
             j2_expected = np.array([0, 1, 0])
             tolerance = 60
@@ -137,6 +137,7 @@ def jointAxisEst2D(quat1, quat2, gyr1, gyr2, rate, params=None, debug=False, plo
                 deltaX = solver.step()
                 if i >= 10 and np.linalg.norm(deltaX) < 1e-10:
                     break
+
             if cost is None or solver.objFn.cost() < cost:  # Update the cost, x, and parameters if cost is less than for previous initVal
                 cost = solver.objFn.cost()
                 x = solver.objFn.getX()
