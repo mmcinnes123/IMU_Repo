@@ -9,11 +9,7 @@ from helpers_calibration import get_IMU_offsets_METHOD_1
 from helpers_calibration import get_IMU_offsets_METHOD_2
 from helpers_calibration import get_IMU_offsets_METHOD_3
 from helpers_calibration import get_IMU_offsets_METHOD_4a
-from helpers_calibration import get_IMU_offsets_METHOD_4b
-from helpers_calibration import get_IMU_offsets_METHOD_7_ISO_5reps
 from helpers_calibration import get_IMU_offsets_METHOD_4c
-from helpers_calibration import get_IMU_offsets_METHOD_4d
-from helpers_calibration import get_IMU_offsets_METHOD_7_ADL_both
 from helpers_calibration import get_IMU_offsets_METHOD_7
 from helpers_calibration import get_IMU_offsets_METHOD_5
 from helpers_calibration import set_default_model_pose
@@ -81,10 +77,6 @@ def run_method(method_name, subject_code, IMU_type):
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_4a(subject_code, IMU_type)
 
-        elif method_name == 'METHOD_4b':
-            thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                get_IMU_offsets_METHOD_4b(subject_code, IMU_type)
-
         elif method_name == 'METHOD_4c':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_4c(subject_code, IMU_type)
@@ -92,10 +84,6 @@ def run_method(method_name, subject_code, IMU_type):
         elif method_name == 'METHOD_5':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
                 get_IMU_offsets_METHOD_5(subject_code, IMU_type)
-
-        elif method_name == 'METHOD_4d':
-            thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
-                get_IMU_offsets_METHOD_4d(subject_code, IMU_type)
 
         elif method_name == 'METHOD_7_ISO_5reps':
             thorax_virtual_IMU, humerus_virtual_IMU, radius_virtual_IMU = \
@@ -143,7 +131,7 @@ def run_method(method_name, subject_code, IMU_type):
 subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 IMU_type_list = ['Real']
 # method_name_list = ['OSIM_N_self', 'OSIM_N_asst', 'OSIM_Alt_asst', 'OSIM_Alt_self', 'METHOD_4b']
-method_name_list = ['METHOD_7_ISO_1rep']
+method_name_list = ['METHOD_7_ISO_5reps', 'METHOD_7_ADL_both']
 
 for method_name in method_name_list:
 
