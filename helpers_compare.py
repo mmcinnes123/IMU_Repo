@@ -278,8 +278,8 @@ def plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_tim
     # Throw warning and quit if not equal number of peaks/troughs was found
     if plot_peaks == True:
         if len(OMC_peaks) != len(IMU_peaks) or len(OMC_troughs) != len(IMU_troughs):
-            print("Quit because number of OMC peaks/troughs found did not match IMU peaks/troughs found.")
-            quit()
+            # print("Quit because number of OMC peaks/troughs found did not match IMU peaks/troughs found.")
+            # quit()
             mean_peak_error = np.nan
             mean_trough_error = np.nan
 
