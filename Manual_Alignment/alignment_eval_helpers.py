@@ -253,3 +253,38 @@ def angle_between_2D_vecs_arctan(target_vec, v2):
     return angle_deg
 
 
+def get_single_angle_error(IMU_name, hum_clus_all, rad_clus_all):
+
+    if IMU_name == 'humerus':
+        local_axis = 'y'
+        target_axis = [0, -1, 0]
+        clus_all = hum_clus_all
+
+    elif IMU_name == 'radius':
+        local_axis = 'x'
+        target_axis = [-1, 0, 0]
+        clus_all = rad_clus_all
+
+    local_index = dict(x=0, y=1, z=2)[local_axis]
+
+    single_angle_errors = {}
+    for subject in clus_all.keys():
+        # Orientation of the cluster in the body frame
+        clus_in_body = clus_all[subject]
+
+        # Get the local IMU CF axes of interest
+        clus_local_vec = qmt.quatToRotMat(clus_in_body)[:, local_index]
+
+        # Get the anlge between the two 3D vecs
+        angle = qmt.angleBetween2Vecs(target_axis, clus_local_vec)
+        single_angle_errors[subject] = np.rad2deg(angle)
+
+    def get_mean_and_sd_from_dict(dict):
+        error_angles = np.array(list(dict.values()))
+        error_angles_mean = np.mean(abs(error_angles))
+        error_anlges_SD = np.std(error_angles)
+        return error_angles_mean, error_anlges_SD
+
+    mean_single_angle_error, sd_single_angle_error = get_mean_and_sd_from_dict(single_angle_errors)
+
+    return mean_single_angle_error, sd_single_angle_error
