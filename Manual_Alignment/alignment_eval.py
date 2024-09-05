@@ -31,7 +31,7 @@ sh_abd_settings = dict(JA_name='Shoulder Abduction', local_axis='y', global_axis
 sh_rot_settings = dict(JA_name='Shoulder Rotation', local_axis='z', global_axis_1='X', global_axis_2='Z', target_global_axis='X')
 el_flex_settings = dict(JA_name='Elbow Flexion', local_axis='x', global_axis_1='Y', global_axis_2='X', target_global_axis='-X')
 el_abd_settings = dict(JA_name='Elbow Abduction', local_axis='y', global_axis_1='Z', global_axis_2='Y', target_global_axis='-Y')
-pro_sup_settings = dict(JA_name='Pronation/Supination', local_axis='x', global_axis_1='Z', global_axis_2='X', target_global_axis='-X')
+pro_sup_settings = dict(JA_name='Pronation Supination', local_axis='x', global_axis_1='Z', global_axis_2='X', target_global_axis='-X')
 
 
 """ 
@@ -48,15 +48,15 @@ For each joint angle, for each subject, get the 2D vector projected onto the pla
 
 all_results = pd.DataFrame(columns=['JA', 'mean_error', 'SD_error'])
 
-# Get the error between the 3D vecs
-for IMU_name in ['humerus', 'radius']:
-
-    mean_single_angle_error, sd_single_angle_error = get_single_angle_error(IMU_name, hum_clus_all, rad_clus_all)
-
-    new_row = pd.DataFrame({'JA': [IMU_name + '_single_angle'], 'mean_error': [mean_single_angle_error],
-                            'SD_error': [sd_single_angle_error]})
-    # Log the results
-    all_results = pd.concat([all_results, new_row], ignore_index=True)
+# # Get the error between the 3D vecs
+# for IMU_name in ['humerus', 'radius']:
+#
+#     mean_single_angle_error, sd_single_angle_error = get_single_angle_error(IMU_name, hum_clus_all, rad_clus_all)
+#
+#     new_row = pd.DataFrame({'JA': [IMU_name + '_single_angle'], 'mean_error': [mean_single_angle_error],
+#                             'SD_error': [sd_single_angle_error]})
+#     # Log the results
+#     all_results = pd.concat([all_results, new_row], ignore_index=True)
 
 
 for JA_settings in [sh_flex_settings, sh_abd_settings, sh_rot_settings]:
@@ -73,20 +73,20 @@ for JA_settings in [sh_flex_settings, sh_abd_settings, sh_rot_settings]:
     # Log the results
     all_results = pd.concat([all_results, new_row], ignore_index=True)
 
-for JA_settings in [el_flex_settings, el_abd_settings, pro_sup_settings]:
-    mean_error, SD_error = plot_local_vec_on_global_plane(rad_clus_all,
-                                   JA_name=JA_settings['JA_name'],
-                                   local_axis=JA_settings['local_axis'],
-                                   global_axis_1=JA_settings['global_axis_1'],
-                                   global_axis_2=JA_settings['global_axis_2'],
-                                   target_global_axis=JA_settings['target_global_axis'])
-    new_row = pd.DataFrame({'JA': [JA_settings['JA_name']], 'mean_error': [mean_error],
-                            'SD_error': [SD_error]})
-    # Log the results
-    all_results = pd.concat([all_results, new_row], ignore_index=True)
+# for JA_settings in [el_flex_settings, el_abd_settings, pro_sup_settings]:
+#     mean_error, SD_error = plot_local_vec_on_global_plane(rad_clus_all,
+#                                    JA_name=JA_settings['JA_name'],
+#                                    local_axis=JA_settings['local_axis'],
+#                                    global_axis_1=JA_settings['global_axis_1'],
+#                                    global_axis_2=JA_settings['global_axis_2'],
+#                                    target_global_axis=JA_settings['target_global_axis'])
+#     new_row = pd.DataFrame({'JA': [JA_settings['JA_name']], 'mean_error': [mean_error],
+#                             'SD_error': [SD_error]})
+#     # Log the results
+#     all_results = pd.concat([all_results, new_row], ignore_index=True)
 
 
 
 # Save results to csv
 results_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results'
-all_results.to_csv(join(results_dir, 'Alignment_Results.csv'), index=False)
+# all_results.to_csv(join(results_dir, 'Alignment_Results.csv'), index=False)

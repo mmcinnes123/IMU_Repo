@@ -3,6 +3,7 @@ import opensim as osim
 import qmt
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
+import plotly.io as pio
 import numpy as np
 from os.path import join
 
@@ -131,30 +132,30 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
     vec_origins_v = [0]*len(vec_us)
 
 
-    # Create the first quiver plot (red)
-    quiver_vecs = ff.create_quiver(vec_origins_u, vec_origins_v, vec_us, vec_vs, line_color='red', scale=1, arrow_scale=.1, angle=np.pi / 6,
+    # Create quiver plots of the 20 vec results
+    quiver_vecs = ff.create_quiver(vec_origins_u, vec_origins_v, vec_us, vec_vs, line_color='red', scale=1.3, arrow_scale=.1, angle=np.pi / 6,
                                    name='vec1', line=dict(width=1))
 
-    # Create the second quiver plot (black)
+    # Create the CF quiver plots (black)
     target_quiver_U = ff.create_quiver(o_u, o_v, [target_axis_u[0]], [target_axis_u[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
-                                       name='vec1', line=dict(width=1))
+                                       name='vec1', line=dict(width=2))
     target_quiver_V = ff.create_quiver(o_u, o_v, [target_axis_v[0]], [target_axis_v[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
-                                       name='vec1', line=dict(width=1))
+                                       name='vec1', line=dict(width=2))
 
 
     # Initialize the figure
     fig = go.Figure()
 
-    # Add the first quiver plot
-    for trace in quiver_vecs['data']:
-        fig.add_trace(trace)
-
-    # Add the second quiver plot
+    # Add the first CF quiver
     for trace in target_quiver_U['data']:
         fig.add_trace(trace)
 
-    # Add the third quiver plot
+    # Add the second CF quiver
     for trace in target_quiver_V['data']:
+        fig.add_trace(trace)
+
+    # Add the 20 results quivers
+    for trace in quiver_vecs['data']:
         fig.add_trace(trace)
 
     # Add annotations with custom labels
@@ -168,12 +169,14 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
         dict(
             x=target_axis_u[0], y=target_axis_u[1], xref="x", yref="y",
             text=u_axis_label, showarrow=False, xanchor="center", yanchor="top",  # Offset position
-            xshift=0, yshift=0  # Pixel offset from the point
+            xshift=0, yshift=0,  # Pixel offset from the point
+            font=dict(size=20, family="Times New Roman Bold, Times, serif", color="black")
         ),
         dict(
             x=target_axis_v[0], y=target_axis_v[1], xref="x", yref="y",
             text=v_axis_label, showarrow=False, xanchor="right", yanchor="middle",  # Offset position
-            xshift=0, yshift=0  # Pixel offset from the point
+            xshift=0, yshift=0,  # Pixel offset from the point
+            font=dict(size=20, family="Times New Roman Bold, Times, serif", color="black")
         )
     ]
 
@@ -200,8 +203,8 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
             showticklabels=False
         ),
         title={
-            'text': f'IMU {local_axis}-axis',
-            'font': {'size': 26, 'color': 'black'},
+            'text': f'Sensor {local_axis}-axis on<br>Humerus {global_axis_1}{global_axis_2} Plane',
+            'font': {'size': 28, 'color': 'black', 'family': 'Times New Roman, Times, serif'},
             'x': 0.5,
             'xanchor': 'center'},
         showlegend=False,
@@ -212,7 +215,12 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
     )
 
     # Display the plot
-    fig.show()
+    # fig.show()
+
+    save_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Reports\Paper\Image Development\Alignment Images'
+    image_name = JA_name + '.png'
+    image_path = join(save_dir, image_name)
+    fig.write_image(image_path, width=600, height=600, scale=3, format='png',engine='kaleido')
 
     return error_angles_mean, error_angles_SD
 
