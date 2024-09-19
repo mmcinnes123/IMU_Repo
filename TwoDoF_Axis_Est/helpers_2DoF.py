@@ -394,7 +394,7 @@ def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
     """ Function to calculate 3D angular velocity vectors (in the IMU's global frame (Ei), from IMU orientation quats.
     The following is based on equations A41 and A42 in Appendix C """
 
-    # Calculate quaternion changes from i - 1 to i
+    # Calculate quaternion changes from i - 1 to i (this gives the quat in the global frame)
     q_change = qmt.qmult(quats[1:], qmt.qinv(quats[:-1]))
 
     # Use this function to stop the quat suddenly flipping from close to [1, 0, 0, 0] to [-1, 0, 0, 0]

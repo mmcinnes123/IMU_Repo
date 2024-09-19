@@ -203,8 +203,8 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
             showticklabels=False
         ),
         title={
-            'text': f'Sensor {local_axis}-axis on<br>Humerus {global_axis_1}{global_axis_2} Plane',
-            'font': {'size': 28, 'color': 'black', 'family': 'Times New Roman, Times, serif'},
+            'text': f'Radius Sensor {local_axis}-axis on<br>Radius Segment {global_axis_1}{global_axis_2} Plane',
+            'font': {'size': 34, 'color': 'black', 'family': 'Times New Roman, Times, serif'},
             'x': 0.5,
             'xanchor': 'center'},
         showlegend=False,
