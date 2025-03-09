@@ -2,7 +2,7 @@ import json
 import os
 from copy import deepcopy
 
-# Base directory to save the subject files
+# Base directory to save the subject_code files
 parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 base_dir = os.path.join(parent_dir, 'SubjectEventFiles')
 
@@ -24,7 +24,7 @@ trials_dict = {'CP': CP_events, 'JA_Slow': JA_Slow_events, 'JA_Fast': JA_Fast_ev
 if not os.path.exists(base_dir):
     os.makedirs(base_dir)
 
-# Iterate over each subject
+# Iterate over each subject_code
 for subject in subjects:
 
     file_path = os.path.join(base_dir, f"{subject}_event_dict.txt")
@@ -36,7 +36,7 @@ for subject in subjects:
         print(f"\nCreating new event dict file for {subject}.")
         print(f"\nEntering data for {subject}.")
 
-        # Alter the trials dict based on each subject
+        # Alter the trials dict based on each subject_code
         subject_trials_dict = deepcopy(trials_dict)
 
         # For these subjects, use a pose from JA_Slow to represent the Alt2_self pose, since it wasn't performed in CP
@@ -45,7 +45,7 @@ for subject in subjects:
             subject_trials_dict['CP'].remove('Alt2_self')
             subject_trials_dict['JA_Slow'].append('Alt2_self')
 
-        # Dictionary to hold the events and times for the current subject
+        # Dictionary to hold the events and times for the current subject_code
         subject_events_times = {}
 
         # Iterate through trials
@@ -64,12 +64,12 @@ for subject in subjects:
                 else:
                     time = int(time_input)
 
-                # Store the event and time in the subject's dictionary
+                # Store the event and time in the subject_code's dictionary
                 events_times[event] = time
 
             subject_events_times[trial] = events_times
 
-        # Save the subject's data to a text file
+        # Save the subject_code's data to a text file
         file_obj = open(file_path, 'w')
         file_obj.write(str(subject_events_times))
         file_obj.close()
@@ -108,7 +108,7 @@ for subject in subjects:
 
                 subject_events_times[trial][event] = time
 
-        # Save the subject's data to a text file
+        # Save the subject_code's data to a text file
         file_obj = open(file_path, 'w')
         file_obj.write(str(subject_events_times))
         file_obj.close()

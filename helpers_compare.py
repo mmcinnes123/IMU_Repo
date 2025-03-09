@@ -16,7 +16,9 @@ from scipy.stats import pearsonr
 from scipy.spatial.transform import Rotation as R
 from matplotlib.widgets import SpanSelector
 
-
+def debug_print(**kwargs):
+    for name, value in kwargs.items():
+        print(f"{name} = {value}")
 
 # Take an osim tables of coords and check that certain coords are within a specified sensible range
 def check_sensible_GHs(file_name, table, GH_coord_limit):
@@ -75,7 +77,6 @@ def get_body_quats_from_analysis_sto(analysis_sto_path, start_time, end_time):
     body_quats = pd.DataFrame(combined_array, columns=['time', 'thorax_q0', 'thorax_q1', 'thorax_q2', 'thorax_q3',
                                                        'humerus_q0', 'humerus_q1', 'humerus_q2', 'humerus_q3',
                                                        'radius_q0', 'radius_q1', 'radius_q2', 'radius_q3'])
-
     return body_quats
 
 
@@ -672,3 +673,56 @@ def run_span_selector(OMC_angle, IMU_angle, time, joint_name):
 
 
 
+def get_ROM_and_var(OMC_angles, joint_name, debug):
+
+    OMC_angle = OMC_angles[joint_name].to_numpy()
+    time = OMC_angles['time'].to_numpy()
+
+    label = joint_name.replace('_', ' ').title()
+
+    min = OMC_angle.min()
+    max = OMC_angle.max()
+    range = OMC_angle.ptp()
+    std = OMC_angle.std()
+
+    if debug:
+        debug_print(OMC_angle=OMC_angle, joint_name=joint_name, min=min, max=max, range=range, std=std)
+
+    return min, max, range, std
+
+
+def get_JAs_from_OMC_IK_results(subject_code, trial_name, start_time, end_time):
+
+    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    OMC_IK_results_dir = os.path.join(parent_dir, 'OMC', trial_name + '_IK_Results')
+    OMC_analysis_sto_path = os.path.join(OMC_IK_results_dir, 'analyze_BodyKinematics_pos_global.sto')
+    OMC_mot_file = os.path.join(OMC_IK_results_dir, 'OMC_IK_results.mot')
+    # debug_print(trial_name=trial_name, start_time=start_time, end_time=end_time)
+
+    """ READ IN DATA """
+
+    # Read in coordinates from IK results .mot files
+    OMC_table = osim.TimeSeriesTable(OMC_mot_file)
+
+    # Turn the osim coords tables into dataframes
+    OMC_coords = convert_osim_table_to_df(OMC_table)
+    OMC_coords_trimmed = trim_df(OMC_coords, start_time, end_time)
+
+    # Read in the orientation data of the model bodies from the analysis sto results file
+    intial_time = math.floor(OMC_table.getIndependentColumn()[0])
+    final_time = math.floor(OMC_table.getIndependentColumn()[-1])
+    OMC_body_quats = get_body_quats_from_analysis_sto(OMC_analysis_sto_path, intial_time, final_time)
+    OMC_body_quats_trimmed = trim_df(OMC_body_quats, start_time, end_time)
+
+    # Get projected vector humero-thoracic joint angles from the model body orientations
+    OMC_HT_angles = get_HT_angles(OMC_body_quats_trimmed)
+
+    # Join the coord and HT angles data together to make one data frame with all angles
+    rename_dict = {'TH_y': 'thorax_rotation', 'TH_x': 'thorax_forward_tilt', 'TH_z': 'thorax_lateral_tilt',
+                   'EL_x': 'elbow_flexion', 'PS_y': 'elbow_pronation'}
+    OMC_angles_from_coords = OMC_coords_trimmed[['TH_y', 'TH_x', 'TH_z', 'EL_x', 'PS_y']].copy().rename(
+        columns=rename_dict)
+    OMC_angles = pd.concat([OMC_angles_from_coords, OMC_HT_angles], axis=1)
+    # debug_print(OMC_angles=OMC_angles)
+
+    return OMC_angles
