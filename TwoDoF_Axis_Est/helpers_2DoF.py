@@ -24,7 +24,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, opt_method,
     else:
         report_ext = None
 
-    # Get the .txt file with quats based on subject code, whcih trial to use, and which type of IMU
+    # Get the .txt file with quats based on subject_code code, whcih trial to use, and which type of IMU
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     raw_data_dir = join(parent_dir, 'RawData')
     tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
@@ -161,7 +161,7 @@ def visualise_quat_data(quats, rate):
 
 def get_J1_J2_from_calibrated_OMC_model(model_file, debug):
 
-    """Get the cluster frames, expressed relative to the body frames, specific to the subject's model"""
+    """Get the cluster frames, expressed relative to the body frames, specific to the subject_code's model"""
 
     # Read in calibrated model file to get position of humerus markers in humerus body frame
     my_model = osim.Model(model_file)
@@ -236,7 +236,7 @@ def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, s
     else:
         report_ext = None
 
-    # Get the .txt file with quats based on subject code, whcih trial to use, and which type of IMU
+    # Get the .txt file with quats based on subject_code code, whcih trial to use, and which type of IMU
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     raw_data_dir = join(parent_dir, 'RawData')
     tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
@@ -590,7 +590,7 @@ def get_input_data_from_file(subject_code, IMU_type_for_opt, start_time, end_tim
     else:
         report_ext = None
 
-    # Get the .txt file with quats based on subject code, whcih trial to use, and which type of IMU
+    # Get the .txt file with quats based on subject_code code, whcih trial to use, and which type of IMU
     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
     raw_data_dir = join(parent_dir, 'RawData')
     tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext

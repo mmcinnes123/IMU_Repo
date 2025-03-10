@@ -10,7 +10,7 @@ from os.path import join
 
 
 def get_IMU_in_body_frame(model_file):
-    """Get the cluster frames, expressed relative to the body frames, specific to the subject's model"""
+    """Get the cluster frames, expressed relative to the body frames, specific to the subject_code's model"""
 
     # Read in calibrated model file to get position of humerus markers in humerus body frame
     my_model = osim.Model(model_file)

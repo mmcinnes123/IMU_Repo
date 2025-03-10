@@ -37,7 +37,7 @@ sample_rate = 100          # This is the sample rate of the data going into the 
 
 def run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_Slow_period_dict, ADL_period_dict):
 
-    # Initiate dict to store the calculated error for each subject
+    # Initiate dict to store the calculated error for each subject_code
     all_data = pd.DataFrame()
     alt_all_data = pd.DataFrame()
     vec_in_model_frames_data = pd.DataFrame()

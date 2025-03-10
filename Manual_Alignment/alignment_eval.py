@@ -42,7 +42,7 @@ defined in the frame of the associated body (e.g. humerus or radius frame).
 hum_clus_all, rad_clus_all = get_all_clus_in_body_frame(subject_list)
 
 """ 
-For each joint angle, for each subject, get the 2D vector projected onto the plane of interest, plot these on a 2D plot, 
+For each joint angle, for each subject_code, get the 2D vector projected onto the plane of interest, plot these on a 2D plot, 
  and get the angular difference ('error') between the vector and the 'target vector', and the variation in that error. 
  """
 

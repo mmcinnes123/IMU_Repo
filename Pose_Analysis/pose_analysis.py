@@ -1,4 +1,4 @@
-# This script analyses how successfully a subject performed each pose, relative to the target (default)
+# This script analyses how successfully a subject_code performed each pose, relative to the target (default)
 # pose of the model
 
 from pose_analysis_helpers import get_trial_pose_time_dict_from_file
@@ -17,7 +17,7 @@ directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 
 
 """ INDIVIDUAL RESULTS """
-# The following code reads the results of the OMC IK for each subject, extracts the joint angle values during each
+# The following code reads the results of the OMC IK for each subject_code, extracts the joint angle values during each
 # pose (using a pre-saved event dict as a reference for the time of each pose in each trial) and compares the
 # measured joint angles with the target joint angles, then saves the value and the error to individual pose_results.csvs
 
@@ -29,7 +29,7 @@ if write_results:
 
     for subject_code in subject_code_list:
 
-        # Initiate a subject results dict
+        # Initiate a subject_code results dict
         subject_results = pd.DataFrame()
 
         # Define some file paths
@@ -101,8 +101,8 @@ if write_results:
                         pd.set_option('display.width', None)
                         print(subject_results)
 
-        # Save the results for each subject
-        print(f'Writing subject {subject_code} results to .csv.')
+        # Save the results for each subject_code
+        print(f'Writing subject_code {subject_code} results to .csv.')
         output_file_name = str(subject_code) + r"_Pose_Results.csv"
         subject_results.to_csv(join(parent_dir, output_file_name),
                            mode='w', encoding='utf-8', na_rep='nan')
@@ -120,12 +120,12 @@ if compile_results:
     # Make an empty dict, based on the template above
     all_results = pd.DataFrame()
 
-    # Read in each subject's results .csv and compile into a 'final results' /csv
+    # Read in each subject_code's results .csv and compile into a 'final results' /csv
     for subject_code in subject_code_list:
 
-        print(f"Reading pose results for subject: {subject_code}...")
+        print(f"Reading pose results for subject_code: {subject_code}...")
 
-        # Read in the dataframe from each subject's .csv file
+        # Read in the dataframe from each subject_code's .csv file
         parent_dir = join(directory, subject_code)
         output_file_name = str(subject_code) + r"_Pose_Results.csv"
         with open(join(parent_dir, output_file_name), 'r') as file:

@@ -322,7 +322,7 @@ def get_IMU_offsets_METHOD_7(subject_code, IMU_type, opt_trial_name, event_to_st
 
 # Get the file path for the sto file containing the IMU orientation data during the specified pose
 def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
+    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject_code
     sto_files_dir = join(join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
     cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
     cal_oris_file_path = join(sto_files_dir, cal_oris_file)
@@ -467,7 +467,7 @@ def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
 # Get/make the folder for saving the calibrated model, defined by the calibration name
 def get_calibrated_model_dir(subject_code, IMU_type, calibration_name):
 
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
+    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject_code
 
     IMU_type_dir = join(parent_dir, IMU_type)  # dir for each IMU type
     makedirs(IMU_type_dir, exist_ok=True)
@@ -1759,7 +1759,7 @@ def get_IMU_offset(cal_method_dict, calibration_orientations_file, cal_oris2_fil
 
 
 # def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
-#     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject
+#     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject_code
 #     sto_files_dir = join(join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
 #     cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
 #     cal_oris_file_path = join(sto_files_dir, cal_oris_file)

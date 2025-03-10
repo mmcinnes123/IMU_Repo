@@ -63,7 +63,7 @@ def set_GH_coords_for_given_HT_angles(target_abd_angle):
     # Decompose into 'YZY' Eulers, used to update the coordinates of the model.
     GH_Y_new, GH_Z_new, GH_X_new = R_h_in_s.as_euler('YZX')
     print('\nThe GH coordinates will be set as follows: (GH_y, GH_z, GH_x)')
-    print('(Remember these are subject to gimbal lock, so may look random)')
+    print('(Remember these are subject_code to gimbal lock, so may look random)')
     print(GH_Y_new * 180 / np.pi, GH_Z_new * 180 / np.pi, GH_X_new * 180 / np.pi)
 
     # Update the model coordinates

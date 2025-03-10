@@ -35,7 +35,7 @@ CP_subject_dict = {'P1': {'start_time': 0, 'end_time': 30, 'time_elevation_start
                    'P2': {'start_time': 0, 'end_time': 30, 'time_elevation_starts': 30},
                    'P3': {'start_time': 0, 'end_time': 30, 'time_elevation_starts': 30}}
 
-# Choose which subject you want to run the function for (e.g just P1, or all)
+# Choose which subject_code you want to run the function for (e.g just P1, or all)
 subject_list = ['P1']
 
 """ MAIN """

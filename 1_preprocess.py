@@ -27,10 +27,10 @@ osim.Logger.setLevelString("Off")
 
 """ MAIN """
 
-# For each subject, each trial in trial_name_dict, and each IMU type, move the data from the .txt file into an .sto file
+# For each subject_code, each trial in trial_name_dict, and each IMU type, move the data from the .txt file into an .sto file
 for subject_code in subject_code_list:
 
-    print('Creating preprocessed data (.stos) for subject: ', subject_code)
+    print('Creating preprocessed data (.stos) for subject_code: ', subject_code)
 
     # Read the existing event dict txt file to get the pose names and associated times
     trial_name_dict = get_trial_pose_time_dict_from_file(directory, subject_code)
