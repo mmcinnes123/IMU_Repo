@@ -9,7 +9,7 @@ import opensim as osim
 from scipy.spatial.transform import Rotation as R
 from os.path import join
 import plotly.graph_objects as go
-
+from constants import data_dir
 
 def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, opt_method,
                        trial_for_opt, subject_event_dict, event_to_start, event_to_end,
@@ -25,7 +25,7 @@ def get_J1_J2_from_opt(subject_code, IMU_type_for_opt, opt_method,
         report_ext = None
 
     # Get the .txt file with quats based on subject_code code, whcih trial to use, and which type of IMU
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    parent_dir = data_dir + '\\' + subject_code
     raw_data_dir = join(parent_dir, 'RawData')
     tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
     tmm_txt_file = join(raw_data_dir, tmm_txt_file_name)
@@ -237,7 +237,7 @@ def get_J1_J2_from_isolate_move(subject_code, IMU_type_for_opt, trial_for_opt, s
         report_ext = None
 
     # Get the .txt file with quats based on subject_code code, whcih trial to use, and which type of IMU
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    parent_dir = data_dir + '\\' + subject_code
     raw_data_dir = join(parent_dir, 'RawData')
     tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
     tmm_txt_file = join(raw_data_dir, tmm_txt_file_name)
@@ -417,7 +417,7 @@ def get_ang_vels_from_quats(quats, sample_rate, debug_plot):
 
 def get_event_dict_from_file(subject_code):
 
-    event_files_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\SubjectEventFiles'
+    event_files_folder = data_dir + '\SubjectEventFiles'
     event_file_name = subject_code + '_event_dict.txt'
     event_file = join(event_files_folder, event_file_name)
 
@@ -591,7 +591,7 @@ def get_input_data_from_file(subject_code, IMU_type_for_opt, start_time, end_tim
         report_ext = None
 
     # Get the .txt file with quats based on subject_code code, whcih trial to use, and which type of IMU
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    parent_dir = data_dir + '\\' + subject_code
     raw_data_dir = join(parent_dir, 'RawData')
     tmm_txt_file_name = subject_code + '_' + trial_for_opt + report_ext
     tmm_txt_file = join(raw_data_dir, tmm_txt_file_name)

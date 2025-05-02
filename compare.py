@@ -11,6 +11,7 @@ from helpers_compare import get_range_dict
 from helpers_compare import find_heading_offset
 from helpers_compare import plot_compare_any_JAs
 from helpers_compare import plot_compare_body_oris
+from constants import data_dir
 
 import pandas as pd
 import math
@@ -29,7 +30,7 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     """ SETTINGS """
     # Define some file names
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    parent_dir = data_dir + '\\' + subject_code
     JA_range_dict_file = os.path.join(parent_dir, subject_code + '_JA_range_dict.txt')
     compare_name = subject_code + '_' + calibration_name + '_' + trial_name
 

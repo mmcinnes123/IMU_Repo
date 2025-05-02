@@ -5,13 +5,35 @@
 import numpy as np
 import pandas as pd
 import os
+from constants import data_dir
 
+# TODO: This should really be written so it reads the file already written and just adds new results
 
 # Quick Settings
-directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
-list_of_subjects = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
-IMU_type_list = ['Real']
+directory = data_dir
+from_subject = 1
+to_subject = 20
+list_of_subjects = [f'P{str(i).zfill(3)}' for i in range(from_subject, (to_subject+1))]
+IMU_type_list = ['Perfect', 'Real']
 trial_name = 'JA_Slow'
+
+# Calibration Name Dictionary
+# --------------------------
+# Key: Calibration type
+# Value: None (populated during runtime)
+#
+# 1. OpenSim Default Calibrations:
+#    - 'OSIM_N_self'
+#    - 'OSIM_N_asst'
+#    - 'OSIM_Alt_self'
+#    - 'OSIM_Alt_asst'
+#
+# 2. Method 7 Variations:
+#    - 'METHOD_7_ISO_5reps'
+#    - 'METHOD_7_ISO_1rep'
+#    - 'METHOD_7_ADL_both'
+
+# Add all methods you want to compile results for
 calibration_name_dict = {'OSIM_N_self': None,
                          'OSIM_N_asst': None,
                          'OSIM_Alt_self': None,

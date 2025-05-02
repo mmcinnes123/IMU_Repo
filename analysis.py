@@ -4,7 +4,7 @@
 # Output is .sto file
 
 from helpers_analysis import run_analyze_tool
-from constants import analyze_settings_template_file, sample_rate
+from constants import analyze_settings_template_file, sample_rate, data_dir
 
 import opensim as osim
 import os
@@ -15,7 +15,7 @@ def run_analysis(subject_code, trial_name, calibration_name, start_time, end_tim
     """ SETTINGS """
 
     # Define some file paths
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    parent_dir = data_dir + '\\' + subject_code
     IMU_type_dir = os.path.join(parent_dir, IMU_type)
     IK_results_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name, trial_name)
     coord_file_for_analysis = os.path.join(IK_results_dir, "IMU_IK_results.mot")

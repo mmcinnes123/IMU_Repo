@@ -128,10 +128,12 @@ def run_method(method_name, subject_code, IMU_type):
 
 """ RUN THE CALIBRATION """
 
-subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
-IMU_type_list = ['Real']
+from_subject = 2
+to_subject = 20
+subject_list = [f'P{str(i).zfill(3)}' for i in range(from_subject, (to_subject+1))]
+IMU_type_list = ['Perfect']
 # method_name_list = ['OSIM_N_self', 'OSIM_N_asst', 'OSIM_Alt_asst', 'OSIM_Alt_self', 'METHOD_4b']
-method_name_list = ['METHOD_7_ISO_5reps', 'METHOD_7_ADL_both']
+method_name_list = ['METHOD_7_ISO_1rep']
 
 for method_name in method_name_list:
 

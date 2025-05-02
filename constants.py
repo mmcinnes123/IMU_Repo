@@ -6,6 +6,7 @@ sample_rate = 100
 template_model_file = 'das3.osim'
 
 # Files
+data_dir = r'D:\2024 Data Collection'
 APDM_template_file = "APDM_template_4S.csv"
 
 # Settings files

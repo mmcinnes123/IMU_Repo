@@ -2,6 +2,7 @@
 
 import opensim as osim
 from os.path import join
+from constants import data_dir
 
 
 def run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_file,
@@ -45,7 +46,7 @@ def run_osim_IMU_IK(IMU_IK_settings_file, calibrated_model_file, orientations_fi
 
 
 def get_event_dict_from_file(subject_code):
-    event_files_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\SubjectEventFiles'
+    event_files_folder = data_dir + '\SubjectEventFiles'
     event_file_name = subject_code + '_event_dict.txt'
     event_file = join(event_files_folder, event_file_name)
 

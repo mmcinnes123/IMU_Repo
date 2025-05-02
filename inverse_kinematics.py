@@ -3,7 +3,7 @@
 # Calibrates an .osim model by assigning IMUs to segments
 # Outputs .mot IK results
 
-from constants import IMU_IK_settings_file
+from constants import IMU_IK_settings_file, data_dir
 from helpers_inverse_k import run_osim_IMU_IK
 from helpers_inverse_k import get_event_dict_from_file
 
@@ -22,7 +22,7 @@ def run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end
     sensor_to_opensim_rotations = osim.Vec3(0, 0, 0)
 
     # Define some file paths
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code
+    parent_dir = data_dir + '\\' + subject_code
     IMU_type_dir = os.path.join(parent_dir, IMU_type)
     IK_results_parent_dir = os.path.join(IMU_type_dir, 'IMU_IK_results_' + calibration_name)
     IK_results_dir = os.path.join(IK_results_parent_dir, trial_name)

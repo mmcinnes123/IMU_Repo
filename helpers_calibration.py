@@ -3,6 +3,7 @@
 from constants import calibration_settings_template_file
 from constants import sample_rate
 from constants import template_model_file
+from constants import data_dir
 from helpers_preprocess import APDM_2_sto_Converter
 from TwoDoF_Axis_Est.helpers_2DoF import get_J1_J2_from_opt
 
@@ -322,7 +323,7 @@ def get_IMU_offsets_METHOD_7(subject_code, IMU_type, opt_trial_name, event_to_st
 
 # Get the file path for the sto file containing the IMU orientation data during the specified pose
 def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject_code
+    parent_dir = data_dir + '\\' + subject_code  # parent dir for the subject_code
     sto_files_dir = join(join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
     cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
     cal_oris_file_path = join(sto_files_dir, cal_oris_file)
@@ -467,7 +468,7 @@ def write_to_APDM(df_1, df_2, df_3, df_4, template_file, output_dir, tag):
 # Get/make the folder for saving the calibrated model, defined by the calibration name
 def get_calibrated_model_dir(subject_code, IMU_type, calibration_name):
 
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject_code
+    parent_dir = data_dir + '\\' + subject_code  # parent dir for the subject_code
 
     IMU_type_dir = join(parent_dir, IMU_type)  # dir for each IMU type
     makedirs(IMU_type_dir, exist_ok=True)
@@ -532,7 +533,7 @@ def set_default_model_pose(model_file, pose):
 
 def get_event_dict_from_file(subject_code):
 
-    event_files_folder = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection\SubjectEventFiles'
+    event_files_folder = data_dir + '\SubjectEventFiles'
     event_file_name = subject_code + '_event_dict.txt'
     event_file = join(event_files_folder, event_file_name)
 
@@ -1759,7 +1760,7 @@ def get_IMU_offset(cal_method_dict, calibration_orientations_file, cal_oris2_fil
 
 
 # def get_cal_ori_file_path(subject_code, trial_name, pose_name, IMU_type):
-#     parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection' + '\\' + subject_code  # parent dir for the subject_code
+#     parent_dir = data_dir + '\\' + subject_code  # parent dir for the subject_code
 #     sto_files_dir = join(join(parent_dir, 'Preprocessed_Data'), trial_name)  # dir for preprocess orientations files
 #     cal_oris_file = IMU_type + '_Quats_' + pose_name + '.sto'
 #     cal_oris_file_path = join(sto_files_dir, cal_oris_file)
