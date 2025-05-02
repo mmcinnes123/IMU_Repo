@@ -1,24 +1,50 @@
-# Used to iterate through files
-
+# This script batch runs the IMU IK, analysis, and comparison scripts for a given subject, calibration method, and movement trial
+# Ot relies on the calibrated model already created
+# Read run_IMU_IK, run_analysis, and run_IK_compare to find out what each function does
 
 from inverse_kinematics import run_IMU_IK
 from analysis import run_analysis
 from compare import run_IK_compare
 
-# Quick Settings
+# TODO: Update data_dir in constants.py to point to the correct overarching data directory
+
+""" SETTINGS"""
+
+# Choose which trial to run the IMU IK, analysis and comparison for
 trial_name = 'JA_Slow'      # Choose which trial to run IK
 
-# calibration_list = ['OSIM_N_self', 'OSIM_Alt_self', 'ALL_MANUAL', 'METHOD_1_Alt_self', 'METHOD_2_Alt_self', 'METHOD_3']     # Used to find the calibrated model file
-# calibration_list = ['OSIM_N_self', 'OSIM_N_asst', 'OSIM_Alt_asst', 'OSIM_Alt_self', 'METHOD_4b']     # Used to find the calibrated model file
-calibration_list = ['METHOD_7_ISO_5reps', 'METHOD_7_ADL_both']     # Used to find the calibrated model file
 
-IMU_type_list = ['Real']        # Options: 'Perfect' or 'Real'
+# Available calibration types:
+# 1. Basic OSIM Types:
+#    - 'OSIM_N_self'     # Neutral pose, self-performed
+#    - 'OSIM_N_asst'     # Neutral pose, assisted
+#    - 'OSIM_Alt_self'   # Alternative pose, self-performed
+#    - 'OSIM_Alt_asst'   # Alternative pose, assisted
+#
+# 2. Method-specific Types:
+#    - 'METHOD_1_Alt_self'
+#    - 'METHOD_2_Alt_self'
+#    - 'METHOD_3'
+#    - 'METHOD_4b'
+#    - 'METHOD_7_ISO_1rep'
+#
+# 3. Special Types:
+#    - 'ALL_MANUAL'         # Full manual calibration
 
-subject_list = [f'P{str(i).zfill(3)}' for i in range(7, 21)]
-# subject_list = [f'P{str(i).zfill(3)}' for i in range(15, 21)]
-# subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21) if f'P{str(i).zfill(3)}' not in 'P019']
-# subject_list = ['P014']
+# Choose which calibrated model type(s) to run the IMU IK, analysis and comparison for
+calibration_list = ['METHOD_7_ISO_1rep']     # Used to find the calibrated model file
 
+IMU_type_list = ['Perfect']        # Options: 'Perfect' or 'Real'
+
+# Choose which subjects to run the chosen functions for
+from_subject = 1
+to_subject = 20
+subject_list = [f'P{str(i).zfill(3)}' for i in range(from_subject, (to_subject+1))]
+
+
+# Use these if you want to change the start and end time used for the IK, analysis or comparison.
+# (Default is to use the pose which marks the start of the movements of interest as the marker to start the
+# inverse kinematics, and to use the full length of IK .mot data)
 IK_start_at_pose_bool = True
 IK_trim_bool = False
 IK_start_time = 7
