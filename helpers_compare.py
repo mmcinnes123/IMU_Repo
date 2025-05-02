@@ -287,6 +287,137 @@ def plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_tim
     return RMSE_angle1, R, mean_peak_error, mean_trough_error
 
 
+
+def alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, figure_results_dir,
+                                 range_dict, compare_name):
+
+    IMU_angle = IMU_angles[[joint_name]].to_numpy()
+    OMC_angle = OMC_angles[[joint_name]].to_numpy()
+    time = IMU_angles[['time']].to_numpy()
+
+    # For thorax rotation (heading), compare change in value from initial ref point
+    if joint_name == 'thorax_rotation':
+        OMC_angle = OMC_angle - OMC_angle[0]
+        IMU_angle = IMU_angle - IMU_angle[0]
+
+    label = joint_name.replace('_', ' ').title() + ' Angle\n '
+
+    """ Get the peaks and troughs """
+
+    if joint_name not in ('thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation'):
+
+        plot_peaks = False   # Don't bother calculating or plotting thorax peaks
+        time_start, time_end = range_dict[joint_name][0], range_dict[joint_name][1]   # Get the indices saved in the range dict
+
+        OMC_peaks, OMC_peak_inds, OMC_peak_times = get_peaks_or_troughs(OMC_angles, joint_name, time_start, time_end, peak_or_trough='peak', debug=False)
+        IMU_peaks, IMU_peak_inds, IMU_peak_times = get_peaks_or_troughs(IMU_angles, joint_name, time_start, time_end, peak_or_trough='peak', debug=False)
+        OMC_troughs, OMC_trough_inds, OMC_trough_times = get_peaks_or_troughs(OMC_angles, joint_name, time_start, time_end, peak_or_trough='trough', debug=False)
+        IMU_troughs, IMU_trough_inds, IMU_trough_times = get_peaks_or_troughs(IMU_angles, joint_name, time_start, time_end, peak_or_trough='trough', debug=False)
+
+        # Check we have found enough peaks/troughs
+        if any(len(var) < 4 for var in [OMC_peaks, IMU_peaks, OMC_troughs, IMU_troughs]):
+            print(f"WARNING: No/not enough peaks found for {joint_name} (less than 4)")
+
+        # Get the mean peak/trough error
+        mean_peak_error = get_peak_and_trough_errors(OMC_peaks, IMU_peaks, joint_name)
+        mean_trough_error = get_peak_and_trough_errors(OMC_troughs, IMU_troughs, joint_name)
+
+    else:
+        plot_peaks = False
+        mean_peak_error = np.nan     # Sub in value for plotting
+        mean_trough_error = np.nan   # Sub in value for plotting
+
+    """ CROSS CORRELATE """
+
+    # Calculate cross-correlation lag
+    lag = get_cross_cor_lag(OMC_angle, IMU_angle)
+
+    # Shift IMU and OMC data if lag is within sensible range
+    if -20 < lag < 0:
+        IMU_angle = IMU_angle[-lag:]    # Remove first n values from IMU data
+        OMC_angle = OMC_angle[:lag]     # Remove last n values from OMC data
+        time = time[:lag]               # Remove last n values from time array
+        print(f' CROSS-COR: For {joint_name}, lag = {lag} => APPLIED')
+    else:
+        print(f' CROSS-COR: For {joint_name}, lag = {lag} => NOT APPLIED')
+
+    """ GET ERROR METRICS """
+
+    error_angle1 = abs(OMC_angle - IMU_angle)       # Calculate error array
+    R = get_pearsonr(OMC_angle, IMU_angle)          # Calculate Pearson correlation coefficient
+    RMSE_angle1 = get_RMSE(error_angle1)            # Calculate RMSE
+    max_error_angle1 = np.nanmax(error_angle1)      # Calculate max error
+
+    """ CREATE FIGURE """
+
+    plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 18})  # Change 14 to your desired font size
+
+    fig, axs = plt.subplots(2, 1, figsize=(16,9), height_ratios=[7,3])
+
+    """ Plot joint angles """
+
+    # Axs 0 settings
+    axs[0].set_title(label, fontsize=22)
+    axs[0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
+    axs[0].legend(['OMC', 'IMU'])
+    axs[0].grid(color="lightgrey")
+
+    # Plot the joint angles
+    axs[0].plot(time, OMC_angle, color='#003f5c', label='OMC')
+    axs[0].plot(time, IMU_angle, color='#fe8616', label='IMC')
+
+    axs[0].legend()  # Adds a legend using the labels
+
+    """ Plot the peaks and troughs """
+
+    if plot_peaks == True:
+        axs[0].plot(OMC_trough_times, OMC_troughs, "x", c='blue')
+        axs[0].plot(OMC_peak_times, OMC_peaks, "x", c='blue')
+        axs[0].plot(IMU_trough_times, IMU_troughs, "x", c='orange')
+        axs[0].plot(IMU_peak_times, IMU_peaks, "x", c='orange')
+
+        # Annotate with mean peak/trough error
+        y_min, y_max = axs[0].get_ylim()
+        y_mid = (y_min + y_max) / 2
+        axs[0].text(time[-1]+0.1*(end_time-start_time), y_mid+10,
+                    "Mean peak\nerror = " + str(round(mean_peak_error,1)) + " deg")
+        axs[0].text(time[-1]+0.1*(end_time-start_time), y_mid-10,
+                    "Mean trough\nerror = " + str(round(mean_trough_error,1)) + " deg")
+
+    """ Plot error graphs """
+
+    # Axs 1 settings
+    axs[1].set(xlabel="Time [s]", ylabel="IMU Error [deg]", ylim=(0,40))
+    axs[1].grid(color="lightgrey")
+
+    # Plot to time-series error
+    axs[1].scatter(time, error_angle1, s=0.4)
+
+    # Plot RMSE error lines and text
+    axs[1].axhline(y=RMSE_angle1, linewidth=2, c="red", linestyle='--')
+    axs[1].text(time[-1]+0.07*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+
+    # Plot max error lines
+    y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
+    axs[1].axhline(y=y_max_line_placement_1, linewidth=1, c="red", linestyle='--')
+
+    # Plot max error text
+    y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
+    axs[1].text(time[-1]+0.07*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+
+    fig.tight_layout(pad=2.0)
+    fig.savefig(r'C:\Users\r03mm22\Documents\Protocol_Testing\Results\Other_Figs_From_Python' + "\\" + compare_name + joint_name + "_angles.png")
+    plt.close()
+
+    # Throw warning and quit if not equal number of peaks/troughs was found
+    if plot_peaks == True:
+        if len(OMC_peaks) != len(IMU_peaks) or len(OMC_troughs) != len(IMU_troughs):
+            # print("Quit because number of OMC peaks/troughs found did not match IMU peaks/troughs found.")
+            # quit()
+            mean_peak_error = np.nan
+            mean_trough_error = np.nan
+
+
 # Define a function to plot IMU vs OMC model body orientation errors (single angle quaternion difference)
 def plot_compare_body_oris(OMC_body_quats, IMU_body_quats,
                            heading_offset, start_time, end_time, figure_results_dir):

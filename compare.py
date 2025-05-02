@@ -11,6 +11,7 @@ from helpers_compare import get_range_dict
 from helpers_compare import find_heading_offset
 from helpers_compare import plot_compare_any_JAs
 from helpers_compare import plot_compare_body_oris
+from helpers_compare import alt_plot_for_thesis_compare_any_JAs
 from constants import data_dir
 
 import pandas as pd
@@ -117,6 +118,11 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
         new_row = pd.DataFrame({'JA': joint_name, 'RMSE': [RMSE], 'R': [R], 'peakROM': [mean_peak_error], 'troughROM': [mean_trough_error]})
         results_df = pd.concat([results_df, new_row], ignore_index=True)
 
+    # # Create another plot with nice formatting
+    # for joint_name in [col for col in IMU_angles.columns if col != 'time']:
+    #     alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
+    #                              range_dict, compare_name)
+
     """ ANALYSE MODEL BODY ORIENTATIONS """
 
     # Find the average heading offset between the IMU thorax body and the OMC thorax body frames
@@ -141,10 +147,10 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     # Write final RMSE values to a csv
     print('Writing results to .csv.')
     all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
-                    mode='w', encoding='utf-8', na_rep='nan', index=False)
+                    ode='w', encoding='utf-8', na_rep='nan', index=False)
 
 
-# Run single test
+# Run single test (set test=True to choose input and output files)
 if __name__ == '__main__':
 
-    run_IK_compare('P3', 'JA_Slow', 'METHOD_4_Opt', 0, 90, False, 'Perfect', test=True)
+    run_IK_compare('P014', 'JA_Slow', 'OSIM_N_self', 6, 80, False, 'Perfect', test=False)
