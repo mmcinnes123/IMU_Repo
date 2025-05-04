@@ -83,10 +83,10 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     #     alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
     #                              range_dict, compare_name)
 
-    # # Create a bland altman plot
-    # for joint_name in [col for col in IMU_angles.columns if col not in ['time', 'thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation']]:
-    #     plot_BA_any_JAs_with_peak_data(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
-    #                              range_dict)
+    # Create a bland altman plot
+    for joint_name in [col for col in IMU_angles.columns if col not in ['time', 'thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation']]:
+        plot_BA_any_JAs_with_peak_data(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
+                                 range_dict)
 
     """ ANALYSE MODEL BODY ORIENTATIONS """
 

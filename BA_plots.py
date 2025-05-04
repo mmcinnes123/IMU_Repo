@@ -81,6 +81,7 @@ if __name__ == '__main__':
             continue
 
     # Create combined Bland-Altman plots for each joint
+    # Create combined Bland-Altman plots for each joint
     for joint_name, data in all_subjects_data.items():
         errors = np.array(data['errors'])
         means = np.array(data['means'])
@@ -94,24 +95,50 @@ if __name__ == '__main__':
         # Calculate regression line
         slope, intercept = np.polyfit(means, errors, 1)
         regression_line = slope * means + intercept
-        r_squared = np.corrcoef(means, errors)[0,1]**2
+        r = np.corrcoef(means, errors)[0,1]  # R instead of R²
 
         # Create plot
-        plt.figure(figsize=(10, 6))
+        plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 18})  # Change 14 to your desired font size
+        plt.figure(figsize=(10, 7))
         plt.scatter(means, errors, alpha=0.5)
         plt.plot(means, regression_line, 'b--',
-                 label=f'Regression line\ny = {slope:.2f}x + {intercept:.2f}\nR² = {r_squared:.3f}')
-        plt.axhline(y=bias, color='k', linestyle='-', label='Bias')
-        plt.axhline(y=upper_loa, color='r', linestyle='--', label='+1.96 SD')
-        plt.axhline(y=lower_loa, color='r', linestyle='--', label='-1.96 SD')
-
-        label = joint_name.replace('_', ' ').title()
-        plt.xlabel('Mean of OMC and IMU measurements')
-        plt.ylabel('Error (IMU - OMC)')
-        plt.title(f'Combined Bland-Altman Plot for {label}\nAll Subjects')
+                 label=f'Regression line (R = {r:.3f})')
+        plt.axhline(y=bias, color='k', linestyle='-')
+        plt.axhline(y=upper_loa, color='r', linestyle='--')
+        plt.axhline(y=lower_loa, color='r', linestyle='--')
         plt.legend()
+
+        # Add annotations for LOA lines
+        x_min, x_max = plt.xlim()
+        plt.text(x_max + 1, upper_loa, f'Upper LoA',
+                 verticalalignment='center')
+        plt.text(x_max + 1, lower_loa, f'Lower LoA',
+                 verticalalignment='center')
+        plt.text(x_max + 1, bias, f'Bias',)
+
+        custom_labels = {
+            'HT_flexion': 'Shoulder Flexion',
+            'HT_abd': 'Shoulder Abduction',
+            'HT_rotation': 'Shoulder Rotation',
+            'elbow_flexion': 'Elbow Flexion',
+            'elbow_pronation': 'Forearm Pronation'
+        }
+
+        # Use the dictionary to set the label, with a fallback to the default formatting
+        label = custom_labels.get(joint_name)
+        plt.xlabel('Mean Joint Angle (OMC + IMC / 2)')
+        plt.ylabel('Error (IMC - OMC)')
+        plt.title(f'Bland-Altman Plot\n{label}')
+        plt.axhline(y=0, color='gray', linestyle='-', alpha=0.5, label='y=0 Line')
+
+        # Set y-axis limits
+        plt.ylim(-40, 50)
+
+        # Adjust layout to accommodate annotations
+        plt.tight_layout()
 
         # Save the figure
         os.makedirs(fig_output_dir, exist_ok=True)
-        plt.savefig(join(fig_output_dir, f'combined_bland_altman_{joint_name}.png'))
+        plt.savefig(join(fig_output_dir, f'combined_bland_altman_{joint_name}.png'),
+                    bbox_inches='tight')  # Ensures annotations are not cut off
         plt.close()
