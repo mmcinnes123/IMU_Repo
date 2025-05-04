@@ -422,7 +422,6 @@ def alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, star
 def plot_compare_body_oris(OMC_body_quats, IMU_body_quats,
                            heading_offset, start_time, end_time, figure_results_dir):
 
-
     thorax_OMC = get_quat_arr_from_df(OMC_body_quats, 'thorax')
     humerus_OMC = get_quat_arr_from_df(OMC_body_quats, 'humerus')
     radius_OMC = get_quat_arr_from_df(OMC_body_quats, 'radius')
