@@ -38,7 +38,7 @@ calibration_list = ['METHOD_7_ISO_1rep', 'OSIM_N_self']     # Used to find the c
 IMU_type_list = ['Perfect', 'Real']        # Options: 'Perfect' or 'Real'
 
 # Choose which subjects to run the chosen functions for
-from_subject = 1
+from_subject = 2
 to_subject = 20
 subject_list = [f'P{str(i).zfill(3)}' for i in range(from_subject, (to_subject+1))]
 
@@ -68,7 +68,7 @@ for calibration_name in calibration_list:
             # run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end_time, IK_start_at_pose_bool, IK_trim_bool, IMU_type)
             # run_analysis(subject_code, trial_name, calibration_name, analysis_start_time, analysis_end_time, analysis_trim_bool, IMU_type)
             run_compile_JAs(subject_code, trial_name, calibration_name, IMU_type)
-            # run_IK_compare(subject_code, trial_name, calibration_name, compare_start_time, compare_end_time, compare_trim_bool, IMU_type, test=False)
+            run_IK_compare(subject_code, trial_name, calibration_name, compare_start_time, compare_end_time, compare_trim_bool, IMU_type, test=False)
 
 
 

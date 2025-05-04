@@ -13,7 +13,7 @@ import numpy as np
 
 
 # Set main directory
-directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
+directory = r'D:\2024 Data Collection'
 
 
 """ INDIVIDUAL RESULTS """
@@ -21,7 +21,7 @@ directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
 # pose (using a pre-saved event dict as a reference for the time of each pose in each trial) and compares the
 # measured joint angles with the target joint angles, then saves the value and the error to individual pose_results.csvs
 
-write_results = False
+write_results = True
 if write_results:
 
     # Settings

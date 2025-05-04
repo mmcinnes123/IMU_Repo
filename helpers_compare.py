@@ -5,6 +5,7 @@ from quat_functions import quat_conj
 from constants import sample_rate
 
 import os
+from os.path import join
 import opensim as osim
 import numpy as np
 import matplotlib.pyplot as plt
@@ -285,6 +286,131 @@ def plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_tim
             mean_trough_error = np.nan
 
     return RMSE_angle1, R, mean_peak_error, mean_trough_error
+
+def plot_BA_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, figure_results_dir,
+                                 range_dict):
+
+    IMU_angle = IMU_angles[[joint_name]].to_numpy()
+    OMC_angle = OMC_angles[[joint_name]].to_numpy()
+    time = IMU_angles[['time']].to_numpy()
+
+    # For thorax rotation (heading), compare change in value from initial ref point
+    if joint_name == 'thorax_rotation':
+        OMC_angle = OMC_angle - OMC_angle[0]
+        IMU_angle = IMU_angle - IMU_angle[0]
+
+    label = joint_name.replace('_', ' ').title()
+
+    """ Get the peaks and troughs """
+
+    """ CROSS CORRELATE """
+
+    # Calculate cross-correlation lag
+    lag = get_cross_cor_lag(OMC_angle, IMU_angle)
+
+    # Shift IMU and OMC data if lag is within sensible range
+    if -20 < lag < 0:
+        IMU_angle = IMU_angle[-lag:]    # Remove first n values from IMU data
+        OMC_angle = OMC_angle[:lag]     # Remove last n values from OMC data
+        time = time[:lag]               # Remove last n values from time array
+        print(f' CROSS-COR: For {joint_name}, lag = {lag} => APPLIED')
+    else:
+        print(f' CROSS-COR: For {joint_name}, lag = {lag} => NOT APPLIED')
+
+    """ GET ERROR METRICS """
+
+    error_angle1 = IMU_angle - OMC_angle       # Calculate error array
+
+    # Calculate mean between OMC and IMU angles
+    mean_angles = (OMC_angle + IMU_angle) / 2
+
+    # Calculate bias (mean difference)
+    bias = np.mean(error_angle1)
+
+    # Calculate limits of agreement (LOA)
+    std_diff = np.std(error_angle1)
+    upper_loa = bias + (1.96 * std_diff)
+    lower_loa = bias - (1.96 * std_diff)
+
+    # Create the Bland-Altman plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(mean_angles, error_angle1, alpha=0.5)
+    plt.axhline(y=bias, color='k', linestyle='-', label='Bias')
+    plt.axhline(y=upper_loa, color='r', linestyle='--', label='+1.96 SD')
+    plt.axhline(y=lower_loa, color='r', linestyle='--', label='-1.96 SD')
+
+    plt.xlabel('Mean of OMC and IMU measurements')
+    plt.ylabel('Absolute Error (OMC - IMU)')
+    plt.title(f'Bland-Altman Plot for {label}')
+    plt.legend()
+
+    # Save the figure
+    plt.savefig(join(figure_results_dir, f'bland_altman_{joint_name}.png'))
+    plt.close()
+
+def plot_BA_any_JAs_with_peak_data(joint_name, IMU_angles, OMC_angles, start_time, end_time, figure_results_dir,
+                                 range_dict):
+
+    IMU_angle = IMU_angles[[joint_name]].to_numpy()
+    OMC_angle = OMC_angles[[joint_name]].to_numpy()
+    time = IMU_angles[['time']].to_numpy()
+
+    # For thorax rotation (heading), compare change in value from initial ref point
+    if joint_name == 'thorax_rotation':
+        OMC_angle = OMC_angle - OMC_angle[0]
+        IMU_angle = IMU_angle - IMU_angle[0]
+
+    label = joint_name.replace('_', ' ').title()
+
+    """ Get the peaks and troughs """
+
+    time_start, time_end = range_dict[joint_name][0], range_dict[joint_name][1]  # Get the indices saved in the range dict
+
+    OMC_peaks, OMC_peak_inds, OMC_peak_times = get_peaks_or_troughs(OMC_angles, joint_name, time_start, time_end,
+                                                                    peak_or_trough='peak', debug=False)
+    IMU_peaks, IMU_peak_inds, IMU_peak_times = get_peaks_or_troughs(IMU_angles, joint_name, time_start, time_end,
+                                                                    peak_or_trough='peak', debug=False)
+    OMC_troughs, OMC_trough_inds, OMC_trough_times = get_peaks_or_troughs(OMC_angles, joint_name, time_start, time_end,
+                                                                          peak_or_trough='trough', debug=False)
+    IMU_troughs, IMU_trough_inds, IMU_trough_times = get_peaks_or_troughs(IMU_angles, joint_name, time_start, time_end,
+                                                                          peak_or_trough='trough', debug=False)
+
+    # Check we have found enough peaks/troughs
+    if any(len(var) < 4 for var in [OMC_peaks, IMU_peaks, OMC_troughs, IMU_troughs]):
+        print(f"WARNING: No/not enough peaks found for {joint_name} (less than 4)")
+
+    # Get the mean peak/trough error
+    IMU_peaks_and_troughs = np.concatenate((IMU_peaks, IMU_troughs))
+    OMC_peaks_and_troughs = np.concatenate((OMC_peaks, OMC_troughs))
+    peak_trough_errors = IMU_peaks_and_troughs - OMC_peaks_and_troughs
+    peak_trough_mean_angles = (IMU_peaks_and_troughs + OMC_peaks_and_troughs) / 2
+
+    # Calculate bias (mean difference)
+    bias = np.mean(peak_trough_errors)
+
+    # Calculate limits of agreement (LOA)
+    std_diff = np.std(peak_trough_errors)
+    upper_loa = bias + (1.96 * std_diff)
+    lower_loa = bias - (1.96 * std_diff)
+
+    # Create the Bland-Altman plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(peak_trough_mean_angles, peak_trough_errors, alpha=0.5)
+    plt.axhline(y=bias, color='k', linestyle='-', label='Bias')
+    plt.axhline(y=upper_loa, color='r', linestyle='--', label='+1.96 SD')
+    plt.axhline(y=lower_loa, color='r', linestyle='--', label='-1.96 SD')
+
+    plt.xlabel('Mean of OMC and IMU measurements')
+    plt.ylabel('Absolute Error (OMC - IMU)')
+    plt.title(f'Bland-Altman Plot for {label}')
+    plt.legend()
+
+    # Save the figure
+    plt.savefig(join(figure_results_dir, f'bland_altman_peaktroughs{joint_name}.png'))
+    plt.close()
+
+
+
 
 
 
@@ -757,7 +883,7 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
 
     # Assign to clinically relevant joint angles
     abduction = -y_rel2_Y_on_XY
-    flexion = z_rel2_Z_on_YZ
+    flexion = -z_rel2_Z_on_YZ
     rotation_elbow_down = x_rel2_X_on_ZX
     rotation_elbow_up = z_rel2_Z_on_YZ
 
