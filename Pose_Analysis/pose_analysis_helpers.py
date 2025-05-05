@@ -76,9 +76,9 @@ def get_body_quats_from_analysis_sto(analysis_sto_path, pose_time):
     humerus_R = R.from_euler('XYZ', humerus_eulers, degrees=True)
     radius_R = R.from_euler('XYZ', radius_eulers, degrees=True)
 
-    thorax_quats = thorax_R.as_quat()[:,[1, 2, 3, 0]]
-    humerus_quats = humerus_R.as_quat()[:,[1, 2, 3, 0]]
-    radius_quats = radius_R.as_quat()[:,[1, 2, 3, 0]]
+    thorax_quats = thorax_R.as_quat()[:,[3, 0, 1, 2]]
+    humerus_quats = humerus_R.as_quat()[:,[3, 0, 1, 2]]
+    radius_quats = radius_R.as_quat()[:,[3, 0, 1, 2]]
 
     return thorax_quats, humerus_quats, radius_quats
 
