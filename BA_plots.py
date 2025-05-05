@@ -14,6 +14,191 @@ import matplotlib.pyplot as plt
 
 fig_output_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results\Other_Figs_From_Python\Combined_BA_Plots'
 
+
+def plot_BA_per_JA(all_subjects_data):
+
+    for joint_name, data in all_subjects_data.items():
+        errors = np.array(data['errors'])
+        means = np.array(data['means'])
+
+        # Calculate statistics
+        bias = np.mean(errors)
+        std_diff = np.std(errors)
+        upper_loa = bias + (1.96 * std_diff)
+        lower_loa = bias - (1.96 * std_diff)
+
+        # Calculate regression line
+        slope, intercept = np.polyfit(means, errors, 1)
+        regression_line = slope * means + intercept
+        r = np.corrcoef(means, errors)[0,1]  # R instead of R²
+
+        # Create plot
+        plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 18})  # Change 14 to your desired font size
+        plt.figure(figsize=(10, 7))
+        plt.scatter(means, errors, alpha=0.5)
+        plt.plot(means, regression_line, 'b--',
+                 label=f'Regression line (R = {r:.3f})')
+        plt.axhline(y=bias, color='k', linestyle='-')
+        plt.axhline(y=upper_loa, color='r', linestyle='--')
+        plt.axhline(y=lower_loa, color='r', linestyle='--')
+        plt.legend()
+
+        # Add annotations for LOA lines
+        x_min, x_max = plt.xlim()
+        plt.text(x_max + 1, upper_loa, f'Upper LoA',
+                 verticalalignment='center')
+        plt.text(x_max + 1, lower_loa, f'Lower LoA',
+                 verticalalignment='center')
+        plt.text(x_max + 1, bias, f'Bias',)
+
+        custom_labels = {
+            'HT_flexion': 'Shoulder Flexion',
+            'HT_abd': 'Shoulder Abduction',
+            'HT_rotation': 'Shoulder Rotation',
+            'elbow_flexion': 'Elbow Flexion',
+            'elbow_pronation': 'Forearm Pronation'
+        }
+
+        # Use the dictionary to set the label, with a fallback to the default formatting
+        label = custom_labels.get(joint_name)
+        plt.xlabel('Mean Joint Angle (OMC + IMC / 2)')
+        plt.ylabel('Error (IMC - OMC)')
+        plt.title(f'Bland-Altman Plot\n{label}')
+        plt.axhline(y=0, color='gray', linestyle='-', alpha=0.5)
+
+        # Set y-axis limits
+        plt.ylim(-40, 50)
+
+        # Adjust layout to accommodate annotations
+        plt.tight_layout()
+
+        # Save the figure
+        os.makedirs(fig_output_dir, exist_ok=True)
+        plt.savefig(join(fig_output_dir, f'combined_bland_altman_{joint_name}.png'),
+                    bbox_inches='tight')  # Ensures annotations are not cut off
+        plt.close()
+
+def plot_combined_BA(all_subjects_data):
+    """
+    Creates one figure with all joint angles
+    """
+    plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 24})  # Change 14 to your desired font size
+
+
+    # Create a single figure with 2 columns and 3 rows
+    fig, axes = plt.subplots(3, 2, figsize=(20, 24))  # Adjust figure size as needed
+    axes = axes.flatten()  # Flatten the 2D array of axes for easier indexing
+
+    # Define the order of joint names for the subplots
+    joint_order = ['elbow_flexion', 'elbow_pronation', 'HT_flexion', 'HT_abd', 'HT_rotation']
+
+    # Iterate through the joint names and plot on the corresponding subplot
+    for idx, joint_name in enumerate(joint_order):
+        if joint_name not in all_subjects_data:
+            continue  # Skip if the joint data is not available
+
+        data = all_subjects_data[joint_name]
+        errors = np.array(data['errors'])
+        means = np.array(data['means'])
+
+        # Calculate statistics
+        bias = np.mean(errors)
+        std_diff = np.std(errors)
+        upper_loa = bias + (1.96 * std_diff)
+        lower_loa = bias - (1.96 * std_diff)
+
+        # Calculate regression line
+        slope, intercept = np.polyfit(means, errors, 1)
+        regression_line = slope * means + intercept
+        r = np.corrcoef(means, errors)[0, 1]  # R instead of R²
+
+        # Set the legend labels for only first plot:
+        if idx == 0:
+            bias_label = 'Bias'
+            upper_loa_label = 'Limits of Agreement'
+        else:
+            bias_label = None
+            upper_loa_label = None
+
+        # Create plot on the current axis
+        ax = axes[idx]
+        ax.scatter(means, errors, alpha=0.5, color='#003f5c')
+        ax.axhline(y=bias, label=bias_label, color='r', linestyle='-')
+        ax.axhline(y=upper_loa, label=upper_loa_label, color='r', linestyle='--')
+        ax.axhline(y=lower_loa, color='r', linestyle='--')
+        # ax.plot(means, regression_line, color='#21918c', linestyle='--', dashes=[5, 10], label=f'Regression line (R = {r:.3f})')
+        ax.axhline(y=0, color='k', linestyle='-', alpha=0.5)
+
+        # Set y-axis limits
+        ax.set_ylim(-40, 50)
+
+        # Set labels and title
+        custom_labels = {
+            'HT_flexion': 'Shoulder Flexion',
+            'HT_abd': 'Shoulder Abduction',
+            'HT_rotation': 'Shoulder Rotation',
+            'elbow_flexion': 'Elbow Flexion',
+            'elbow_pronation': 'Forearm Pronation'
+        }
+        label = custom_labels.get(joint_name, joint_name.replace('_', ' ').title())
+        ax.set_xlabel('Joint Angle (OMC + IMC / 2)')
+        ax.set_ylabel('Difference (IMC - OMC)')
+        ax.set_title(f'{label}\n')
+        ax.legend()
+
+    # Remove any unused subplots
+    for idx in range(len(joint_order), len(axes)):
+        fig.delaxes(axes[idx])
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout(pad=3.0, h_pad=4.0, w_pad=4.0)
+
+    # Save the combined figure
+    os.makedirs(fig_output_dir, exist_ok=True)
+    plt.savefig(join(fig_output_dir, 'combined_bland_altman_plots.png'), bbox_inches='tight')
+    plt.close()
+
+
+def save_bias_and_loa_to_csv(all_subjects_data, output_file):
+    """
+    Saves the bias and LoA results to a CSV file.
+    """
+    results = []
+
+    # Define custom labels for joint names
+    custom_labels = {
+        'HT_flexion': 'Shoulder Flexion',
+        'HT_abd': 'Shoulder Abduction',
+        'HT_rotation': 'Shoulder Rotation',
+        'elbow_flexion': 'Elbow Flexion',
+        'elbow_pronation': 'Forearm Pronation'
+    }
+
+    # Iterate through the joint names and calculate statistics
+    for joint_name, data in all_subjects_data.items():
+        errors = np.array(data['errors'])
+
+        # Calculate statistics
+        bias = np.mean(errors)
+        std_diff = np.std(errors)
+        upper_loa = bias + (1.96 * std_diff)
+        lower_loa = bias - (1.96 * std_diff)
+
+        # Get the custom label for the joint
+        label = custom_labels.get(joint_name, joint_name.replace('_', ' ').title())
+
+        # Append the results to the list
+        results.append({
+            'Joint Angle': label,
+            'Bias': round(bias, 1),
+            'Upper LoA': round(upper_loa, 1),
+            'Lower LoA': round(lower_loa, 1)
+        })
+
+    # Convert the results to a DataFrame and save to CSV
+    df = pd.DataFrame(results)
+    df.to_csv(output_file, index=False)
+
 if __name__ == '__main__':
 
     # Create dictionaries to store all peak/trough data across subjects
@@ -80,65 +265,6 @@ if __name__ == '__main__':
             print(f"Error processing subject {subject_code}: {str(e)}")
             continue
 
-    # Create combined Bland-Altman plots for each joint
-    # Create combined Bland-Altman plots for each joint
-    for joint_name, data in all_subjects_data.items():
-        errors = np.array(data['errors'])
-        means = np.array(data['means'])
-
-        # Calculate statistics
-        bias = np.mean(errors)
-        std_diff = np.std(errors)
-        upper_loa = bias + (1.96 * std_diff)
-        lower_loa = bias - (1.96 * std_diff)
-
-        # Calculate regression line
-        slope, intercept = np.polyfit(means, errors, 1)
-        regression_line = slope * means + intercept
-        r = np.corrcoef(means, errors)[0,1]  # R instead of R²
-
-        # Create plot
-        plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 18})  # Change 14 to your desired font size
-        plt.figure(figsize=(10, 7))
-        plt.scatter(means, errors, alpha=0.5)
-        plt.plot(means, regression_line, 'b--',
-                 label=f'Regression line (R = {r:.3f})')
-        plt.axhline(y=bias, color='k', linestyle='-')
-        plt.axhline(y=upper_loa, color='r', linestyle='--')
-        plt.axhline(y=lower_loa, color='r', linestyle='--')
-        plt.legend()
-
-        # Add annotations for LOA lines
-        x_min, x_max = plt.xlim()
-        plt.text(x_max + 1, upper_loa, f'Upper LoA',
-                 verticalalignment='center')
-        plt.text(x_max + 1, lower_loa, f'Lower LoA',
-                 verticalalignment='center')
-        plt.text(x_max + 1, bias, f'Bias',)
-
-        custom_labels = {
-            'HT_flexion': 'Shoulder Flexion',
-            'HT_abd': 'Shoulder Abduction',
-            'HT_rotation': 'Shoulder Rotation',
-            'elbow_flexion': 'Elbow Flexion',
-            'elbow_pronation': 'Forearm Pronation'
-        }
-
-        # Use the dictionary to set the label, with a fallback to the default formatting
-        label = custom_labels.get(joint_name)
-        plt.xlabel('Mean Joint Angle (OMC + IMC / 2)')
-        plt.ylabel('Error (IMC - OMC)')
-        plt.title(f'Bland-Altman Plot\n{label}')
-        plt.axhline(y=0, color='gray', linestyle='-', alpha=0.5, label='y=0 Line')
-
-        # Set y-axis limits
-        plt.ylim(-40, 50)
-
-        # Adjust layout to accommodate annotations
-        plt.tight_layout()
-
-        # Save the figure
-        os.makedirs(fig_output_dir, exist_ok=True)
-        plt.savefig(join(fig_output_dir, f'combined_bland_altman_{joint_name}.png'),
-                    bbox_inches='tight')  # Ensures annotations are not cut off
-        plt.close()
+    # plot_combined_BA(all_subjects_data)
+    # plot_BA_per_JA(all_subjects_data)
+    save_bias_and_loa_to_csv(all_subjects_data, join(fig_output_dir, 'BA_Results.csv'))
