@@ -476,14 +476,14 @@ def alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, star
 
     """ CREATE FIGURE """
 
-    plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 18})  # Change 14 to your desired font size
+    plt.rcParams.update({'font.family': 'Times New Roman', 'font.size': 22})
 
     fig, axs = plt.subplots(2, 1, figsize=(16,9), height_ratios=[7,3])
 
     """ Plot joint angles """
 
     # Axs 0 settings
-    axs[0].set_title(label, fontsize=22)
+    axs[0].set_title(label, fontsize=24)
     axs[0].set(xlabel="Time [s]", ylabel="Joint Angle [deg]")
     axs[0].legend(['OMC', 'IMU'])
     axs[0].grid(color="lightgrey")
@@ -521,15 +521,15 @@ def alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, star
 
     # Plot RMSE error lines and text
     axs[1].axhline(y=RMSE_angle1, linewidth=2, c="red", linestyle='--')
-    axs[1].text(time[-1]+0.07*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
+    axs[1].text(time[-1]+0.08*(end_time-start_time), RMSE_angle1, "RMSE = " + str(round(RMSE_angle1,1)) + " deg")
 
     # Plot max error lines
     y_max_line_placement_1 = y_max_line_placement(max_error_angle1)
-    axs[1].axhline(y=y_max_line_placement_1, linewidth=1, c="red", linestyle='--')
+    # axs[1].axhline(y=y_max_line_placement_1, linewidth=1, c="red", linestyle='--')
 
     # Plot max error text
     y_max_text_placement_1 = y_max_text_placement(max_error_angle1, RMSE_angle1)
-    axs[1].text(time[-1]+0.07*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
+    # axs[1].text(time[-1]+0.08*(end_time-start_time), y_max_text_placement_1, "Max = " + str(round(max_error_angle1,1)) + " deg")
 
     fig.tight_layout(pad=2.0)
     fig.savefig(r'C:\Users\r03mm22\Documents\Protocol_Testing\Results\Other_Figs_From_Python' + "\\" + compare_name + joint_name + "_angles.png")
