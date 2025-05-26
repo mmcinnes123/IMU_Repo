@@ -1,3 +1,6 @@
+# This script runs the optimisation function for estimating PS and FE joint axes and compares the results to the model's
+# FE and PS axes, iterating through a list of subjects, IMU types, and optimisation methods.
+
 import os.path
 
 from helpers_2DoF import get_J1_J2_from_calibrated_OMC_model
@@ -29,7 +32,7 @@ logging.basicConfig(level=logging.INFO, filename="FE_axis.log", filemode="w")
 """" RUN FUNCTIONS ABOVE """
 
 # Data to use for the optimisation
-directory = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
+directory = r'D:\2024 Data Collection'
 sample_rate = 100          # This is the sample rate of the data going into the function
 
 
@@ -233,41 +236,41 @@ def run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_
 
 """ PLOT VARIATION """
 
-# # subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
+subject_list = [f'P{str(i).zfill(3)}' for i in range(1, 21)]
 # subject_list = ['P019']
-# IMU_type_for_opt_list = ['Perfect']
-# opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-# JA_Slow_period_dict = {'ISO_1rep': ['FE5_start', 'PS2_start']}
-# ADL_period_dict = {}
-#
-# all_data, alt_all_data, vec_in_model_frames_data = run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_Slow_period_dict, ADL_period_dict)
-#
-#
-# def plot_variation_in_opt_estimates(vec_data):
-#
-#     # Get FE and PS in model frames
-#     FE_axis_in_humerus = get_model_FE_in_hum()
-#     PS_axis_in_radius = np.array([0.182, 0.98227, -0.044946])
-#
-#     all_FE_axes_est = vec_data['opt_FE_in_hum'].to_numpy()
-#     all_PS_axes_est = vec_data['opt_PS_in_rad'].to_numpy()
-#
-    # plot_FE_estimates(all_FE_axes_est, FE_axis_in_humerus)
-#     plot_PS_estimates(all_PS_axes_est, PS_axis_in_radius)
-
-
-# plot_variation_in_opt_estimates(vec_in_model_frames_data)
-
-
-""" RUN INVESTIGATION """
-
-subject_list = ['P005']
 IMU_type_for_opt_list = ['Perfect']
-opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
-# Define a list of different periods of data to use
-JA_Slow_period_dict = {}
-ADL_period_dict = {'ADL_both': ['kettle1_start', 'drink1_end']}
+opt_method_list = ['rot']   # Options: 'rot', 'ori', 'rot_noDelta'
+JA_Slow_period_dict = {'ISO_1rep': ['FE_start', 'PS_end']}
+ADL_period_dict = {}
 
 all_data, alt_all_data, vec_in_model_frames_data = run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_Slow_period_dict, ADL_period_dict)
 
 
+def plot_variation_in_opt_estimates(vec_data):
+
+    # Get FE and PS in model frames
+    FE_axis_in_humerus = get_model_FE_in_hum()
+    PS_axis_in_radius = np.array([0.182, 0.98227, -0.044946])
+
+    all_FE_axes_est = vec_data['opt_FE_in_hum'].to_numpy()
+    all_PS_axes_est = vec_data['opt_PS_in_rad'].to_numpy()
+
+    plot_FE_estimates(all_FE_axes_est, FE_axis_in_humerus)
+    plot_PS_estimates(all_PS_axes_est, PS_axis_in_radius)
+
+
+plot_variation_in_opt_estimates(vec_in_model_frames_data)
+
+
+""" RUN INVESTIGATION """
+
+# subject_list = ['P005']
+# IMU_type_for_opt_list = ['Perfect']
+# opt_method_list = ['rot_noDelta']   # Options: 'rot', 'ori', 'rot_noDelta'
+# # Define a list of different periods of data to use
+# JA_Slow_period_dict = {}
+# ADL_period_dict = {'ADL_both': ['kettle1_start', 'drink1_end']}
+#
+# all_data, alt_all_data, vec_in_model_frames_data = run_opt_validation(subject_list, IMU_type_for_opt_list, opt_method_list, JA_Slow_period_dict, ADL_period_dict)
+#
+#
