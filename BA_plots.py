@@ -12,8 +12,7 @@ from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
 
-fig_output_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results\Other_Figs_From_Python\Combined_BA_Plots'
-
+results_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Results\Other_Figs_From_Python'
 
 def plot_BA_per_JA(all_subjects_data):
 
@@ -73,6 +72,7 @@ def plot_BA_per_JA(all_subjects_data):
         plt.tight_layout()
 
         # Save the figure
+        fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name)
         os.makedirs(fig_output_dir, exist_ok=True)
         plt.savefig(join(fig_output_dir, f'combined_bland_altman_{joint_name}.png'),
                     bbox_inches='tight')  # Ensures annotations are not cut off
@@ -154,12 +154,13 @@ def plot_combined_BA(all_subjects_data):
     plt.tight_layout(pad=3.0, h_pad=4.0, w_pad=4.0)
 
     # Save the combined figure
+    fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name)
     os.makedirs(fig_output_dir, exist_ok=True)
     plt.savefig(join(fig_output_dir, 'combined_bland_altman_plots.png'), bbox_inches='tight')
     plt.close()
 
 
-def save_bias_and_loa_to_csv(all_subjects_data, output_file):
+def save_bias_and_loa_to_csv(all_subjects_data):
     """
     Saves the bias and LoA results to a CSV file.
     """
@@ -197,9 +198,13 @@ def save_bias_and_loa_to_csv(all_subjects_data, output_file):
 
     # Convert the results to a DataFrame and save to CSV
     df = pd.DataFrame(results)
+    fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name)
+    output_file = join(fig_output_dir, 'BA_Results.csv')
     df.to_csv(output_file, index=False)
 
 if __name__ == '__main__':
+
+    calibration_name = 'METHOD_7_ISO_1rep'
 
     # Create dictionaries to store all peak/trough data across subjects
     all_subjects_data = {}  # Will store data for each joint across all subjects
@@ -207,7 +212,6 @@ if __name__ == '__main__':
     # Iterate through all subjects
     for subject_num in range(1, 21):
         subject_code = f'P{str(subject_num).zfill(3)}'  # Creates P001, P002, etc.
-        calibration_name = 'OSIM_N_self'
         trial_name = 'JA_Slow'
 
         try:
@@ -265,6 +269,6 @@ if __name__ == '__main__':
             print(f"Error processing subject {subject_code}: {str(e)}")
             continue
 
-    # plot_combined_BA(all_subjects_data)
-    # plot_BA_per_JA(all_subjects_data)
-    save_bias_and_loa_to_csv(all_subjects_data, join(fig_output_dir, 'BA_Results.csv'))
+    plot_combined_BA(all_subjects_data)
+    plot_BA_per_JA(all_subjects_data)
+    save_bias_and_loa_to_csv(all_subjects_data)
