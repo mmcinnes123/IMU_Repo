@@ -37,7 +37,8 @@ def get_IMU_in_body_frame(model_file):
 
 def get_all_clus_in_body_frame(subject_list):
 
-    parent_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\2024 Data Collection'
+    from constants import data_dir
+    parent_dir = data_dir
 
     # Initiate empty list with hum_cluster ori results
     hum_clus_all = {}
@@ -91,7 +92,7 @@ def get_vecs_and_error_between_local_and_global(clus_all, JA_name, local_axis, g
         clus_vec_on_2D_plane = [clus_local_vec[global_index_1], clus_local_vec[global_index_2]]
         vecs_dict[subject] = clus_vec_on_2D_plane
 
-        # Get the angle between the vector and the target vector (always positive)
+        # Get the angle between the vector and the target vector (signed)
         angle_between = angle_between_2D_vecs_arctan(target_vec, clus_vec_on_2D_plane)
         error_angles_dict[subject] = angle_between
 
@@ -102,14 +103,14 @@ def get_variation_in_error_angles(error_angles_dict):
 
     error_angles = np.array(list(error_angles_dict.values()))
 
-    error_angles_mean = np.mean(abs(error_angles))
+    error_angles_mean = np.mean(error_angles)
 
     error_anlges_SD = np.std(error_angles)
 
     return error_angles_mean, error_anlges_SD
 
 
-def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1, global_axis_2, target_global_axis):
+def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1, global_axis_2, target_global_axis, create_plot):
 
     error_angles_dict, vecs_dict = get_vecs_and_error_between_local_and_global(clus_all, JA_name,
                                                                                local_axis, global_axis_1,
@@ -117,110 +118,112 @@ def plot_local_vec_on_global_plane(clus_all, JA_name, local_axis, global_axis_1,
                                                                                target_global_axis)
     error_angles_mean, error_angles_SD = get_variation_in_error_angles(error_angles_dict)
 
-    # Define the CF axes
-    target_axis_u = [0, -1.5]
-    target_axis_v = [1.5, 0]
-    o_u = [0]
-    o_v = [0]
-    v_axis_label = global_axis_1
-    u_axis_label = '-' + global_axis_2
+    if create_plot:
 
-    vecs = np.array(list(vecs_dict.values()))
-    vec_us = vecs[:, 0]
-    vec_vs = vecs[:, 1]
-    vec_origins_u = [0]*len(vec_us)
-    vec_origins_v = [0]*len(vec_us)
+        # Define the CF axes
+        target_axis_u = [0, -1.5]
+        target_axis_v = [1.5, 0]
+        o_u = [0]
+        o_v = [0]
+        v_axis_label = global_axis_1
+        u_axis_label = '-' + global_axis_2
 
-
-    # Create quiver plots of the 20 vec results
-    quiver_vecs = ff.create_quiver(vec_origins_u, vec_origins_v, vec_us, vec_vs, line_color='red', scale=1.3, arrow_scale=.1, angle=np.pi / 6,
-                                   name='vec1', line=dict(width=1))
-
-    # Create the CF quiver plots (black)
-    target_quiver_U = ff.create_quiver(o_u, o_v, [target_axis_u[0]], [target_axis_u[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
-                                       name='vec1', line=dict(width=2))
-    target_quiver_V = ff.create_quiver(o_u, o_v, [target_axis_v[0]], [target_axis_v[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
-                                       name='vec1', line=dict(width=2))
+        vecs = np.array(list(vecs_dict.values()))
+        vec_us = vecs[:, 0]
+        vec_vs = vecs[:, 1]
+        vec_origins_u = [0]*len(vec_us)
+        vec_origins_v = [0]*len(vec_us)
 
 
-    # Initialize the figure
-    fig = go.Figure()
+        # Create quiver plots of the 20 vec results
+        quiver_vecs = ff.create_quiver(vec_origins_u, vec_origins_v, vec_us, vec_vs, line_color='red', scale=1.3, arrow_scale=.1, angle=np.pi / 6,
+                                       name='vec1', line=dict(width=1))
 
-    # Add the first CF quiver
-    for trace in target_quiver_U['data']:
-        fig.add_trace(trace)
+        # Create the CF quiver plots (black)
+        target_quiver_U = ff.create_quiver(o_u, o_v, [target_axis_u[0]], [target_axis_u[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
+                                           name='vec1', line=dict(width=2))
+        target_quiver_V = ff.create_quiver(o_u, o_v, [target_axis_v[0]], [target_axis_v[1]], line_color='black', scale=1, arrow_scale=.1, angle=np.pi / 6,
+                                           name='vec1', line=dict(width=2))
 
-    # Add the second CF quiver
-    for trace in target_quiver_V['data']:
-        fig.add_trace(trace)
 
-    # Add the 20 results quivers
-    for trace in quiver_vecs['data']:
-        fig.add_trace(trace)
+        # Initialize the figure
+        fig = go.Figure()
 
-    # Add annotations with custom labels
-    annotations = [
-        # dict(
-        #     x=vecs[0], y=vecs[1], xref="x", yref="y",
-        #     text=vec_label, showarrow=False,
-        #     xanchor="left", yanchor="top",  # Offset position
-        #     xshift=10, yshift=10  # Pixel offset from the point
-        # ),
-        dict(
-            x=target_axis_u[0], y=target_axis_u[1], xref="x", yref="y",
-            text=u_axis_label, showarrow=False, xanchor="center", yanchor="top",  # Offset position
-            xshift=0, yshift=0,  # Pixel offset from the point
-            font=dict(size=20, family="Times New Roman Bold, Times, serif", color="black")
-        ),
-        dict(
-            x=target_axis_v[0], y=target_axis_v[1], xref="x", yref="y",
-            text=v_axis_label, showarrow=False, xanchor="right", yanchor="middle",  # Offset position
-            xshift=0, yshift=0,  # Pixel offset from the point
-            font=dict(size=20, family="Times New Roman Bold, Times, serif", color="black")
+        # Add the first CF quiver
+        for trace in target_quiver_U['data']:
+            fig.add_trace(trace)
+
+        # Add the second CF quiver
+        for trace in target_quiver_V['data']:
+            fig.add_trace(trace)
+
+        # Add the 20 results quivers
+        for trace in quiver_vecs['data']:
+            fig.add_trace(trace)
+
+        # Add annotations with custom labels
+        annotations = [
+            # dict(
+            #     x=vecs[0], y=vecs[1], xref="x", yref="y",
+            #     text=vec_label, showarrow=False,
+            #     xanchor="left", yanchor="top",  # Offset position
+            #     xshift=10, yshift=10  # Pixel offset from the point
+            # ),
+            dict(
+                x=target_axis_u[0], y=target_axis_u[1], xref="x", yref="y",
+                text=u_axis_label, showarrow=False, xanchor="center", yanchor="top",  # Offset position
+                xshift=0, yshift=0,  # Pixel offset from the point
+                font=dict(size=20, family="Times New Roman Bold, Times, serif", color="black")
+            ),
+            dict(
+                x=target_axis_v[0], y=target_axis_v[1], xref="x", yref="y",
+                text=v_axis_label, showarrow=False, xanchor="right", yanchor="middle",  # Offset position
+                xshift=0, yshift=0,  # Pixel offset from the point
+                font=dict(size=20, family="Times New Roman Bold, Times, serif", color="black")
+            )
+        ]
+
+
+
+        # Set the axes labels and properties
+        fig.update_layout(
+            xaxis=dict(
+                title='',
+                zeroline=True,
+                # autorange='reversed',  # Invert the x-axis
+                range = [2, -2],
+                showgrid=False,
+                showline=False,
+                showticklabels=False
+            ),
+            yaxis=dict(
+                title='',
+                zeroline=True,
+                scaleanchor="x",  # Ensure equal scaling
+                scaleratio=1,
+                showgrid=False,
+                showline=False,
+                showticklabels=False
+            ),
+            title={
+                'text': f'Radius Sensor {local_axis}-axis on<br>Radius Segment {global_axis_1}{global_axis_2} Plane',
+                'font': {'size': 34, 'color': 'black', 'family': 'Times New Roman, Times, serif'},
+                'x': 0.5,
+                'xanchor': 'center'},
+            showlegend=False,
+            width=600,  # Adjust width to ensure equal scaling visually
+            height=600,
+            plot_bgcolor='white',
+            annotations=annotations
         )
-    ]
 
+        # Display the plot
+        # fig.show()
 
-
-    # Set the axes labels and properties
-    fig.update_layout(
-        xaxis=dict(
-            title='',
-            zeroline=True,
-            # autorange='reversed',  # Invert the x-axis
-            range = [2, -2],
-            showgrid=False,
-            showline=False,
-            showticklabels=False
-        ),
-        yaxis=dict(
-            title='',
-            zeroline=True,
-            scaleanchor="x",  # Ensure equal scaling
-            scaleratio=1,
-            showgrid=False,
-            showline=False,
-            showticklabels=False
-        ),
-        title={
-            'text': f'Radius Sensor {local_axis}-axis on<br>Radius Segment {global_axis_1}{global_axis_2} Plane',
-            'font': {'size': 34, 'color': 'black', 'family': 'Times New Roman, Times, serif'},
-            'x': 0.5,
-            'xanchor': 'center'},
-        showlegend=False,
-        width=600,  # Adjust width to ensure equal scaling visually
-        height=600,
-        plot_bgcolor='white',
-        annotations=annotations
-    )
-
-    # Display the plot
-    # fig.show()
-
-    save_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Reports\Paper\Image Development\Alignment Images'
-    image_name = JA_name + '.png'
-    image_path = join(save_dir, image_name)
-    fig.write_image(image_path, width=600, height=600, scale=3, format='png',engine='kaleido')
+        save_dir = r'C:\Users\r03mm22\Documents\Protocol_Testing\Reports\Paper\Image Development\Alignment Images'
+        image_name = JA_name + '.png'
+        image_path = join(save_dir, image_name)
+        fig.write_image(image_path, width=600, height=600, scale=3, format='png',engine='kaleido')
 
     return error_angles_mean, error_angles_SD
 
