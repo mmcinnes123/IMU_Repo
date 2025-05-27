@@ -38,12 +38,11 @@ def run_compile_JAs(subject_code, trial_name, calibration_name, IMU_type):
     end_time = math.floor(IMU_table.getIndependentColumn()[-1])
 
     # Run compile_JAs for IMU data
-    print(f'\n  Running compileJAs.py for IMC')
     compile_JAs(IMU_analysis_sto_path, IMU_mot_file, IMU_IK_results_file, start_time, end_time, 'IMU')
 
     # Run compile_JAs for OMC data if it hasn't been run already
     if not os.path.exists(OMC_IK_results_file):
-        print(f'\n  Running compileJAs.py for OMC')
+        # print(f'\n  Running compileJAs.py for OMC')
         compile_JAs(OMC_analysis_sto_path, OMC_mot_file, OMC_IK_results_file, start_time, end_time, 'OMC')
 
 

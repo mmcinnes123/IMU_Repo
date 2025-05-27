@@ -28,18 +28,19 @@ trial_name = 'JA_Slow'      # Choose which trial to run IK
 #    - 'METHOD_3'
 #    - 'METHOD_4b'
 #    - 'METHOD_7_ISO_1rep'
+#    - 'METHOD_7_ADL_both'
 #
 # 3. Special Types:
 #    - 'ALL_MANUAL'         # Full manual calibration
 
 # Choose which calibrated model type(s) to run the IMU IK, analysis and comparison for
-calibration_list = ['METHOD_7_ISO_1rep', 'OSIM_N_self']     # Used to find the calibrated model file
+calibration_list = ['METHOD_7_ADL_both']     # Used to find the calibrated model file
 
-IMU_type_list = ['Perfect', 'Real']        # Options: 'Perfect' or 'Real'
+IMU_type_list = ['Perfect']        # Options: 'Perfect' or 'Real'
 
 # Choose which subjects to run the chosen functions for
-from_subject = 2
-to_subject = 20
+from_subject = 14
+to_subject = 14
 subject_list = [f'P{str(i).zfill(3)}' for i in range(from_subject, (to_subject+1))]
 
 
@@ -65,7 +66,7 @@ for calibration_name in calibration_list:
 
         for subject_code in subject_list:
 
-            run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end_time, IK_start_at_pose_bool, IK_trim_bool, IMU_type)
+            # run_IMU_IK(subject_code, trial_name, calibration_name, IK_start_time, IK_end_time, IK_start_at_pose_bool, IK_trim_bool, IMU_type)
             # run_analysis(subject_code, trial_name, calibration_name, analysis_start_time, analysis_end_time, analysis_trim_bool, IMU_type)
             run_compile_JAs(subject_code, trial_name, calibration_name, IMU_type)
             run_IK_compare(subject_code, trial_name, calibration_name, compare_start_time, compare_end_time, compare_trim_bool, IMU_type, test=False)
