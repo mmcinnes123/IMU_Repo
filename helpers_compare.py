@@ -779,7 +779,7 @@ def get_peak_and_trough_errors(OMC_peaks, IMU_peaks, joint_name):
         mean_error = np.mean(errors)
     else:
         print(f'Warning: number of OMC peaks/troughs does not equal number of IMU peaks/troughs found for joint: {joint_name}')
-        mean_error = 0      # Fill in number for plotting
+        mean_error = np.nan      # Fill in number for plotting
     return mean_error
 
 
@@ -860,7 +860,7 @@ def get_vec_angles_from_two_CFs(CF1, CF2):
         # Calculate the angle of certain CF2 vectors on certain CF1 planes
         # Discount measures of vector angle unless the 2D vector is a good/stable projection on the plane
         # i.e. If the magnitude of the vector gets close to 0, its normal to plane and so angle is unstable
-        threshold = 0.5
+        threshold = 0.3
         if np.linalg.norm(vec_x_on_XY) > threshold:
             x_rel2_X_on_XY[row] = angle_between_two_2D_vecs(vec_x_on_XY, X_on_XY)
         else:
