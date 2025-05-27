@@ -81,10 +81,17 @@ for IMU_type in IMU_type_list:
                                                 'R': Results_df.loc[Results_df.index[row], 'R'],
                                                 'peakROM': Results_df.loc[Results_df.index[row], 'peakROM'],
                                                 'troughROM': Results_df.loc[Results_df.index[row], 'troughROM']})
+                        
+                        # Check for NaN values only if JA doesn't start with 'thorax' and doesn't end with 'ori'
+                        current_ja = str(Results_df.index[row])
+                        if not (current_ja.startswith('thorax') or current_ja.endswith('ori')):
+                            nan_columns = new_row.columns[new_row.isna().any()].tolist()
+                            if nan_columns:
+                                print(f"Warning: NaN values found in {subject_code}, {calibration_name}, {IMU_type}, {current_ja} for columns: {nan_columns}")
+                        
                         all_data = pd.concat([all_data, new_row], ignore_index=True)
                 else:
                     print(f'File for {calibration_name}, {IMU_type} IMUs, {trial_name}, {subject_code} does not exist.')
 
 out_file_dir = os.path.join(r'C:\Users\r03mm22\Documents\Protocol_Testing\Results', 'Main_Results.csv')
 all_data.to_csv(out_file_dir)
-
