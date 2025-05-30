@@ -28,9 +28,6 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
 
     print(f'\nRunning a comparison between IMU and OMC for {subject_code}, {trial_name}, {calibration_name}, {IMU_type}')
 
-    if trial_name != 'JA_Slow':
-        print('Compare code written specifically for JA_Slow. Need to handle RoM code. Quitting.')
-        quit()
 
     """ SETTINGS """
     # Define some file names
@@ -74,14 +71,14 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     for joint_name in [col for col in IMU_angles.columns if col != 'time']:
         RMSE, R, mean_peak_error, mean_trough_error = \
             plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
-                                 range_dict)
+                                 range_dict, trial_name)
         new_row = pd.DataFrame({'JA': joint_name, 'RMSE': [RMSE], 'R': [R], 'peakROM': [mean_peak_error], 'troughROM': [mean_trough_error]})
         results_df = pd.concat([results_df, new_row], ignore_index=True)
 
-    # Create another plot with nice formatting
-    for joint_name in [col for col in IMU_angles.columns if col != 'time']:
-        alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
-                                 range_dict, compare_name)
+    # # Create another plot with nice formatting
+    # for joint_name in [col for col in IMU_angles.columns if col != 'time']:
+    #     alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
+    #                              range_dict, compare_name)
 
 
     """ ANALYSE MODEL BODY ORIENTATIONS """

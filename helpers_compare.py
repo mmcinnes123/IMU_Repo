@@ -161,7 +161,7 @@ def find_heading_offset(OMC_body_quats, IMU_body_quats, report):
 
 
 def plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, figure_results_dir,
-                                 range_dict):
+                                 range_dict, trial_name):
 
     IMU_angle = IMU_angles[[joint_name]].to_numpy()
     OMC_angle = OMC_angles[[joint_name]].to_numpy()
@@ -175,8 +175,8 @@ def plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_tim
     label = joint_name.replace('_', ' ').title()
 
     """ Get the peaks and troughs """
-
-    if joint_name not in ('thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation'):
+    plot_peaks = False
+    if trial_name == 'JA_Slow' and joint_name not in ('thorax_forward_tilt', 'thorax_lateral_tilt', 'thorax_rotation'):
 
         plot_peaks = True   # Don't bother calculating or plotting thorax peaks
         time_start, time_end = range_dict[joint_name][0], range_dict[joint_name][1]   # Get the indices saved in the range dict

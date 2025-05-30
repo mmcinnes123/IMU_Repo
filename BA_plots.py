@@ -72,7 +72,7 @@ def plot_BA_per_JA(all_subjects_data):
         plt.tight_layout()
 
         # Save the figure
-        fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name)
+        fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name + '_' + IMU_type)
         os.makedirs(fig_output_dir, exist_ok=True)
         plt.savefig(join(fig_output_dir, f'combined_bland_altman_{joint_name}.png'),
                     bbox_inches='tight')  # Ensures annotations are not cut off
@@ -154,7 +154,7 @@ def plot_combined_BA(all_subjects_data):
     plt.tight_layout(pad=3.0, h_pad=4.0, w_pad=4.0)
 
     # Save the combined figure
-    fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name)
+    fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name + '_' + IMU_type)
     os.makedirs(fig_output_dir, exist_ok=True)
     plt.savefig(join(fig_output_dir, 'combined_bland_altman_plots.png'), bbox_inches='tight')
     plt.close()
@@ -198,13 +198,15 @@ def save_bias_and_loa_to_csv(all_subjects_data):
 
     # Convert the results to a DataFrame and save to CSV
     df = pd.DataFrame(results)
-    fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name)
+    fig_output_dir = join(results_dir, 'Combined_BA_Plots_' + calibration_name + '_' + IMU_type)
+    os.makedirs(fig_output_dir, exist_ok=True)
     output_file = join(fig_output_dir, 'BA_Results.csv')
     df.to_csv(output_file, index=False)
 
 if __name__ == '__main__':
 
     calibration_name = 'METHOD_7_ISO_1rep'
+    IMU_type = 'Real'
 
     # Create dictionaries to store all peak/trough data across subjects
     all_subjects_data = {}  # Will store data for each joint across all subjects
@@ -217,7 +219,7 @@ if __name__ == '__main__':
         try:
             # Get the paths for this subject
             parent_dir = data_dir + '\\' + subject_code
-            IMU_type_dir = join(parent_dir, 'Perfect')
+            IMU_type_dir = join(parent_dir, IMU_type)
             IMU_IK_results_dir = join(IMU_type_dir, 'IMU_IK_results_' + calibration_name, trial_name)
             OMC_IK_results_dir = join(parent_dir, 'OMC', 'JA_Slow_IK_Results')
             IMU_IK_results_file = join(IMU_IK_results_dir, 'all_IMU_IK_results.csv')
