@@ -426,7 +426,10 @@ def alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, star
         OMC_angle = OMC_angle - OMC_angle[0]
         IMU_angle = IMU_angle - IMU_angle[0]
 
-    label = joint_name.replace('_', ' ').title() + ' Angle\n '
+    if joint_name == 'HT_rotation':
+        label = 'Shoulder Rotation Angle'
+    else:
+        label = joint_name.replace('_', ' ').title() + ' Angle\n '
 
     """ Get the peaks and troughs """
 

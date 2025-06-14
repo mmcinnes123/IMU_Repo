@@ -43,10 +43,10 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     results_dir = os.path.join(IMU_IK_results_dir, "Comparison_" + compare_name)
     os.makedirs(results_dir, exist_ok=True) # Make results folder if it doesn't exist yet
 
-    if test:
-        results_dir = str(askdirectory(title=' Choose the folder where you want to save the compare results ... '))
-        OMC_IK_results_file = str(askopenfilename(title=' Choose the OMC .sto analysis file ... '))
-        IMU_IK_results_file = str(askopenfilename(title=' Choose the IMU all IK results .csv file ... '))
+    # if test:
+    #     results_dir = str(askdirectory(title=' Choose the folder where you want to save the compare results ... '))
+    #     OMC_IK_results_file = str(askopenfilename(title=' Choose the OMC .sto analysis file ... '))
+    #     IMU_IK_results_file = str(askopenfilename(title=' Choose the IMU all IK results .csv file ... '))
 
 
     """ READ IN DATA """
@@ -68,17 +68,19 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     results_df = pd.DataFrame(columns=['JA', 'RMSE', 'R', 'peakROM', 'troughROM'])
 
     # For each joint angle of interest, get the error metrics between IMU and OMC results
-    for joint_name in [col for col in IMU_angles.columns if col != 'time']:
-        RMSE, R, mean_peak_error, mean_trough_error = \
-            plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
-                                 range_dict, trial_name)
-        new_row = pd.DataFrame({'JA': joint_name, 'RMSE': [RMSE], 'R': [R], 'peakROM': [mean_peak_error], 'troughROM': [mean_trough_error]})
-        results_df = pd.concat([results_df, new_row], ignore_index=True)
+    if not test:
+        for joint_name in [col for col in IMU_angles.columns if col != 'time']:
+            RMSE, R, mean_peak_error, mean_trough_error = \
+                plot_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
+                                     range_dict, trial_name)
+            new_row = pd.DataFrame({'JA': joint_name, 'RMSE': [RMSE], 'R': [R], 'peakROM': [mean_peak_error], 'troughROM': [mean_trough_error]})
+            results_df = pd.concat([results_df, new_row], ignore_index=True)
 
-    # # Create another plot with nice formatting
-    # for joint_name in [col for col in IMU_angles.columns if col != 'time']:
-    #     alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
-    #                              range_dict, compare_name)
+    # Create another plot with nice formatting
+    if test:
+        for joint_name in [col for col in IMU_angles.columns if col != 'time']:
+            alt_plot_for_thesis_compare_any_JAs(joint_name, IMU_angles, OMC_angles, start_time, end_time, results_dir,
+                                     range_dict, compare_name)
 
 
     """ ANALYSE MODEL BODY ORIENTATIONS """
@@ -104,13 +106,14 @@ def run_IK_compare(subject_code, trial_name, calibration_name, start_time, end_t
     all_data = results_df
 
     # Write final RMSE values to a csv
-    print('Writing results to .csv.')
-    all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
-                    mode='w', encoding='utf-8', na_rep='nan', index=False)
+    if not test:
+        print('Writing results to .csv.')
+        all_data.to_csv(results_dir + "\\" + str(compare_name) + r"_Final_RMSEs.csv",
+                        mode='w', encoding='utf-8', na_rep='nan', index=False)
 
 
 
 # Run single test (set test=True to choose input and output files)
 if __name__ == '__main__':
 
-    run_IK_compare('P019', 'JA_Slow', 'OSIM_N_self', 6, 80, False, 'Perfect', test=False)
+    run_IK_compare('P001', 'JA_Slow', 'OSIM_N_self', 6, 80, False, 'Perfect', test=True)
